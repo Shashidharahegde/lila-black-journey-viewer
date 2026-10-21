@@ -3,7 +3,12 @@ name = "lila-pipeline"
 version = "0.1.0"
 description = "Build-time data pipeline for the LILA BLACK player journey viewer"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "numpy>=2.4.6",
+    "pandas>=3.0.6",
+    "pillow>=13.0.0",
+    "pyarrow>=26.0.0",
+]
 
 [dependency-groups]
 dev = ["pytest>=8"]
