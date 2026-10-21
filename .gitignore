@@ -1,0 +1,7 @@
+data/raw/player_data
+.env*
+node_modules/
+.venv/
+__pycache__/
+.DS_Store
+COMMIT_CONVENTION.md
