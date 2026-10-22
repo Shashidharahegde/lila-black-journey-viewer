@@ -2,11 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* shadcn components carry dark: classes; tie them to a .dark class we never set, not to the OS setting */
+/* shadcn components carry dark: classes; tie them to the .dark class on <html> (src/ui/theme.ts), not to the OS setting */
 @custom-variant dark (&:is(.dark *));
 
-/* Design tokens: docs/FRONTEND_GUIDELINES.md §4. Light chrome around a dark map; no dark theme. */
+/* Design tokens: docs/FRONTEND_GUIDELINES.md §4. Light values here; the dark set is under .dark below. */
 :root {
+  color-scheme: light;
+
   /* Interface */
   --canvas: #f5f7fa;
   --surface: #ffffff;
@@ -29,6 +31,10 @@
   --loot: #d99a19;
   --storm: #8b5cf6;
 
+  /* Match list sort tints (small chips and icons only); kills, deaths and loot reuse their event colours */
+  --sort-duration: #0891b2;
+  --sort-recent: #12a06b;
+
   /* shadcn variables mapped to the tokens (§6) */
   --background: var(--canvas);
   --foreground: var(--text);
@@ -49,6 +55,26 @@
   --input: var(--line);
   --ring: var(--brand);
   --radius: 0.625rem;
+}
+
+/* Dark theme (default). Only what differs from the light set; gameplay hues are shared because the map is
+   dark in both themes. --death is lightened: charcoal is 1.5:1 on a dark card. Contrast on --surface:
+   text 14.1:1, text-secondary 6.9:1, text-muted 4.7:1, brand 4.7:1, death 6.4:1. */
+.dark {
+  color-scheme: dark;
+
+  --canvas: #0e1520;
+  --surface: #151f2d;
+  --subtle: #1d2a3b;
+  --line: #2a3a4f;
+  --text: #e6edf5;
+  --text-secondary: #9aa9bc;
+  --text-muted: #7a8aa0;
+  --brand-tint: #12263f;
+
+  --death: #8ea2bd;
+
+  --destructive: oklch(0.704 0.191 22.216);
 }
 
 @theme inline {
@@ -74,6 +100,8 @@
   --color-death: var(--death);
   --color-loot: var(--loot);
   --color-storm: var(--storm);
+  --color-sort-duration: var(--sort-duration);
+  --color-sort-recent: var(--sort-recent);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -121,6 +149,11 @@
   /* Visible 2 px brand focus ring for anything shadcn doesn't style (§6 Keyboard) */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+  /* Radix wraps scroll content in a display:table div that grows to its widest child, so long rows push past
+     the panel and get clipped. Block layout keeps the content as wide as the panel; none of our scroll areas scroll sideways. */
+  [data-radix-scroll-area-viewport] > div {
+    display: block !important;
   }
   code,
   kbd,

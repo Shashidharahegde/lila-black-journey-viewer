@@ -1,4 +1,4 @@
-import { LinkIcon, PanelLeftIcon } from 'lucide-react'
+import { LinkIcon, MoonIcon, PanelLeftIcon, SunIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import type { DateInfo, Index } from '@/data/types'
 import { useStore } from '@/state/store'
 import type { Selection } from '@/state/url'
 import { AboutDataPopover, ShortcutsPopover } from './HelpPopovers'
+import { setTheme, useTheme } from './theme'
 
 // Radix Select can't use '' as a value, so "all dates" gets its own token.
 const ALL_DATES = 'all'
@@ -101,6 +102,21 @@ async function copyLink() {
   }
 }
 
+function ThemeToggle() {
+  const theme = useTheme()
+  const next = theme === 'dark' ? 'light' : 'dark'
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Switch to ${next} theme`} onClick={() => setTheme(next)}>
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Switch to {next} theme</TooltipContent>
+    </Tooltip>
+  )
+}
+
 interface Props {
   index: Index | null
   selection: Selection | null
@@ -135,6 +151,7 @@ export default function TopBar({ index, selection, onOpenPanel }: Props) {
         <span className="sr-only lg:hidden">Copy link</span>
       </Button>
       <div className="flex shrink-0 items-center">
+        <ThemeToggle />
         <AboutDataPopover />
         <ShortcutsPopover />
       </div>
