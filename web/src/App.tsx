@@ -7,7 +7,7 @@ import { buildJourneys, type PathDatum } from './map/journeys'
 import { zoomStyle } from './map/encoding'
 import { journeyLayers } from './map/journeyLayers'
 import { loadMinimap, prefetchMinimap } from './map/minimap'
-import { highlightedActor, useStore } from './state/store'
+import { useStore } from './state/store'
 import { useMatchFile } from './state/useMatchFile'
 import { useUrlSync } from './state/useUrlSync'
 import JourneyTooltip from './ui/JourneyTooltip'
@@ -26,7 +26,8 @@ export default function App() {
   const selection = useStore((s) => s.selection)
   const matchFile = useStore((s) => s.matchFile)
   const setIndex = useStore((s) => s.setIndex)
-  const highlight = useStore(highlightedActor)
+  const hovered = useStore((s) => s.hoveredActor)
+  const pinned = useStore((s) => s.pinnedActor)
   const hoverActor = useStore((s) => s.hoverActor)
   const pinActor = useStore((s) => s.pinActor)
   const [indexError, setIndexError] = useState<string | null>(null)
@@ -77,8 +78,8 @@ export default function App() {
   const hide = selection?.hide
   const journeys = useMemo(() => (loaded && map && hide ? buildJourneys(loaded, map, hide) : null), [loaded, map, hide])
   const overlays = useCallback(
-    (levelsIn: number) => (journeys ? journeyLayers(journeys, highlight, zoomStyle(levelsIn)) : []),
-    [journeys, highlight],
+    (levelsIn: number) => (journeys ? journeyLayers(journeys, { hovered, pinned }, zoomStyle(levelsIn)) : []),
+    [journeys, hovered, pinned],
   )
   const onHoverObject = useCallback((object: unknown) => hoverActor(pickedActor(object)), [hoverActor])
   const onClickObject = useCallback((object: unknown) => pinActor(pickedActor(object)), [pinActor])

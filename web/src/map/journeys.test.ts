@@ -105,6 +105,50 @@ describe('paths', () => {
   })
 })
 
+describe('start, end and direction', () => {
+  const data = buildJourneys(sample, grandRift)
+
+  it('marks where each journey was first and last recorded, across all its pieces', () => {
+    const h1 = data.endpoints.filter((e) => e.actor.id === 'h1')
+    expect(h1.map((e) => [e.which, e.t])).toEqual([
+      ['start', 0],
+      ['end', 110],
+    ])
+    expect(h1[0].position).toEqual(uvToSpace(0.1, 0.9, grandRift))
+    expect(h1[1].position).toEqual(uvToSpace(0.8, 0.2, grandRift))
+    // b1 ends on a lone sample after a gap
+    expect(data.endpoints.find((e) => e.actor.id === 'b1' && e.which === 'end')?.t).toBe(200)
+  })
+
+  it('gives a one-sample journey a start but no end', () => {
+    const one = { ...sample, actors: [actor('x', 'human', [[[7, 0.5, 0.5]]])] }
+    expect(buildJourneys(one, grandRift).endpoints.map((e) => e.which)).toEqual(['start'])
+  })
+
+  it('puts one arrow on each step that moved, never across a gap', () => {
+    // h1: 1 + 2 steps (the lone sample has none); u1, h2, b1: 1 step each
+    expect(data.arrows.map((a) => a.actor.id)).toEqual(['h1', 'h1', 'h1', 'u1', 'h2', 'b1'])
+    const still = { ...sample, actors: [actor('x', 'human', [[[0, 0.5, 0.5], [5, 0.5, 0.5]]])] }
+    expect(buildJourneys(still, grandRift).arrows).toEqual([])
+  })
+
+  it('points arrows the way the actor moved on screen (counter-clockwise from right)', () => {
+    const [x0, y0] = uvToSpace(0.5, 0.5, grandRift)
+    const [x1, y1] = uvToSpace(0.5, 0.51, grandRift)
+    const h2 = data.arrows.find((a) => a.actor.id === 'h2')!
+    expect(h2.angle).toBeCloseTo(90, 9) // v grows northwards = up the screen
+    expect(h2.position).toEqual([(x0 + x1) / 2, (y0 + y1) / 2])
+    // h1's first step goes east and south: below the horizontal
+    expect(data.arrows[0].angle).toBeLessThan(0)
+    expect(data.arrows[0].angle).toBeGreaterThan(-90)
+  })
+
+  it('leaves hidden actors out', () => {
+    const noBots = buildJourneys(sample, grandRift, ['bots'])
+    expect([...noBots.endpoints, ...noBots.arrows].some((d) => d.actor.kind === 'bot')).toBe(false)
+  })
+})
+
 describe('markers', () => {
   it('are drawn loot first and kills last, then by time', () => {
     const { markers } = buildJourneys(sample, grandRift)

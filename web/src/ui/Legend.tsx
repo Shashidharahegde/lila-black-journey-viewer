@@ -5,7 +5,7 @@ import { IconBadge } from '@/components/icon-badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { ActorKind, MatchFile } from '@/data/types'
 import { cn } from '@/lib/utils'
-import { ACTOR, EVENT, EVENT_ORDER } from '@/map/encoding'
+import { ACTOR, ARROW_ICON, EVENT, EVENT_ORDER, endpointIcon } from '@/map/encoding'
 import { ID_MISMATCH_NOTE, layerCounts } from '@/map/journeys'
 import { useStore } from '@/state/store'
 import type { LayerKey, Selection } from '@/state/url'
@@ -30,7 +30,8 @@ function PathSwatch({ kind }: { kind: ActorKind }) {
 interface RowProps {
   symbol: ReactNode
   label: ReactNode
-  count: number
+  /** omitted for rows that only explain a symbol */
+  count?: number
   /** omitted for rows that can't be switched off */
   layer?: LayerKey
   hide: LayerKey[]
@@ -51,7 +52,7 @@ function Row({ symbol, label, count, layer, hide, title }: RowProps) {
       <label htmlFor={layer ? id : undefined} className={cn('flex flex-1 items-center gap-2', layer && 'cursor-pointer')}>
         {symbol}
         <span className="flex-1">{label}</span>
-        <span className="font-mono text-xs tabular-nums">{count}</span>
+        {count !== undefined && <span className="font-mono text-xs tabular-nums">{count}</span>}
       </label>
     </li>
   )
@@ -105,6 +106,18 @@ export default function Legend({ selection, match }: { selection: Selection; mat
               <ActorAvatar kind="bot" size="sm" />
               <PathSwatch kind="bot" />
             </>
+          }
+        />
+        <Row
+          hide={hide}
+          label="Start · end · direction"
+          title="Where each journey was first and last recorded, and which way it went. Bots show these when hovered or selected."
+          symbol={
+            <span aria-hidden className="flex items-center gap-1 rounded-sm bg-stage px-1 py-0.5">
+              <img src={endpointIcon('human', 'start').url} alt="" className="size-3" />
+              <img src={endpointIcon('human', 'end').url} alt="" className="size-3" />
+              <img src={ARROW_ICON.url} alt="" className="size-3" />
+            </span>
           }
         />
         {events.map((type) => (

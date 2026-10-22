@@ -116,3 +116,37 @@ export function positionIcon(kind: ActorKind) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g fill="${COLOR[ACTOR[kind].tone]}" stroke="#fff" stroke-width="3">${POSITION_SHAPE[kind]}</g></svg>`
   return { id: `position-${kind}`, url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, width: 32, height: 32 }
 }
+
+/**
+ * Journey start and end (map pass M3): an open ring where the journey was first recorded,
+ * a filled square where it was last recorded, in the actor's colour with a white outline.
+ * Shape tells them apart; neither is a death (that has its own marker).
+ */
+export const ENDPOINT_SIZE = 12
+
+const ENDPOINT_SHAPE: Record<'start' | 'end', (fill: string) => string> = {
+  start: (c) => `<circle cx="16" cy="16" r="10" fill="#fff" stroke="${c}" stroke-width="6"/>`,
+  end: (c) => `<rect x="5" y="5" width="22" height="22" rx="3" fill="${c}" stroke="#fff" stroke-width="3"/>`,
+}
+
+export function endpointIcon(kind: ActorKind, which: 'start' | 'end') {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${ENDPOINT_SHAPE[which](COLOR[ACTOR[kind].tone])}</svg>`
+  return { id: `${which}-${kind}`, url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, width: 32, height: 32 }
+}
+
+/** Direction chevron drawn on the route, pointing right before rotation; white with a dark edge so it reads on any colour. */
+export const ARROW_SIZE = 15
+/** The collision test draws arrows this much larger, which sets the minimum gap between them. */
+export const ARROW_SPACING = 3
+export const ARROW_ICON = {
+  id: 'arrow',
+  url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M9 6L22 16L9 26" fill="none" stroke="#182638" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6L22 16L9 26" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  )}`,
+  width: 32,
+  height: 32,
+}
+
+/** The selected journey: wider, with a soft white glow underneath, so it can't be mistaken for a hovered one. */
+export const SELECTED_SCALE = 1.5
+export const SELECTED_GLOW = { extraWidth: 10, opacity: 0.35 }

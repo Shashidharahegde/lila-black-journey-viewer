@@ -6,67 +6,56 @@ import {
   ACTOR,
   ACTOR_ORDER,
   ACTOR_PRIORITY,
+  ARROW_ICON,
+  ARROW_SIZE,
+  ARROW_SPACING,
   BOT_DASH,
   BOT_MARKER_OPACITY,
   BOT_MARKER_SCALE,
   CASING_WIDTH,
   COLOR,
   DIM_OPACITY,
+  ENDPOINT_SIZE,
   EVENT,
   EVENT_ORDER,
   HIGHLIGHT_PRIORITY,
   HOVER_SCALE,
   MARKER_PRIORITY,
   POSITION_SIZE,
+  SELECTED_GLOW,
+  SELECTED_SCALE,
   WHITE,
   badgeIcon,
+  endpointIcon,
   positionIcon,
   rgba,
   type EventType,
   type zoomStyle,
 } from './encoding'
-import type { ActorInfo, JourneyData, MarkerDatum, PathDatum, PointDatum } from './journeys'
+import type { ActorInfo, ArrowDatum, EndpointDatum, JourneyData, MarkerDatum, PathDatum, PointDatum } from './journeys'
 
 const DASH = new PathStyleExtension({ dash: true })
+const COLLISION = new CollisionFilterExtension()
 const POSITION_ICONS = Object.fromEntries(ACTOR_ORDER.map((k) => [k, positionIcon(k)])) as Record<
   ActorKind,
   ReturnType<typeof positionIcon>
 >
-const COLLISION = new CollisionFilterExtension()
+const ENDPOINT_ICONS = Object.fromEntries(
+  ACTOR_ORDER.flatMap((k) => (['start', 'end'] as const).map((w) => [`${w}-${k}`, endpointIcon(k, w)])),
+) as Record<string, ReturnType<typeof endpointIcon>>
 // badge and icon as one image, so the collision filter treats each marker as a whole
 const BADGE_ICONS = Object.fromEntries(
   EVENT_ORDER.map((type) => [type, { ...badgeIcon(type), anchorY: 64, mask: false }]),
 ) as Record<EventType, ReturnType<typeof badgeIcon> & { anchorY: number; mask: boolean }>
 
-/** 1 for the highlighted actor (or when nothing is highlighted), DIM_OPACITY for the rest. */
-function emphasis(actor: ActorInfo, highlight: string | null): number {
-  return highlight === null || actor.id === highlight ? 1 : DIM_OPACITY
-}
-
-function markerScale(m: MarkerDatum, highlight: string | null): number {
-  return (m.actor.kind === 'bot' ? BOT_MARKER_SCALE : 1) * (m.actor.id === highlight ? HOVER_SCALE : 1)
-}
-
-function markerOpacity(m: MarkerDatum, highlight: string | null): number {
-  return (m.actor.kind === 'bot' ? BOT_MARKER_OPACITY : 1) * emphasis(m.actor, highlight)
+/** Who the map emphasises: the actor under the pointer, and the one picked with a click. */
+export interface Focus {
+  hovered: string | null
+  pinned: string | null
 }
 
 function withAlpha([r, g, b]: number[], opacity: number): [number, number, number, number] {
   return [r, g, b, Math.round(255 * opacity)]
-}
-
-/** H1, H2 at the start of each tagged human's journey. */
-function humanTags(data: JourneyData): { tag: string; position: [number, number]; actor: ActorInfo }[] {
-  const seen = new Set<string>()
-  const starts = [
-    ...data.paths.map((p) => ({ actor: p.actor, position: p.path[0] })),
-    ...data.lonePoints.map((p) => ({ actor: p.actor, position: p.position })),
-  ]
-  return starts.flatMap(({ actor, position }) => {
-    if (!actor.tag || seen.has(actor.id)) return []
-    seen.add(actor.id)
-    return [{ tag: actor.tag, position, actor }]
-  })
 }
 
 /**
@@ -75,10 +64,23 @@ function humanTags(data: JourneyData): { tag: string; position: [number, number]
  */
 export function journeyLayers(
   data: JourneyData,
-  highlight: string | null,
+  { hovered, pinned }: Focus = { hovered: null, pinned: null },
   zoom: ReturnType<typeof zoomStyle> = { routeScale: 1, markerScale: 1 },
 ): Layer[] {
-  const triggers = { getColor: highlight, getFillColor: highlight, getLineColor: highlight, getSize: highlight }
+  // hover wins over the pinned actor for dimming; the pinned actor alone gets the selected look
+  const highlight = hovered ?? pinned
+  const focusKey = `${hovered}|${pinned}`
+  const triggers = { getColor: focusKey, getFillColor: focusKey, getSize: focusKey, getWidth: focusKey }
+
+  /** 1 for the highlighted actor (or when nothing is highlighted), DIM_OPACITY for the rest. */
+  const emphasis = (a: ActorInfo) => (highlight === null || a.id === highlight ? 1 : DIM_OPACITY)
+  const widthFactor = (a: ActorInfo) => (a.id === pinned ? SELECTED_SCALE : a.id === highlight ? HOVER_SCALE : 1)
+  // humans (and unknown) always show where they started, ended and which way they went;
+  // bots only when focused, so 14 bots don't add 28 endpoints and hundreds of arrows (P15)
+  const detailed = (a: ActorInfo) => a.kind !== 'bot' || a.id === highlight || a.id === pinned
+  const markerScale = (m: MarkerDatum) => (m.actor.kind === 'bot' ? BOT_MARKER_SCALE : 1) * (m.actor.id === highlight ? HOVER_SCALE : 1)
+  const markerOpacity = (m: MarkerDatum) => (m.actor.kind === 'bot' ? BOT_MARKER_OPACITY : 1) * emphasis(m.actor)
+
   const pathsOf = (kind: ActorKind) => data.paths.filter((p) => p.actor.kind === kind)
   const pathLayer = (kind: ActorKind) => {
     const style = ACTOR[kind]
@@ -87,14 +89,15 @@ export function journeyLayers(
       id: `${kind}-paths`,
       data: pathsOf(kind),
       getPath: (d) => d.path,
-      getColor: (d) => withAlpha(base, style.opacity * emphasis(d.actor, highlight)),
-      getWidth: (d) => style.pathWidth * (d.actor.id === highlight ? HOVER_SCALE : 1),
+      // the selected bot is drawn at full strength, not at its usual 60 %
+      getColor: (d) => withAlpha(base, (d.actor.id === pinned ? 1 : style.opacity) * emphasis(d.actor)),
+      getWidth: (d) => style.pathWidth * widthFactor(d.actor),
       widthUnits: 'pixels',
       widthScale: zoom.routeScale,
       capRounded: !style.dashed,
       jointRounded: true,
       pickable: true,
-      updateTriggers: { ...triggers, getWidth: highlight },
+      updateTriggers: triggers,
       ...(style.dashed && {
         extensions: [DASH],
         getDashArray: BOT_DASH,
@@ -103,44 +106,39 @@ export function journeyLayers(
     })
   }
 
+  const selectedPaths = pinned ? data.paths.filter((p) => p.actor.id === pinned) : []
   const lonePoints = [...data.lonePoints].sort(
     (a, b) => ACTOR_ORDER.indexOf(a.actor.kind) - ACTOR_ORDER.indexOf(b.actor.kind),
   )
-  const markers = new IconLayer<MarkerDatum, CollisionFilterExtensionProps<MarkerDatum>>({
-    id: 'event-markers',
-    data: data.markers, // already in draw order: loot first, kills last
-    getPosition: (d) => d.position,
-    getIcon: (d) => BADGE_ICONS[d.type],
-    getSize: (d) => EVENT[d.type].size * markerScale(d, highlight),
-    sizeUnits: 'pixels',
-    sizeScale: zoom.markerScale,
-    // mask is off, so only the alpha is used: the badge's opacity
-    getColor: (d) => withAlpha(WHITE, markerOpacity(d, highlight)),
-    pickable: true,
-    // where markers overlap, the rarer event (and the human's, and the highlighted actor's) wins;
-    // zooming in pulls them apart and reveals the rest (FRONTEND_GUIDELINES §11 P14)
-    extensions: [COLLISION],
-    collisionGroup: 'event-markers',
-    getCollisionPriority: (d) =>
-      MARKER_PRIORITY[d.type] + ACTOR_PRIORITY[d.actor.kind] + (d.actor.id === highlight ? HIGHLIGHT_PRIORITY : 0),
-    updateTriggers: { ...triggers, getCollisionPriority: highlight },
-  })
+  const humanTags = data.endpoints.filter((e) => e.which === 'start' && e.actor.tag)
 
   return [
-    // bottom to top: bot paths, unknown paths, human casing and paths, positions, tags, loot … kills
+    // bottom to top: selected glow, bot / unknown / human paths, positions, direction arrows,
+    // start and end, H1/H2 tags, then event markers (loot … kills)
+    new PathLayer<PathDatum>({
+      id: 'selected-glow',
+      data: selectedPaths,
+      getPath: (d) => d.path,
+      getColor: withAlpha(WHITE, SELECTED_GLOW.opacity),
+      getWidth: (d) => ACTOR[d.actor.kind].pathWidth * SELECTED_SCALE + SELECTED_GLOW.extraWidth,
+      widthUnits: 'pixels',
+      widthScale: zoom.routeScale,
+      capRounded: true,
+      jointRounded: true,
+    }),
     pathLayer('bot'),
     pathLayer('unknown'),
     new PathLayer<PathDatum>({
       id: 'human-casing',
       data: pathsOf('human'),
       getPath: (d) => d.path,
-      getColor: (d) => withAlpha(WHITE, 0.9 * emphasis(d.actor, highlight)),
-      getWidth: (d) => (ACTOR.human.pathWidth + 2 * CASING_WIDTH) * (d.actor.id === highlight ? HOVER_SCALE : 1),
+      getColor: (d) => withAlpha(WHITE, 0.9 * emphasis(d.actor)),
+      getWidth: (d) => (ACTOR.human.pathWidth + 2 * CASING_WIDTH) * widthFactor(d.actor),
       widthUnits: 'pixels',
       widthScale: zoom.routeScale,
       capRounded: true,
       jointRounded: true,
-      updateTriggers: { ...triggers, getWidth: highlight },
+      updateTriggers: triggers,
     }),
     pathLayer('human'),
     new IconLayer<PointDatum>({
@@ -151,28 +149,75 @@ export function journeyLayers(
       getSize: (d) => POSITION_SIZE[d.actor.kind],
       sizeUnits: 'pixels',
       sizeScale: zoom.routeScale,
-      getColor: (d) => withAlpha(WHITE, ACTOR[d.actor.kind].opacity * emphasis(d.actor, highlight)),
+      getColor: (d) => withAlpha(WHITE, ACTOR[d.actor.kind].opacity * emphasis(d.actor)),
       pickable: true,
       updateTriggers: triggers,
     }),
-    new TextLayer<ReturnType<typeof humanTags>[number]>({
-      id: 'human-tags',
-      data: humanTags(data),
+    new IconLayer<ArrowDatum, CollisionFilterExtensionProps<ArrowDatum>>({
+      id: 'direction-arrows',
+      data: data.arrows.filter((a) => detailed(a.actor)),
       getPosition: (d) => d.position,
-      getText: (d) => d.tag,
+      getIcon: () => ARROW_ICON,
+      getAngle: (d) => d.angle,
+      getSize: ARROW_SIZE,
+      sizeUnits: 'pixels',
+      sizeScale: zoom.markerScale,
+      getColor: (d) => withAlpha(WHITE, emphasis(d.actor)),
+      updateTriggers: triggers,
+      // arrows that would crowd each other are hidden; zooming in spreads the route and shows more
+      extensions: [COLLISION],
+      collisionGroup: 'direction-arrows',
+      collisionTestProps: { sizeScale: zoom.markerScale * ARROW_SPACING },
+      getCollisionPriority: (d) => ACTOR_PRIORITY[d.actor.kind] + (d.actor.id === highlight ? HIGHLIGHT_PRIORITY : 0),
+    }),
+    new IconLayer<EndpointDatum>({
+      id: 'journey-endpoints',
+      data: data.endpoints.filter((e) => detailed(e.actor)),
+      getPosition: (d) => d.position,
+      getIcon: (d) => ENDPOINT_ICONS[`${d.which}-${d.actor.kind}`],
+      getSize: (d) => ENDPOINT_SIZE * (d.actor.id === highlight ? HOVER_SCALE : 1),
+      sizeUnits: 'pixels',
+      sizeScale: zoom.markerScale,
+      getColor: (d) => withAlpha(WHITE, emphasis(d.actor)),
+      pickable: true,
+      updateTriggers: triggers,
+    }),
+    new TextLayer<EndpointDatum>({
+      id: 'human-tags',
+      data: humanTags,
+      getPosition: (d) => d.position,
+      getText: (d) => d.actor.tag ?? '',
       getSize: 12,
       sizeUnits: 'pixels',
       fontFamily: 'Inter, sans-serif',
       fontWeight: 600,
       characterSet: 'H0123456789',
-      getColor: (d) => withAlpha(rgba(COLOR.human), emphasis(d.actor, highlight)),
+      getColor: (d) => withAlpha(rgba(COLOR.human), emphasis(d.actor)),
       background: true,
-      getBackgroundColor: (d) => withAlpha(WHITE, emphasis(d.actor, highlight)),
+      getBackgroundColor: (d) => withAlpha(WHITE, emphasis(d.actor)),
       backgroundPadding: [4, 2],
-      // side by side, so tags of humans who start together don't overlap
-      getPixelOffset: (d) => [(d.actor.humanIndex ?? 0) * 24, -14],
+      // side by side above the start ring, so tags of humans who start together don't overlap
+      getPixelOffset: (d) => [(d.actor.humanIndex ?? 0) * 24, -16],
       updateTriggers: triggers,
     }),
-    markers,
+    new IconLayer<MarkerDatum, CollisionFilterExtensionProps<MarkerDatum>>({
+      id: 'event-markers',
+      data: data.markers, // already in draw order: loot first, kills last
+      getPosition: (d) => d.position,
+      getIcon: (d) => BADGE_ICONS[d.type],
+      getSize: (d) => EVENT[d.type].size * markerScale(d),
+      sizeUnits: 'pixels',
+      sizeScale: zoom.markerScale,
+      // mask is off, so only the alpha is used: the badge's opacity
+      getColor: (d) => withAlpha(WHITE, markerOpacity(d)),
+      pickable: true,
+      // where markers overlap, the rarer event (and the human's, and the highlighted actor's) wins;
+      // zooming in pulls them apart and reveals the rest (FRONTEND_GUIDELINES §11 P14)
+      extensions: [COLLISION],
+      collisionGroup: 'event-markers',
+      getCollisionPriority: (d) =>
+        MARKER_PRIORITY[d.type] + ACTOR_PRIORITY[d.actor.kind] + (d.actor.id === highlight ? HIGHLIGHT_PRIORITY : 0),
+      updateTriggers: { ...triggers, getCollisionPriority: focusKey },
+    }),
   ]
 }

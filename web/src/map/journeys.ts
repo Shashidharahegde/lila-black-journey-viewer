@@ -40,6 +40,22 @@ export interface MarkerDatum {
   position: [number, number]
 }
 
+/** Where a journey was first and last recorded (its first and last position samples). */
+export interface EndpointDatum {
+  actor: ActorInfo
+  which: 'start' | 'end'
+  position: [number, number]
+  t: number
+}
+
+/** A direction mark halfway along one step between two samples, pointing the way the actor moved. */
+export interface ArrowDatum {
+  actor: ActorInfo
+  position: [number, number]
+  /** degrees, counter-clockwise on screen from pointing right (deck.gl IconLayer `getAngle`) */
+  angle: number
+}
+
 export interface JourneyData {
   /** segments with two or more samples; a gap over 30 s already starts a new segment */
   paths: PathDatum[]
@@ -47,6 +63,10 @@ export interface JourneyData {
   lonePoints: PointDatum[]
   /** sorted in EVENT_ORDER, then by time */
   markers: MarkerDatum[]
+  /** start and end of each shown journey; a journey with one sample has only a start */
+  endpoints: EndpointDatum[]
+  /** one candidate per step; the map hides those that would crowd (collision filter) */
+  arrows: ArrowDatum[]
 }
 
 export function actorInfos(match: MatchFile): Map<Actor, ActorInfo> {
@@ -84,6 +104,8 @@ export function buildJourneys(match: MatchFile, map: MapInfo, hide: readonly Lay
   const paths: PathDatum[] = []
   const lonePoints: PointDatum[] = []
   const markers: MarkerDatum[] = []
+  const endpoints: EndpointDatum[] = []
+  const arrows: ArrowDatum[] = []
 
   for (const actor of match.actors) {
     if (actorHidden(actor.kind, hide)) continue
@@ -93,16 +115,36 @@ export function buildJourneys(match: MatchFile, map: MapInfo, hide: readonly Lay
         const [t, u, v] = segment[0]
         lonePoints.push({ actor: info, position: uvToSpace(u, v, map), t })
       } else {
-        paths.push({ actor: info, path: segment.map(([, u, v]) => uvToSpace(u, v, map)) })
+        const path = segment.map(([, u, v]) => uvToSpace(u, v, map))
+        paths.push({ actor: info, path })
+        arrows.push(...stepArrows(path, info))
       }
     }
+    const first = actor.segments.at(0)?.at(0)
+    const last = actor.segments.at(-1)?.at(-1)
+    if (first) endpoints.push({ actor: info, which: 'start', position: uvToSpace(first[1], first[2], map), t: first[0] })
+    if (last && last !== first) endpoints.push({ actor: info, which: 'end', position: uvToSpace(last[1], last[2], map), t: last[0] })
     for (const e of actor.events) {
       if (!isEventType(e.type) || hide.includes(e.type)) continue
       markers.push(toMarker(e, e.type, info, map))
     }
   }
   markers.sort((a, b) => EVENT_ORDER.indexOf(a.type) - EVENT_ORDER.indexOf(b.type) || a.t - b.t)
-  return { paths, lonePoints, markers }
+  return { paths, lonePoints, markers, endpoints, arrows }
+}
+
+/** Steps where the actor stood still have no direction, so they get no arrow. */
+function stepArrows(path: [number, number][], actor: ActorInfo): ArrowDatum[] {
+  const arrows: ArrowDatum[] = []
+  for (let i = 1; i < path.length; i++) {
+    const [x0, y0] = path[i - 1]
+    const [x1, y1] = path[i]
+    if (x0 === x1 && y0 === y1) continue
+    // drawing-space Y points down the screen, so it is negated for a screen angle
+    const angle = (Math.atan2(-(y1 - y0), x1 - x0) * 180) / Math.PI
+    arrows.push({ actor, position: [(x0 + x1) / 2, (y0 + y1) / 2], angle })
+  }
+  return arrows
 }
 
 function toMarker(e: MatchEvent, type: EventType, actor: ActorInfo, map: MapInfo): MarkerDatum {
@@ -186,6 +228,17 @@ export function actorText(a: ActorInfo): TooltipText {
   if (a.segments > 1) notes.push(`${a.segments} path pieces: no line is drawn across gaps over 30 s`)
   if (a.idMismatch) notes.push(ID_MISMATCH_NOTE)
   return { title: [KIND_LABEL[a.kind], a.tag].filter(Boolean).join(' '), who: a.id, when: null, notes }
+}
+
+/** "Journey start" / "Last recorded position", with who and when. Neither is a death or an extraction (EC-13). */
+export function endpointText(e: EndpointDatum): TooltipText {
+  const start = e.which === 'start'
+  return {
+    title: start ? 'Journey start' : 'Last recorded position',
+    who: actorLabel(e.actor),
+    when: durationLabel(e.t),
+    notes: [start ? 'First position sample of this journey' : 'Last position sample; the journey may have ended here or just after'],
+  }
 }
 
 /** "Killed a bot (BotKill) at 4:12 — human h1", then where, then any notes. */
