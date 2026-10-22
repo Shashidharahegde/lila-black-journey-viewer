@@ -72,7 +72,7 @@ const NOTES: { badge?: string; text: string }[] = [
   { badge: 'Numeric ID', text: 'Some journeys have a bot-style ID but player-client events. They are shown as Unknown and counted as neither human nor bot.' },
   { text: 'A Kill and a Killed logged by one player in the same second are both shown; the data can’t tell what caused them.' },
   { badge: 'Partial', text: 'Dates at the edge of the collection window cover less than a full day.' },
-  { text: 'Match card counts come from human files only.' },
+  { text: 'Event counts have three scopes: the match card counts events in human files; the legend counts markers on the map, bot events included; the journey card counts one journey.' },
   { text: 'There is no extraction event, so any extraction view is inferred.' },
 ]
 

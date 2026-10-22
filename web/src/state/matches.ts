@@ -1,8 +1,129 @@
 import type { MatchSummary } from '../data/types'
 
-/** Matches on one map, on one date (null = all dates), busiest first. */
-export function pickerMatches(matches: MatchSummary[], map: string, date: string | null): MatchSummary[] {
-  return matches.filter((m) => m.map === map && (date === null || m.date === date)).sort(byRecordedPlayers)
+export type MatchSort = 'duration' | 'kills' | 'deaths' | 'loot' | 'recent'
+
+export const DEFAULT_SORT: MatchSort = 'kills'
+
+/** One sort option: `order` is the direction label next to the list title; `metric` is what the row leads with. */
+export const SORTS: { value: MatchSort; label: string; order: string; explain: string }[] = [
+  { value: 'duration', label: 'Duration', order: 'Longest first', explain: 'Time from the first to the last recorded event.' },
+  { value: 'kills', label: 'Kills', order: 'Most kills first', explain: 'Kills logged by human journeys. The Kill of a Kill/Killed pair isn’t counted.' },
+  { value: 'deaths', label: 'Deaths', order: 'Most deaths first', explain: 'Deaths logged by human journeys, storm deaths not included.' },
+  { value: 'loot', label: 'Loot', order: 'Most loot first', explain: 'Loot pickups logged by human journeys.' },
+  { value: 'recent', label: 'Recent', order: 'Latest first', explain: 'Start time, in UTC.' },
+]
+
+function metric(m: MatchSummary, sort: MatchSort): number {
+  switch (sort) {
+    case 'duration':
+      return m.duration_s
+    case 'kills':
+      return m.counts.kill
+    case 'deaths':
+      return m.counts.death
+    case 'loot':
+      return m.counts.loot
+    case 'recent':
+      return Date.parse(m.start_utc)
+  }
+}
+
+/** Chosen metric descending, then longest, then id so the order is stable. */
+function compare(sort: MatchSort) {
+  return (a: MatchSummary, b: MatchSummary) =>
+    metric(b, sort) - metric(a, sort) || b.duration_s - a.duration_s || a.id.localeCompare(b.id)
+}
+
+export interface DateGroup {
+  date: string
+  matches: MatchSummary[]
+}
+
+/** Matches on one map, on one date (null = all dates), grouped by start date (newest first) and sorted inside each group. */
+export function pickerGroups(
+  matches: MatchSummary[],
+  map: string,
+  date: string | null,
+  sort: MatchSort = DEFAULT_SORT,
+): DateGroup[] {
+  const byDate = new Map<string, MatchSummary[]>()
+  for (const m of matches) {
+    if (m.map !== map || (date !== null && m.date !== date)) continue
+    byDate.set(m.date, [...(byDate.get(m.date) ?? []), m])
+  }
+  return [...byDate.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([d, list]) => ({ date: d, matches: list.sort(compare(sort)) }))
+}
+
+/** Same matches as `pickerGroups`, flattened in list order. */
+export function pickerMatches(
+  matches: MatchSummary[],
+  map: string,
+  date: string | null,
+  sort: MatchSort = DEFAULT_SORT,
+): MatchSummary[] {
+  return pickerGroups(matches, map, date, sort).flatMap((g) => g.matches)
+}
+
+/** "Tue, Feb 10" for a UTC start date. */
+export function dateLabel(date: string): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
+/** "21:54" from an ISO start time (UTC). */
+export function timeOfDay(startUtc: string): string {
+  return startUtc.slice(11, 16)
+}
+
+/** The number a row leads with: the metric the list is sorted by. */
+export function primaryLabel(m: MatchSummary, sort: MatchSort): string {
+  switch (sort) {
+    case 'duration':
+      return `${durationLabel(m.duration_s)} min`
+    case 'kills':
+      return plural(m.counts.kill, 'kill')
+    case 'deaths':
+      return plural(m.counts.death, 'death')
+    case 'loot':
+      return `${m.counts.loot} loot`
+    case 'recent':
+      return `${timeOfDay(m.start_utc)} UTC`
+  }
+}
+
+// Other signals offered per sort, in priority order; loot is left to the inspector unless it is the sort.
+const SIGNALS: Record<MatchSort, ('duration' | 'kills' | 'deaths' | 'storm')[]> = {
+  duration: ['kills', 'deaths', 'storm'],
+  kills: ['deaths', 'storm', 'duration'],
+  deaths: ['kills', 'storm', 'duration'],
+  loot: ['kills', 'deaths', 'duration'],
+  recent: ['duration', 'kills', 'deaths'],
+}
+
+/** Up to two non-zero context signals that differ from the row's primary metric. */
+export function signalLabels(m: MatchSummary, sort: MatchSort): string[] {
+  const text = {
+    duration: m.duration_s > 0 ? `${durationLabel(m.duration_s)} min` : '',
+    kills: m.counts.kill > 0 ? plural(m.counts.kill, 'kill') : '',
+    deaths: m.counts.death > 0 ? plural(m.counts.death, 'death') : '',
+    storm: m.counts.storm_death > 0 ? plural(m.counts.storm_death, 'storm death') : '',
+  }
+  return SIGNALS[sort].map((k) => text[k]).filter(Boolean).slice(0, 2)
+}
+
+/** "1 human journey · 6 bots": only the kinds that exist; the full breakdown is in the inspector. */
+export function compositionLabel(m: Pick<MatchSummary, 'humans' | 'unknown' | 'bots'>): string {
+  const parts: string[] = []
+  if (m.humans) parts.push(plural(m.humans, 'human journey'))
+  if (m.unknown) parts.push(`${m.unknown} unknown`)
+  if (m.bots) parts.push(plural(m.bots, 'bot'))
+  return parts.join(' · ')
 }
 
 /** Recorded journeys (humans + unknown + bots) in a match. */
@@ -10,12 +131,7 @@ export function recordedPlayers(m: Pick<MatchSummary, 'humans' | 'unknown' | 'bo
   return m.humans + m.unknown + m.bots
 }
 
-/** Recorded players descending, then duration descending, then id so the order is stable. */
-export function byRecordedPlayers(a: MatchSummary, b: MatchSummary): number {
-  return recordedPlayers(b) - recordedPlayers(a) || b.duration_s - a.duration_s || a.id.localeCompare(b.id)
-}
-
-function plural(n: number, word: string): string {
+export function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`
 }
 
