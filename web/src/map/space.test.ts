@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index } from '../data/types'
-import { SPACE_WIDTH, clampTarget, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToSpace, uvToWorld } from './space'
+import {
+  SPACE_WIDTH,
+  clampTarget,
+  fitZoom,
+  imageBounds,
+  isInsideMap,
+  overviewToSpace,
+  spaceHeight,
+  spaceToUv,
+  uvToSpace,
+  uvToWorld,
+  viewportRect,
+} from './space'
 
 const { maps } = indexJson as Index
 const MAP_IDS = Object.keys(maps)
@@ -102,6 +114,31 @@ describe('fit to screen', () => {
   it('a tall panel is limited by width', () => {
     const map = maps.Lockdown
     expect(2 ** fitZoom(600, 1200, map, 1)).toBeCloseTo(0.6, 12)
+  })
+})
+
+describe('overview rectangle', () => {
+  const map = maps.GrandRift
+  const h = spaceHeight(map)
+
+  it('is the visible region around the camera target', () => {
+    // zoom 1 on a 400 × 300 px canvas shows 200 × 150 units
+    expect(viewportRect([500, 400], 1, 400, 300, map)).toEqual({ left: 400, top: 325, right: 600, bottom: 475 })
+  })
+
+  it('is cut to the map when the screen shows more than the map', () => {
+    expect(viewportRect([SPACE_WIDTH / 2, h / 2], 0, 2000, 2000, map)).toEqual({ left: 0, top: 0, right: SPACE_WIDTH, bottom: h })
+  })
+
+  it('a clamped camera keeps the rectangle inside the map and the same size', () => {
+    const target = clampTarget([-100, 5000], 1, 400, 300, map)
+    const rect = viewportRect(target, 1, 400, 300, map)
+    expect(rect).toEqual({ left: 0, top: h - 150, right: 200, bottom: h })
+  })
+
+  it('a click on the overview maps to the same share of the map and stays on it', () => {
+    expect(overviewToSpace(0.25, 0.5, map)).toEqual([250, h / 2])
+    expect(overviewToSpace(-1, 2, map)).toEqual([0, h])
   })
 })
 

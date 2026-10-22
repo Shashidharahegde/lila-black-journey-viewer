@@ -40,6 +40,39 @@ export function fitZoom(viewWidth: number, viewHeight: number, map: MapInfo, mar
   return Math.log2(pixelsPerUnit)
 }
 
+/** A rectangle in the drawing space. */
+export interface SpaceRect {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+/** The part of the map the camera shows, cut to the map's edges (the whole map when zoomed out). */
+export function viewportRect(
+  [x, y]: readonly number[],
+  zoom: number,
+  width: number,
+  height: number,
+  map: MapInfo,
+): SpaceRect {
+  const scale = 2 ** zoom
+  const halfW = width / scale / 2
+  const halfH = height / scale / 2
+  return {
+    left: Math.max(0, x - halfW),
+    top: Math.max(0, y - halfH),
+    right: Math.min(SPACE_WIDTH, x + halfW),
+    bottom: Math.min(spaceHeight(map), y + halfH),
+  }
+}
+
+/** A point on the overview picture, as a 0–1 share of its width and height, as a drawing-space position (kept on the map). */
+export function overviewToSpace(fractionX: number, fractionY: number, map: MapInfo): [number, number] {
+  const clamp = (f: number) => Math.min(1, Math.max(0, f))
+  return [clamp(fractionX) * SPACE_WIDTH, clamp(fractionY) * spaceHeight(map)]
+}
+
 /**
  * Keeps the camera on the map: the view never shows more than a margin of black around the image.
  * When the map is narrower (or shorter) than the screen it stays centred on that axis.

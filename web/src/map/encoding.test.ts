@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { ACTOR_PRIORITY, MARKER_PRIORITY, MARKER_SCALE, ROUTE_SCALE, ZOOM_DETAIL_LEVELS, zoomStyle } from './encoding'
+import {
+  ACTOR_PRIORITY,
+  FITTED_MARKER_SHRINK,
+  MARKER_PRIORITY,
+  MARKER_SCALE,
+  ROUTE_SCALE,
+  ZOOM_DETAIL_LEVELS,
+  zoomStyle,
+} from './encoding'
 
 describe('zoom-dependent styling', () => {
-  it('draws wide routes and compact markers on the whole map, thin routes and big markers zoomed in', () => {
-    expect(zoomStyle(0)).toEqual({ routeScale: ROUTE_SCALE.out, markerScale: MARKER_SCALE.out })
+  it('draws compact routes and markers on the whole map, wider routes and bigger markers zoomed in', () => {
+    expect(zoomStyle(0)).toEqual({ routeScale: ROUTE_SCALE.out, markerScale: MARKER_SCALE.out * FITTED_MARKER_SHRINK.scale })
     expect(zoomStyle(ZOOM_DETAIL_LEVELS)).toEqual({ routeScale: ROUTE_SCALE.in, markerScale: MARKER_SCALE.in })
-    expect(ROUTE_SCALE.out).toBeGreaterThan(ROUTE_SCALE.in)
+    expect(ROUTE_SCALE.in).toBeGreaterThan(ROUTE_SCALE.out)
     expect(MARKER_SCALE.in).toBeGreaterThan(MARKER_SCALE.out)
   })
 
@@ -15,6 +23,15 @@ describe('zoom-dependent styling', () => {
     expect(half.markerScale).toBeCloseTo((MARKER_SCALE.out + MARKER_SCALE.in) / 2, 12)
     expect(zoomStyle(-2)).toEqual(zoomStyle(0))
     expect(zoomStyle(ZOOM_DETAIL_LEVELS + 5)).toEqual(zoomStyle(ZOOM_DETAIL_LEVELS))
+  })
+
+  it('shrinks markers further only on the whole-map view, and leaves every other zoom as it was', () => {
+    const { levels } = FITTED_MARKER_SHRINK
+    const plain = (z: number) => MARKER_SCALE.out + ((MARKER_SCALE.in - MARKER_SCALE.out) * z) / ZOOM_DETAIL_LEVELS
+    expect(zoomStyle(levels).markerScale).toBeCloseTo(plain(levels), 12)
+    expect(zoomStyle(1).markerScale).toBeCloseTo(plain(1), 12)
+    expect(zoomStyle(levels / 2).markerScale).toBeLessThan(plain(levels / 2))
+    expect(zoomStyle(levels / 2).markerScale).toBeGreaterThan(zoomStyle(0).markerScale)
   })
 })
 

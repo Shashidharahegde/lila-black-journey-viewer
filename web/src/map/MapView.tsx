@@ -7,10 +7,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { dataUrl } from '../data/load'
 import type { MapInfo } from '../data/types'
 import { isTypingTarget } from '../ui/shortcuts'
+import { MapOverview } from './MapOverview'
 import { useMinimap } from './minimap'
-import { SPACE_WIDTH, clampTarget, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToWorld } from './space'
+import { SPACE_WIDTH, clampTarget, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToWorld, viewportRect } from './space'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: true })
+
+/** The overview appears once the view is this many zoom levels in from the whole map (about 2.8× closer). */
+const OVERVIEW_MIN_LEVELS = 1.5
 
 interface MapButtonProps {
   label: string
@@ -127,10 +131,22 @@ type WorldPoint = { x: number; z: number } | null
 
 function CoordinateReadout({ point }: { point: Signal<WorldPoint> }) {
   const hover = useSignal(point)
+  // shown only while the pointer is over the map; the stage is black in both themes, so it uses white on a faint black
+  if (!hover) return null
   return (
     // fixed size, so the box doesn't change shape as the numbers change
-    <div className="pointer-events-none absolute bottom-3 left-3 flex h-6 w-48 items-center rounded-md bg-card/90 px-2.5 font-mono text-xs whitespace-nowrap text-card-foreground tabular-nums shadow-sm">
-      {hover ? `x ${hover.x.toFixed(1)}  z ${hover.z.toFixed(1)}` : 'world x, z'}
+    <div
+      aria-hidden
+      className="pointer-events-none absolute bottom-3 left-3 flex h-5 w-36 items-center gap-2.5 rounded bg-black/35 px-2 font-mono text-[11px] whitespace-nowrap text-white/90 tabular-nums"
+    >
+      <span className="w-[9ch]">
+        <span className="text-white/55">x </span>
+        {hover.x.toFixed(1)}
+      </span>
+      <span>
+        <span className="text-white/55">z </span>
+        {hover.z.toFixed(1)}
+      </span>
     </div>
   )
 }
@@ -253,6 +269,14 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
           <MaximizeIcon />
         </MapButton>
       </div>
+      {image && camera && size && levelsIn >= OVERVIEW_MIN_LEVELS && (
+        <MapOverview
+          map={map}
+          image={image}
+          viewport={viewportRect(camera.target, camera.zoom, size.width, size.height, map)}
+          onNavigate={(x, y) => setMoved({ mapId, ...bounded(map, size, [x, y], camera.zoom) })}
+        />
+      )}
       <CoordinateReadout point={readout} />
     </div>
   )
