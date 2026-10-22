@@ -1,18 +1,26 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Actor, Index, MatchEvent, MatchFile } from '../data/types'
-import { AFTER_DEATH_NOTE, EVENT_ORDER, ID_MISMATCH_NOTE, buildJourneys, describeActor, describeMarker } from './journeys'
+import {
+  AFTER_DEATH_NOTE,
+  EVENT_ORDER,
+  ID_MISMATCH_NOTE,
+  KILL_KILLED_PAIR_NOTE,
+  buildJourneys,
+  describeActor,
+  describeMarker,
+} from './journeys'
 import { isInsideMap, uvToSpace } from './space'
 
 const index = indexJson as Index
 const grandRift = index.maps.GrandRift
 
-function event(t: number, type: string, raw: string, after_death = false): MatchEvent {
-  return { t, type, raw, u: 0.25, v: 0.75, after_death }
+function event(t: number, type: string, raw: string, after_death = false, kill_killed_pair = false): MatchEvent {
+  return { t, type, raw, u: 0.25, v: 0.75, after_death, kill_killed_pair }
 }
 
-function actor(id: string, kind: 'human' | 'bot', segments: Actor['segments'], events: MatchEvent[] = [], id_mismatch = false): Actor {
-  return { id, kind, id_mismatch, segments, events }
+function actor(id: string, kind: Actor['kind'], segments: Actor['segments'], events: MatchEvent[] = []): Actor {
+  return { id, kind, id_mismatch: kind === 'unknown', segments, events }
 }
 
 const sample: MatchFile = {
@@ -33,7 +41,13 @@ const sample: MatchFile = {
       ],
       [event(252, 'kill', 'BotKill'), event(10, 'loot', 'Loot'), event(110, 'death', 'BotKilled'), event(20, 'loot', 'Loot')],
     ),
-    actor('h2', 'human', [[[0, 0.3, 0.3], [5, 0.31, 0.31]]], [event(30, 'storm_death', 'KilledByStorm')], true),
+    actor('u1', 'unknown', [[[0, 0.3, 0.3], [5, 0.31, 0.31]]], [event(30, 'storm_death', 'KilledByStorm')]),
+    actor(
+      'h2',
+      'human',
+      [[[0, 0.5, 0.5], [5, 0.5, 0.51]]],
+      [event(90, 'kill', 'Kill', false, true), event(90, 'death', 'Killed', false, true)],
+    ),
     actor('b1', 'bot', [[[0, 0.9, 0.9], [5, 0.91, 0.91]], [[200, 0.4, 0.4]]], [event(50, 'kill', 'BotKill'), event(80, 'death', 'BotKilled', true)]),
   ],
 }
@@ -45,6 +59,7 @@ describe('paths', () => {
     expect(data.paths.map((p) => [p.actor.id, p.path.length])).toEqual([
       ['h1', 2],
       ['h1', 3],
+      ['u1', 2],
       ['h2', 2],
       ['b1', 2],
     ])
@@ -62,9 +77,15 @@ describe('paths', () => {
     expect(data.lonePoints[0].position).toEqual(uvToSpace(0.5, 0.5, grandRift))
   })
 
-  it('numbers humans in file order and leaves bots without a colour index', () => {
+  it('numbers humans in file order and leaves unknown and bots without a colour index', () => {
     const byId = Object.fromEntries(data.paths.map((p) => [p.actor.id, p.actor.humanIndex]))
-    expect(byId).toEqual({ h1: 0, h2: 1, b1: null })
+    expect(byId).toEqual({ h1: 0, u1: null, h2: 1, b1: null })
+  })
+
+  it('keeps unknown journeys when bots are hidden', () => {
+    const kinds = buildJourneys(sample, grandRift, ['bots']).paths.map((p) => p.actor.kind)
+    expect(kinds).toContain('unknown')
+    expect(kinds).not.toContain('bot')
   })
 })
 
@@ -76,8 +97,10 @@ describe('markers', () => {
       'loot@20',
       'storm_death@30',
       'death@80',
+      'death@90',
       'death@110',
       'kill@50',
+      'kill@90',
       'kill@252',
     ])
     expect(EVENT_ORDER.at(0)).toBe('loot')
@@ -87,13 +110,13 @@ describe('markers', () => {
   it('hiding bots removes their paths, lone samples and events', () => {
     const data = buildJourneys(sample, grandRift, ['bots'])
     expect([...data.paths, ...data.lonePoints, ...data.markers].some((d) => d.actor.kind === 'bot')).toBe(false)
-    expect(data.markers).toHaveLength(5)
+    expect(data.markers).toHaveLength(7)
   })
 
   it('hiding an event type removes only that type', () => {
     const data = buildJourneys(sample, grandRift, ['loot', 'death'])
-    expect(data.markers.map((m) => m.type).sort()).toEqual(['kill', 'kill', 'storm_death'])
-    expect(data.paths).toHaveLength(4)
+    expect(data.markers.map((m) => m.type).sort()).toEqual(['kill', 'kill', 'kill', 'storm_death'])
+    expect(data.paths).toHaveLength(5)
   })
 })
 
@@ -116,12 +139,24 @@ describe('tooltips', () => {
     )
   })
 
-  it('flag id_mismatch humans on markers and paths', () => {
-    expect(find('storm_death', 'h2')).toBe(
-      `Killed by the storm (KilledByStorm) at 0:30 — human h2\nMarker shows where they died\n${ID_MISMATCH_NOTE}`,
+  it('label unknown journeys on markers and paths', () => {
+    expect(find('storm_death', 'u1')).toBe(
+      `Killed by the storm (KilledByStorm) at 0:30 — unknown u1\nMarker shows where they died\n${ID_MISMATCH_NOTE}`,
     )
-    const h2 = buildJourneys(sample, grandRift).paths.find((p) => p.actor.id === 'h2')!.actor
-    expect(describeActor(h2)).toBe(`Human h2\n${ID_MISMATCH_NOTE}`)
+    const u1 = buildJourneys(sample, grandRift).paths.find((p) => p.actor.id === 'u1')!.actor
+    expect(describeActor(u1)).toBe(`Unknown actor u1\n${ID_MISMATCH_NOTE}`)
+  })
+
+  it('show both halves of a Kill/Killed pair with neutral wording, never as a self-kill', () => {
+    const where = 'Marker shows where this player stood; both events of the pair carry that position'
+    expect(find('kill', 'h2')).toBe(
+      `Kill logged (README: killed a human player) (Kill) at 1:30 — human h2\n${where}\n${KILL_KILLED_PAIR_NOTE}`,
+    )
+    expect(find('death', 'h2')).toBe(
+      `Killed logged (README: killed by a human player) (Killed) at 1:30 — human h2\n${where}\n${KILL_KILLED_PAIR_NOTE}`,
+    )
+    const text = buildJourneys(sample, grandRift).markers.map(describeMarker).join('\n')
+    expect(text).not.toMatch(/self-kill|killed themselves/i)
   })
 
   it('mention gaps on a path with several pieces', () => {
@@ -157,6 +192,13 @@ describe('every generated match file', () => {
       for (const a of match.actors)
         for (const segment of a.segments)
           for (let i = 1; i < segment.length; i++) expect(segment[i][0] - segment[i - 1][0]).toBeLessThanOrEqual(30)
+  })
+
+  it('keeps every unknown journey and both events of every Kill/Killed pair', () => {
+    const actors = files.flatMap((m) => m.actors)
+    expect(actors.filter((a) => a.kind === 'unknown')).toHaveLength(17)
+    const paired = actors.flatMap((a) => a.events.filter((e) => e.kill_killed_pair))
+    expect(paired.map((e) => e.raw).sort()).toEqual(['Kill', 'Kill', 'Kill', 'Killed', 'Killed', 'Killed'])
   })
 
   it('uses only event types the map knows how to draw', () => {

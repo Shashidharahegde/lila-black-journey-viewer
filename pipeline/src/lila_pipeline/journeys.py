@@ -24,8 +24,7 @@ CATEGORIES = {
     "KilledByStorm": "storm_death",
     "Loot": "loot",
 }
-DEATH_CATEGORIES = {"death", "storm_death", "self_kill"}
-SELF_KILL_RAW = "Kill+Killed"
+DEATH_CATEGORIES = {"death", "storm_death"}
 
 
 @dataclass(frozen=True)
@@ -36,11 +35,12 @@ class DeathCutoffReport:
 
 
 def categorize_events(events: pd.DataFrame) -> pd.DataFrame:
-    """Add `category` and `raw` (the original label), merging self-kills first (EC-12).
+    """Add `category`, `raw` (the original label) and `kill_killed_pair` (EC-12).
 
-    A `Kill` and a `Killed` in the same file and second are one self-inflicted death, not a
-    fight between players: they become a single `self_kill` row at the `Killed` row's place.
-    Only then do the remaining `Kill` rows count as kills.
+    Every row is kept. A `Kill` and a `Killed` in the same file and second are both flagged
+    `kill_killed_pair`: the data can't tell a self-inflicted death from a trade with a player
+    who wasn't recorded. The `Killed` is still the owner's death; the `Kill` is left out of
+    kill counts and the kill heatmap, because whether anyone else died is unknown.
     """
     out = events.copy()
     unknown = set(out["event"]) - CATEGORIES.keys()
@@ -53,9 +53,13 @@ def categorize_events(events: pd.DataFrame) -> pd.DataFrame:
     kill_keys = pd.MultiIndex.from_frame(out.loc[out["event"] == "Kill", keys])
     killed_keys = pd.MultiIndex.from_frame(out.loc[out["event"] == "Killed", keys])
     pair_keys = kill_keys.intersection(killed_keys)
-    in_pair = pd.MultiIndex.from_frame(out[keys]).isin(pair_keys) & out["event"].isin(["Kill", "Killed"])
-    out.loc[in_pair & (out["event"] == "Killed"), ["category", "raw"]] = ["self_kill", SELF_KILL_RAW]
-    return out[~(in_pair & (out["event"] == "Kill"))]
+    out["kill_killed_pair"] = pd.MultiIndex.from_frame(out[keys]).isin(pair_keys) & out["event"].isin(["Kill", "Killed"])
+    return out
+
+
+def counted_kills(events: pd.DataFrame) -> pd.Series:
+    """Rows that count as kills in totals and heatmaps: kills that aren't half of a Kill/Killed pair."""
+    return (events["category"] == "kill") & ~events["kill_killed_pair"]
 
 
 def apply_death_cutoff(events: pd.DataFrame) -> tuple[pd.DataFrame, DeathCutoffReport]:

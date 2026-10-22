@@ -10,7 +10,7 @@ export default function MatchHeader({ match }: { match: MatchSummary }) {
       <div className="text-slate-300">
         {playersLabel(match)} · {matchCountsLabel(match)}
       </div>
-      <div className="text-xs text-slate-500">Event counts are from human files only.</div>
+      <div className="text-xs text-slate-500">Event counts are from human files only; unknown journeys aren't counted.</div>
     </div>
   )
 }

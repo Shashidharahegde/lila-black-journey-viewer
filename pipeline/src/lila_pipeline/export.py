@@ -9,12 +9,13 @@ import numpy as np
 import pandas as pd
 
 from lila_pipeline.heatmaps import GRID, count_grid, sparse_cells, traffic_grid
-from lila_pipeline.journeys import DEATH_CATEGORIES, path_segments
+from lila_pipeline.journeys import DEATH_CATEGORIES, counted_kills, path_segments
 from lila_pipeline.projection import MAPS
 
 SCHEMA_VERSION = 1
 UV_DECIMALS = 4
-COUNT_TYPES = ["kill", "death", "storm_death", "loot", "self_kill"]
+COUNT_TYPES = ["kill", "death", "storm_death", "loot", "kill_killed_pair"]
+ACTOR_ORDER = {"human": 0, "unknown": 1, "bot": 2}
 DAY_S = 86_400
 
 
@@ -83,7 +84,9 @@ def build_index(events: pd.DataFrame, map_sizes: dict[str, tuple[int, int]]) -> 
     for match_id, rows in events.groupby("match_id", sort=True):
         actors = rows.groupby("file")["actor_kind"].first()
         human_events = rows[rows["actor_kind"] == "human"]
-        counts = human_events["category"].value_counts()
+        counts = human_events["category"].value_counts().to_dict()
+        counts["kill"] = int(counted_kills(human_events).sum())  # a paired Kill is counted only as a pair
+        counts["kill_killed_pair"] = int((human_events["kill_killed_pair"] & (human_events["event"] == "Killed")).sum())
         matches.append(
             {
                 "id": match_key(str(match_id)),
@@ -94,6 +97,7 @@ def build_index(events: pd.DataFrame, map_sizes: dict[str, tuple[int, int]]) -> 
                 "duration_s": int(rows["t"].max()),
                 "humans": int((actors == "human").sum()),
                 "bots": int((actors == "bot").sum()),
+                "unknown": int((actors == "unknown").sum()),
                 "counts": {kind: int(counts.get(kind, 0)) for kind in COUNT_TYPES},  # recorded by humans
             }
         )
@@ -116,11 +120,12 @@ def build_index(events: pd.DataFrame, map_sizes: dict[str, tuple[int, int]]) -> 
 
 
 def build_match(match_id: str, rows: pd.DataFrame, date: str) -> dict:
-    """One match: every actor's path segments and events, humans first."""
+    """One match: every actor's path segments and events; humans first, then unknown, then bots."""
     actors = []
     order = rows.groupby("file").agg(kind=("actor_kind", "first"), user=("user_id", "first"))
     order["hash"] = order["user"].map(player_hash)
-    for file, actor in order.sort_values(["kind", "hash"], ascending=[False, True]).iterrows():
+    order["rank"] = order["kind"].map(ACTOR_ORDER)
+    for file, actor in order.sort_values(["rank", "hash"]).iterrows():
         journey = rows[rows["file"] == file]
         positions = journey[journey["category"] == "position"]
         others = journey[journey["category"] != "position"]
@@ -138,6 +143,7 @@ def build_match(match_id: str, rows: pd.DataFrame, date: str) -> dict:
                         "u": round(float(e.u), UV_DECIMALS),
                         "v": round(float(e.v), UV_DECIMALS),
                         "after_death": bool(e.after_death),
+                        "kill_killed_pair": bool(e.kill_killed_pair),
                     }
                     for e in others.itertuples()
                 ],
@@ -164,9 +170,11 @@ def _points(segment: pd.DataFrame) -> list[list[float]]:
 def build_heatmap(map_id: str, events: pd.DataFrame) -> dict:
     """Kills, deaths and traffic for one map, from human journeys only, for all dates and each date.
 
+    `unknown` journeys are left out (EC-09), and so are the `Kill` halves of Kill/Killed
+    pairs (EC-12); their `Killed` halves count as deaths.
     `samples` says how much data each date's layers rest on, counted after cleaning:
     `matches` = matches on this map and date with at least one human journey;
-    `human_journeys` = human journeys (files) in them, including the 17 `id_mismatch` ones.
+    `human_journeys` = human journeys (files) in them.
     It counts journeys, not rows: the number of events behind a layer is in `totals`.
     """
     humans = events[(events["map_id"] == map_id) & (events["actor_kind"] == "human")]
@@ -177,7 +185,7 @@ def build_heatmap(map_id: str, events: pd.DataFrame) -> dict:
     for key in ["all", *sorted(dates.unique())]:
         part = humans if key == "all" else humans[dates == key]
         grids = {
-            "kills": count_grid(part[part["category"] == "kill"]),
+            "kills": count_grid(part[counted_kills(part)]),
             "deaths": count_grid(part[part["category"].isin(DEATH_CATEGORIES)]),
             "traffic": traffic_grid(part[part["category"] == "position"]),
         }
@@ -192,7 +200,7 @@ def build_heatmap(map_id: str, events: pd.DataFrame) -> dict:
         "map": map_id,
         "grid": GRID,
         "cells": "[i, j, value]; i = column along u (west to east), j = row along v (south to north)",
-        "units": {"kills": "events", "deaths": "events (incl. storm and self-kills)", "traffic": "seconds"},
+        "units": {"kills": "events", "deaths": "events (incl. storm deaths)", "traffic": "seconds"},
         "layers": layers,
         "totals": totals,
         "samples": samples,

@@ -25,21 +25,19 @@ const HUMAN_COLORS: Color[] = [
   [204, 121, 167, 255],
 ]
 const BOT_COLOR: Color = [200, 200, 200, 115]
+// Unknown journeys (EC-09): neutral, but brighter and wider than bots so they don't read as either kind.
+export const UNKNOWN_COLOR: Color = [255, 255, 255, 210]
 
 export function actorColor(a: ActorInfo): Color {
+  if (a.kind === 'unknown') return UNKNOWN_COLOR
   return a.humanIndex === null ? BOT_COLOR : HUMAN_COLORS[a.humanIndex % HUMAN_COLORS.length]
 }
 
+const PATH_WIDTH: Record<ActorInfo['kind'], number> = { human: 3, unknown: 2, bot: 1.25 }
+const POINT_RADIUS: Record<ActorInfo['kind'], number> = { human: 3, unknown: 2.5, bot: 2 }
+
 export const EVENT_STYLE: Record<EventType, { label: string; color: Color; size: number; svg: string }> = {
   loot: { label: 'Loot', color: [250, 204, 21, 255], size: 7, svg: '<circle cx="32" cy="32" r="22" fill="#fff"/>' },
-  self_kill: {
-    label: 'Self-kill',
-    color: [255, 255, 255, 255],
-    size: 18,
-    svg:
-      '<mask id="m"><rect width="64" height="64" fill="#fff"/><path d="M12 12L52 52M52 12L12 52" stroke="#000" stroke-width="6"/></mask>' +
-      '<path d="M12 12L52 52M52 12L12 52" stroke="#fff" stroke-width="16" stroke-linecap="square" mask="url(#m)"/>',
-  },
   storm_death: { label: 'Storm death', color: [168, 85, 247, 255], size: 16, svg: '<path d="M32 4L60 32L32 60L4 32Z" fill="#fff"/>' },
   death: {
     label: 'Death',
@@ -60,31 +58,35 @@ const ICONS = Object.fromEntries(
 ) as Record<EventType, { id: string; url: string; width: number; height: number; mask: boolean }>
 
 // Markers from bot files are fainter: humans are the focus.
+const MARKER_ALPHA: Record<ActorInfo['kind'], number> = { human: 255, unknown: 200, bot: 150 }
+
 function markerColor(m: MarkerDatum): Color {
   const [r, g, b] = EVENT_STYLE[m.type].color
-  return [r, g, b, m.actor.kind === 'bot' ? 150 : 255]
+  return [r, g, b, MARKER_ALPHA[m.actor.kind]]
 }
 
 export function journeyLayers(data: JourneyData): Layer[] {
-  const botPaths = data.paths.filter((p) => p.actor.kind === 'bot')
-  const humanPaths = data.paths.filter((p) => p.actor.kind === 'human')
+  const pathsOf = (kind: ActorInfo['kind']) => data.paths.filter((p) => p.actor.kind === kind)
   const pathProps = {
     getPath: (d: PathDatum) => d.path,
     getColor: (d: PathDatum) => actorColor(d.actor),
+    getWidth: (d: PathDatum) => PATH_WIDTH[d.actor.kind],
     widthUnits: 'pixels' as const,
     capRounded: true,
     jointRounded: true,
     pickable: true,
   }
   return [
-    new PathLayer<PathDatum>({ id: 'bot-paths', data: botPaths, getWidth: 1.25, ...pathProps }),
-    new PathLayer<PathDatum>({ id: 'human-paths', data: humanPaths, getWidth: 3, ...pathProps }),
+    // bottom to top: bots, unknown, humans
+    new PathLayer<PathDatum>({ id: 'bot-paths', data: pathsOf('bot'), ...pathProps }),
+    new PathLayer<PathDatum>({ id: 'unknown-paths', data: pathsOf('unknown'), ...pathProps }),
+    new PathLayer<PathDatum>({ id: 'human-paths', data: pathsOf('human'), ...pathProps }),
     new ScatterplotLayer<PointDatum>({
       id: 'lone-samples',
       data: data.lonePoints,
       getPosition: (d) => d.position,
       getFillColor: (d) => actorColor(d.actor),
-      getRadius: (d) => (d.actor.kind === 'human' ? 3 : 2),
+      getRadius: (d) => POINT_RADIUS[d.actor.kind],
       radiusUnits: 'pixels',
       pickable: true,
     }),

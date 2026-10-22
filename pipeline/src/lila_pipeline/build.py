@@ -17,13 +17,7 @@ import pandas as pd
 from lila_pipeline import export
 from lila_pipeline.images import export_minimap, source_size, web_size
 from lila_pipeline.ingest import DEFAULT_DATA_DIR, IngestReport, load_journeys
-from lila_pipeline.journeys import (
-    MAX_PATH_GAP_S,
-    SELF_KILL_RAW,
-    DeathCutoffReport,
-    apply_death_cutoff,
-    categorize_events,
-)
+from lila_pipeline.journeys import MAX_PATH_GAP_S, DeathCutoffReport, apply_death_cutoff, categorize_events
 from lila_pipeline.normalize import DoubledJourney, add_match_clock, classify_actors, remove_doubled_journeys
 from lila_pipeline.projection import MAPS, add_uv
 
@@ -50,7 +44,6 @@ def prepare(data_dir: Path = DEFAULT_DATA_DIR) -> Prepared:
     events, doubled = remove_doubled_journeys(events)
     rows["after_removing_doubled_journeys"] = len(events)
     events = categorize_events(classify_actors(events))
-    rows["after_merging_self_kills"] = len(events)
     events, cutoff = apply_death_cutoff(events)
     rows["final"] = len(events)
     return Prepared(add_uv(events), ingest, doubled, cutoff, rows)
@@ -60,7 +53,10 @@ def build_report(prepared: Prepared, index: dict) -> dict:
     """Every count needed to audit the cleaning. Player IDs are hashed."""
     events = prepared.events
     journeys = events.groupby("file").agg(kind=("actor_kind", "first"), mismatch=("id_mismatch", "first"))
-    humans_per_match = events[events["actor_kind"] == "human"].groupby("match_id")["file"].nunique()
+    humans_per_match = (
+        events[events["actor_kind"] == "human"].groupby("match_id")["file"].nunique()
+        .reindex(events["match_id"].unique(), fill_value=0)
+    )
     positions = events[events["category"] == "position"]
     gaps = positions.groupby("file")["epoch_s"].diff()
     return {
@@ -80,11 +76,12 @@ def build_report(prepared: Prepared, index: dict) -> dict:
              "removed_by_event": d.removed_by_event}
             for d in prepared.doubled
         ],
-        "self_kills_merged": int((events["raw"] == SELF_KILL_RAW).sum()),
+        "kill_killed_pairs": int((events["kill_killed_pair"] & (events["event"] == "Killed")).sum()),
         "after_death": asdict(prepared.cutoff),
         "journeys": {
             "human": int((journeys["kind"] == "human").sum()),
             "bot": int((journeys["kind"] == "bot").sum()),
+            "unknown": int((journeys["kind"] == "unknown").sum()),
             "id_mismatch": int(journeys["mismatch"].sum()),
             "matches_by_human_count": {str(k): int(v) for k, v in humans_per_match.value_counts().sort_index().items()},
         },

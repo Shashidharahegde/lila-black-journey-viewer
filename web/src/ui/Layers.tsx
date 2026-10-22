@@ -1,6 +1,6 @@
 // Legend and layer toggles in one list. Plain styling for now (functionality first).
 import type { ReactNode } from 'react'
-import { EVENT_ORDER, type EventType } from '../map/journeys'
+import { EVENT_ORDER, ID_MISMATCH_NOTE, type EventType } from '../map/journeys'
 import { EVENT_STYLE, iconUrl } from '../map/journeyLayers'
 import { useStore } from '../state/store'
 import type { LayerKey, Selection } from '../state/url'
@@ -43,6 +43,9 @@ export default function Layers({ selection }: { selection: Selection }) {
       <div className="flex items-center gap-2 text-sm">
         <span className="inline-block h-[3px] w-4 bg-amber-500" /> Humans (one colour each)
       </div>
+      <div className="flex items-center gap-2 text-sm" title={ID_MISMATCH_NOTE}>
+        <span className="inline-block h-[2px] w-4 bg-white/80" /> Unknown (numeric ID, player-client events)
+      </div>
       <Toggle layer="bots" hide={hide}>
         <span className="inline-block h-px w-4 bg-slate-400" /> Bots (paths and their events)
       </Toggle>
@@ -52,7 +55,8 @@ export default function Layers({ selection }: { selection: Selection }) {
         </Toggle>
       ))}
       <p className="pt-1 text-xs text-slate-500">
-        Kill markers show where the killer stood; death markers show where the victim fell. Positions are sampled about
+        Kill markers show where the killer stood; death markers show where the victim fell. A Kill and a Killed logged in
+        the same second are both shown, at the same spot; their cause is unknown. Positions are sampled about
         every 5 s, so lines are straight between samples and may cross walls. No line is drawn across a gap over 30 s.
       </p>
     </div>

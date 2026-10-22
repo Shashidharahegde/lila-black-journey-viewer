@@ -59,8 +59,8 @@ def main() -> None:
     events, ingest_report = load_journeys(args.data_dir)
     events = add_match_clock(events)
 
-    # Only humans record `Position`; bots record `BotPosition` (data README; EC-09 agrees).
-    # Selecting Position rows picks human movement without a second actor classifier.
+    # Bots record `BotPosition`; `Position` comes from humans and the 17 `unknown` journeys (EC-09).
+    # For alignment both are player-client movement, so no actor classifier is needed here.
     positions = events[(events["map_id"] == MAP_ID) & (events["event"] == "Position")].copy()
     positions["u"], positions["v"] = world_to_uv(MAP_ID, positions["x"], positions["z"])
 

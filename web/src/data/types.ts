@@ -29,7 +29,10 @@ export interface MatchSummary {
   duration_s: number
   humans: number
   bots: number
-  counts: { kill: number; death: number; storm_death: number; loot: number; self_kill: number }
+  /** journeys whose numeric ID and player-client events disagree (EC-09); neither human nor bot */
+  unknown: number
+  /** from human files only; `kill` leaves out the Kill half of each Kill/Killed pair */
+  counts: { kill: number; death: number; storm_death: number; loot: number; kill_killed_pair: number }
 }
 
 export interface Index {
@@ -49,11 +52,15 @@ export interface MatchEvent {
   u: number
   v: number
   after_death: boolean
+  /** a Kill and a Killed logged by the same file in the same second; cause unknown (EC-12) */
+  kill_killed_pair: boolean
 }
+
+export type ActorKind = 'human' | 'unknown' | 'bot'
 
 export interface Actor {
   id: string
-  kind: 'human' | 'bot'
+  kind: ActorKind
   id_mismatch: boolean
   segments: Point[][]
   events: MatchEvent[]

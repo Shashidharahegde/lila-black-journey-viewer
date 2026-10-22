@@ -75,16 +75,19 @@ def remove_doubled_journeys(events: pd.DataFrame) -> tuple[pd.DataFrame, list[Do
 
 
 def classify_actors(events: pd.DataFrame) -> pd.DataFrame:
-    """Add `actor_kind` ("human" or "bot") and `id_mismatch` to every row.
+    """Add `actor_kind` ("human", "bot" or "unknown") and `id_mismatch` to every row (EC-09).
 
-    A journey is a bot when its file contains any `BotPosition` event (EC-09). The data
-    README's rule (numeric ID = bot) is wrong for 17 files that record `Position` and `Loot`
-    like humans; `id_mismatch` flags every file where the ID format disagrees with behaviour.
+    The data README gives two rules: humans have UUIDs and log `Position`; bots have numeric
+    IDs and log `BotPosition`. A journey is classified only when both agree:
+    `human` = UUID ID and `Position` rows, `bot` = numeric ID and `BotPosition` rows.
+    Everything else is `unknown` and `id_mismatch` is set: on this data, 17 numeric-ID files
+    that log `Position` (and `Loot`) like the player client, but whose ID says bot. Nothing
+    in the data shows whether a person played them (docs/evidence/event_forensics/).
     """
     out = events.copy()
     bot_files = set(out.loc[out["event"] == "BotPosition", "file"])
     is_bot = out["file"].isin(bot_files)
     id_says_bot = ~out["user_id"].str.fullmatch(UUID_PATTERN)
-    out["actor_kind"] = is_bot.map({True: "bot", False: "human"})
     out["id_mismatch"] = is_bot != id_says_bot
+    out["actor_kind"] = is_bot.map({True: "bot", False: "human"}).where(~out["id_mismatch"], "unknown")
     return out
