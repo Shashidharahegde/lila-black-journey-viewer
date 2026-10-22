@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { loadIndex } from './data/load'
 import MapView from './map/MapView'
 import { buildJourneys } from './map/journeys'

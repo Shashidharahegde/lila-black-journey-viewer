@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { loadMatch } from '../data/load'
 import { useStore } from './store'
 

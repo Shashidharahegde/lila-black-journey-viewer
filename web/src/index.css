@@ -1,7 +1,140 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-html,
-body,
-#root {
-  height: 100%;
+/* shadcn components carry dark: classes; tie them to a .dark class we never set, not to the OS setting */
+@custom-variant dark (&:is(.dark *));
+
+/* Design tokens: docs/FRONTEND_GUIDELINES.md §4. Light chrome around a dark map; no dark theme. */
+:root {
+  /* Interface */
+  --canvas: #f5f7fa;
+  --surface: #ffffff;
+  --subtle: #edf1f6;
+  --line: #dce3ec;
+  --text: #182638;
+  --text-secondary: #607086;
+  --text-muted: #8895a6; /* 3.05:1 on white: non-essential metadata ≥ 14 px semibold, placeholders only */
+  --brand: #2589f5; /* fills, focus rings, icons; never text on white */
+  --brand-strong: #1672d4; /* primary buttons with white text, links */
+  --brand-tint: #e8f3ff;
+  --stage: #000000;
+
+  /* Gameplay (mirror of src/map/encoding.ts; change both together) */
+  --human: #2589f5;
+  --bot: #e99124;
+  --kill: #e5484d;
+  --death: #344256;
+  --loot: #d99a19;
+  --storm: #8b5cf6;
+
+  /* shadcn variables mapped to the tokens (§6) */
+  --background: var(--canvas);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--brand-strong);
+  --primary-foreground: #ffffff;
+  --secondary: var(--subtle);
+  --secondary-foreground: var(--text);
+  --muted: var(--subtle);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--brand-tint);
+  --accent-foreground: var(--text);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-stage: var(--stage);
+
+  --color-human: var(--human);
+  --color-bot: var(--bot);
+  --color-kill: var(--kill);
+  --color-death: var(--death);
+  --color-loot: var(--loot);
+  --color-storm: var(--storm);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-background text-sm text-foreground;
+  }
+  /* Visible 2 px brand focus ring for anything shadcn doesn't style (§6 Keyboard) */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  code,
+  kbd,
+  samp {
+    @apply font-mono;
+  }
+}
+
+/* §6 Motion: no animation when the user asks for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

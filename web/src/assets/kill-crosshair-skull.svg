@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title desc">
+  <title id="title">Kill event marker</title>
+  <desc id="desc">Red crosshair around a bone-white skull with bold charcoal X-shaped eyes.</desc>
+  <!-- Crosshair: simple solid red geometry, no effects. -->
+  <g fill="none" stroke="#F0444F" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="64" cy="64" r="44"/>
+    <path d="M64 7.5V20.5 M64 107.5V120.5 M7.5 64H20.5 M107.5 64H120.5"/>
+  </g>
+  <!-- Skull silhouette with a heavy charcoal outline for small-size clarity. -->
+  <path d="M64 26
+           C48.7 26 39.4 36.1 39.4 49.2
+           C39.4 56.1 41.2 61 44.8 65.8
+           L43.4 73.2
+           C42.8 76.8 45.1 79.6 48.6 80.4
+           L50.1 91.1
+           C50.5 94 52.7 96 55.7 96
+           H72.3
+           C75.3 96 77.5 94 77.9 91.1
+           L79.4 80.4
+           C82.9 79.6 85.2 76.8 84.6 73.2
+           L83.2 65.8
+           C86.8 61 88.6 56.1 88.6 49.2
+           C88.6 36.1 79.3 26 64 26Z"
+        fill="#F5F1E8" stroke="#252B33" stroke-width="4.5" stroke-linejoin="round"/>
+  <!-- X eyes: thick, unmistakable strokes that survive at 24 px. -->
+  <g fill="none" stroke="#252B33" stroke-width="6.5" stroke-linecap="round">
+    <path d="M49.5 47.5L60.5 58.5 M60.5 47.5L49.5 58.5"/>
+    <path d="M67.5 47.5L78.5 58.5 M78.5 47.5L67.5 58.5"/>
+  </g>
+  <!-- Nose cavity -->
+  <path d="M64 62.5L58.5 70.5Q64 74.2 69.5 70.5Z" fill="#252B33"/>
+  <!-- Compact, chunky teeth -->
+  <g stroke="#252B33" stroke-width="4.5" stroke-linecap="round">
+    <path d="M57 82.5V90 M64 82.5V91 M71 82.5V90"/>
+  </g>
+</svg>
