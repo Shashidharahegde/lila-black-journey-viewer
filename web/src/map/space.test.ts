@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index } from '../data/types'
-import { SPACE_WIDTH, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToSpace, uvToWorld } from './space'
+import { SPACE_WIDTH, clampTarget, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToSpace, uvToWorld } from './space'
 
 const { maps } = indexJson as Index
 const MAP_IDS = Object.keys(maps)
@@ -102,5 +102,25 @@ describe('fit to screen', () => {
   it('a tall panel is limited by width', () => {
     const map = maps.Lockdown
     expect(2 ** fitZoom(600, 1200, map, 1)).toBeCloseTo(0.6, 12)
+  })
+})
+
+describe('camera bounds', () => {
+  const map = maps.GrandRift // not square, so both axes are checked
+  const h = spaceHeight(map)
+
+  it('centres the map on an axis where the whole map fits on screen', () => {
+    // zoom 0 = 1 screen px per unit: a 2000 × 2000 px canvas shows more than the map
+    expect(clampTarget([-500, 9999], 0, 2000, 2000, map)).toEqual([SPACE_WIDTH / 2, h / 2])
+  })
+
+  it('stops panning at the map edge when zoomed in', () => {
+    // zoom 1 on a 400 × 300 px canvas shows 200 × 150 units
+    expect(clampTarget([-100, -100], 1, 400, 300, map)).toEqual([100, 75])
+    expect(clampTarget([5000, 5000], 1, 400, 300, map)).toEqual([SPACE_WIDTH - 100, h - 75])
+  })
+
+  it('leaves a target that is already inside alone', () => {
+    expect(clampTarget([500, 400], 1, 400, 300, map)).toEqual([500, 400])
   })
 })

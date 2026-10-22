@@ -13,6 +13,7 @@ const iconBadgeVariants = cva(
       tone: {
         human: "ring-human",
         bot: "ring-bot",
+        unknown: "ring-unknown text-text-secondary",
         kill: "ring-kill",
         death: "ring-death",
         loot: "ring-loot",
@@ -30,21 +31,28 @@ const iconBadgeVariants = cva(
   }
 )
 
-type IconBadgeProps = Omit<React.ComponentProps<"span">, "children"> &
+type IconBadgeProps = React.ComponentProps<"span"> &
   VariantProps<typeof iconBadgeVariants> & {
-    src: string
+    /** Gameplay icon; without one, `children` (e.g. a lucide icon) fills the badge. */
+    src?: string
     /** Plain-English name ("Death"); empty when a text label sits next to the badge. */
     alt: string
   }
 
-function IconBadge({ className, tone, size, src, alt, ...props }: IconBadgeProps) {
+function IconBadge({ className, tone, size, src, alt, children, ...props }: IconBadgeProps) {
   return (
     <span
       data-slot="icon-badge"
       className={cn(iconBadgeVariants({ tone, size }), className)}
       {...props}
     >
-      <img src={src} alt={alt} draggable={false} className="size-full object-contain" />
+      {src ? (
+        <img src={src} alt={alt} draggable={false} className="size-full object-contain" />
+      ) : (
+        <span role={alt ? "img" : undefined} aria-label={alt || undefined} className="flex size-full items-center justify-center [&>svg]:size-full">
+          {children}
+        </span>
+      )}
     </span>
   )
 }

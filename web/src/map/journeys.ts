@@ -3,12 +3,10 @@
 import type { Actor, ActorKind, MapInfo, MatchEvent, MatchFile } from '../data/types'
 import { durationLabel } from '../state/matches'
 import type { LayerKey } from '../state/url'
+import { EVENT_ORDER, type EventType } from './encoding'
 import { uvToSpace } from './space'
 
-export type EventType = 'kill' | 'death' | 'storm_death' | 'loot'
-
-/** Draw order, bottom to top: loot first so the rare events stay visible. */
-export const EVENT_ORDER: EventType[] = ['loot', 'storm_death', 'death', 'kill']
+export { EVENT_ORDER, type EventType }
 
 export interface ActorInfo {
   id: string
@@ -16,6 +14,8 @@ export interface ActorInfo {
   idMismatch: boolean
   /** 0, 1, … for humans in file order (humans come first); null for unknown and bots */
   humanIndex: number | null
+  /** "H1", "H2" when a match has two or more humans (they share one colour); otherwise null */
+  tag: string | null
   segments: number
 }
 
@@ -49,20 +49,30 @@ export interface JourneyData {
   markers: MarkerDatum[]
 }
 
-function actorInfos(match: MatchFile): Map<Actor, ActorInfo> {
+export function actorInfos(match: MatchFile): Map<Actor, ActorInfo> {
+  const tagged = match.actors.filter((a) => a.kind === 'human').length > 1
   let humans = 0
   return new Map(
-    match.actors.map((a) => [
-      a,
-      {
-        id: a.id,
-        kind: a.kind,
-        idMismatch: a.id_mismatch,
-        humanIndex: a.kind === 'human' ? humans++ : null,
-        segments: a.segments.length,
-      },
-    ]),
+    match.actors.map((a) => {
+      const humanIndex = a.kind === 'human' ? humans++ : null
+      return [
+        a,
+        {
+          id: a.id,
+          kind: a.kind,
+          idMismatch: a.id_mismatch,
+          humanIndex,
+          tag: tagged && humanIndex !== null ? `H${humanIndex + 1}` : null,
+          segments: a.segments.length,
+        },
+      ]
+    }),
   )
+}
+
+/** Humans and bots have toggles; unknown journeys are always shown (EC-09). */
+function actorHidden(kind: ActorKind, hide: readonly LayerKey[]): boolean {
+  return (kind === 'bot' && hide.includes('bots')) || (kind === 'human' && hide.includes('humans'))
 }
 
 function isEventType(type: string): type is EventType {
@@ -76,7 +86,7 @@ export function buildJourneys(match: MatchFile, map: MapInfo, hide: readonly Lay
   const markers: MarkerDatum[] = []
 
   for (const actor of match.actors) {
-    if (actor.kind === 'bot' && hide.includes('bots')) continue
+    if (actorHidden(actor.kind, hide)) continue
     const info = infos.get(actor)!
     for (const segment of actor.segments) {
       if (segment.length === 1) {
@@ -147,24 +157,103 @@ export const AFTER_DEATH_NOTE = "Logged after this player's death; timing uncert
 export const KILL_KILLED_PAIR_NOTE =
   "Kill and Killed logged in the same second; the data can't show whether this was self-inflicted or a trade with an unrecorded player"
 
+/** "human h1", or "human H1 h1" when humans are tagged */
 function actorLabel(a: ActorInfo): string {
-  return `${a.kind} ${a.id}`
+  return [a.kind, a.tag, a.id].filter(Boolean).join(' ')
 }
 
-/** "Killed a bot (BotKill) at 4:12 — human 1a2b3c4d", then where, then any notes. */
-export function describeMarker(m: MarkerDatum): string {
+/** Tooltip text in the order §6 asks for: what happened, who and when, then position meaning and notes. */
+export interface TooltipText {
+  title: string
+  who: string
+  when: string | null
+  notes: string[]
+}
+
+export function markerText(m: MarkerDatum): TooltipText {
   const what = RAW_WHAT[m.raw] ?? WHAT[m.actor.kind][m.type]
-  const where = m.killKilledPair ? PAIR_WHERE : WHERE[m.type]
-  const lines = [`${what} (${m.raw}) at ${durationLabel(m.t)} — ${actorLabel(m.actor)}`, where]
-  if (m.killKilledPair) lines.push(KILL_KILLED_PAIR_NOTE)
-  if (m.afterDeath) lines.push(AFTER_DEATH_NOTE)
-  if (m.actor.idMismatch) lines.push(ID_MISMATCH_NOTE)
-  return lines.join('\n')
+  const notes = [m.killKilledPair ? PAIR_WHERE : WHERE[m.type]]
+  if (m.killKilledPair) notes.push(KILL_KILLED_PAIR_NOTE)
+  if (m.afterDeath) notes.push(AFTER_DEATH_NOTE)
+  if (m.actor.idMismatch) notes.push(ID_MISMATCH_NOTE)
+  return { title: `${what} (${m.raw})`, who: actorLabel(m.actor), when: durationLabel(m.t), notes }
+}
+
+export const SAMPLING_NOTE = 'Positions are sampled about every 5 s; lines are straight between samples'
+
+export function actorText(a: ActorInfo): TooltipText {
+  const notes = [SAMPLING_NOTE]
+  if (a.segments > 1) notes.push(`${a.segments} path pieces: no line is drawn across gaps over 30 s`)
+  if (a.idMismatch) notes.push(ID_MISMATCH_NOTE)
+  return { title: [KIND_LABEL[a.kind], a.tag].filter(Boolean).join(' '), who: a.id, when: null, notes }
+}
+
+/** "Killed a bot (BotKill) at 4:12 — human h1", then where, then any notes. */
+export function describeMarker(m: MarkerDatum): string {
+  const t = markerText(m)
+  return [`${t.title} at ${t.when} — ${t.who}`, ...t.notes].join('\n')
 }
 
 export function describeActor(a: ActorInfo): string {
-  const lines = [`${KIND_LABEL[a.kind]} ${a.id}`]
-  if (a.segments > 1) lines.push(`${a.segments} path pieces: no line is drawn across gaps over 30 s`)
-  if (a.idMismatch) lines.push(ID_MISMATCH_NOTE)
-  return lines.join('\n')
+  const t = actorText(a)
+  return [`${t.title} ${t.who}`, ...t.notes].join('\n')
+}
+
+export interface ActorStats {
+  /** "Killed by a bot at 1:58", or "No death recorded" */
+  end: string
+  /** match time (s) of the first and last recorded sample or event */
+  firstT: number
+  lastT: number
+  /** world units along straight lines between samples; gaps over 30 s add nothing */
+  distance: number
+  /** path pieces (a gap over 30 s starts a new one) */
+  segments: number
+  kills: number
+  deaths: number
+  loot: number
+  /** events logged after death (EC-14); not counted above */
+  afterDeath: number
+}
+
+/** Statistics for one journey, for the card shown when its route is clicked. Rows after death are left out. */
+export function actorStats(actor: Actor, map: MapInfo): ActorStats {
+  const live = actor.events.filter((e) => !e.after_death)
+  const death = live.find((e) => e.type === 'death' || e.type === 'storm_death')
+  const count = (type: string) => live.filter((e) => e.type === type).length
+  let distance = 0
+  for (const segment of actor.segments)
+    for (let i = 1; i < segment.length; i++) {
+      const [, u0, v0] = segment[i - 1]
+      const [, u1, v1] = segment[i]
+      distance += Math.hypot(u1 - u0, v1 - v0) * map.scale
+    }
+  const times = [...actor.segments.flat().map(([t]) => t), ...live.map((e) => e.t)]
+  return {
+    end: death ? `${RAW_WHAT[death.raw] ?? WHAT[actor.kind][death.type as EventType]} at ${durationLabel(death.t)}` : 'No death recorded',
+    firstT: times.length ? Math.min(...times) : 0,
+    lastT: times.length ? Math.max(...times) : 0,
+    distance,
+    segments: actor.segments.length,
+    kills: count('kill'),
+    deaths: count('death') + count('storm_death'),
+    loot: count('loot'),
+    afterDeath: actor.events.length - live.length,
+  }
+}
+
+/**
+ * What the legend counts: actors of each kind, and the markers each event toggle controls.
+ * Hidden actor kinds take their events with them; hidden event types are still counted,
+ * so a switched-off layer shows what switching it on would add.
+ */
+export function layerCounts(match: MatchFile, hide: readonly LayerKey[] = []) {
+  const actors: Record<ActorKind, number> = { human: 0, unknown: 0, bot: 0 }
+  const events: Record<EventType, number> = { kill: 0, death: 0, storm_death: 0, loot: 0 }
+  for (const a of match.actors) {
+    actors[a.kind]++
+    if (actorHidden(a.kind, hide)) continue
+    for (const e of a.events) if (isEventType(e.type)) events[e.type]++
+  }
+  return { actors, events }
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index } from '../data/types'
-import { useStore } from './store'
+import { highlightedActor, useStore } from './store'
 
 const index = indexJson as Index
 const match = index.matches.find((m) => m.map === 'GrandRift')!
@@ -9,7 +9,12 @@ const otherDate = index.dates.find((d) => d.date !== match.date)!.date
 const selection = () => useStore.getState().selection
 
 beforeEach(() => {
-  useStore.setState({ index, selection: { map: 'GrandRift', date: match.date, match: match.id, hide: [] } })
+  useStore.setState({
+    index,
+    selection: { map: 'GrandRift', date: match.date, match: match.id, hide: [] },
+    hoveredActor: null,
+    pinnedActor: null,
+  })
 })
 
 describe('filter changes', () => {
@@ -48,5 +53,24 @@ describe('filter changes', () => {
   it('a date that hides the selected match clears it', () => {
     useStore.getState().setDate(otherDate)
     expect(selection()).toEqual({ map: 'GrandRift', date: otherDate, match: null, hide: [] })
+  })
+})
+
+describe('actor highlight', () => {
+  it('hover wins over the pinned actor', () => {
+    useStore.getState().pinActor('a')
+    expect(highlightedActor(useStore.getState())).toBe('a')
+    useStore.getState().hoverActor('b')
+    expect(highlightedActor(useStore.getState())).toBe('b')
+    useStore.getState().hoverActor(null)
+    expect(highlightedActor(useStore.getState())).toBe('a')
+  })
+
+  it('is cleared when another match opens, kept when only layers change', () => {
+    useStore.getState().pinActor('a')
+    useStore.getState().toggleLayer('loot')
+    expect(useStore.getState().pinnedActor).toBe('a')
+    useStore.getState().selectMatch(null)
+    expect(useStore.getState()).toMatchObject({ pinnedActor: null, hoveredActor: null })
   })
 })

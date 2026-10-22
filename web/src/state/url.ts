@@ -4,7 +4,7 @@ import type { Index } from '../data/types'
 export const DEFAULT_MAP = 'AmbroseValley'
 
 /** Layers that can be switched off, in the order they are written to ?hide=. */
-export const LAYER_KEYS = ['bots', 'kill', 'death', 'storm_death', 'loot'] as const
+export const LAYER_KEYS = ['humans', 'bots', 'kill', 'death', 'storm_death', 'loot'] as const
 export type LayerKey = (typeof LAYER_KEYS)[number]
 
 export interface Selection {

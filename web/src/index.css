@@ -23,6 +23,7 @@
   /* Gameplay (mirror of src/map/encoding.ts; change both together) */
   --human: #2589f5;
   --bot: #e99124;
+  --unknown: #c3ccd8;
   --kill: #e5484d;
   --death: #344256;
   --loot: #d99a19;
@@ -68,6 +69,7 @@
 
   --color-human: var(--human);
   --color-bot: var(--bot);
+  --color-unknown: var(--unknown);
   --color-kill: var(--kill);
   --color-death: var(--death);
   --color-loot: var(--loot);

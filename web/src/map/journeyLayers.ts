@@ -1,111 +1,178 @@
-// deck.gl layers for one match. Styling here is provisional (functionality first; UI pass later).
-import { IconLayer, PathLayer, ScatterplotLayer, type Layer, type PickingInfo } from 'deck.gl'
+// deck.gl layers for one match, styled from encoding.ts (FRONTEND_GUIDELINES §4).
+import { CollisionFilterExtension, PathStyleExtension, type CollisionFilterExtensionProps } from '@deck.gl/extensions'
+import { IconLayer, PathLayer, TextLayer, type Layer } from 'deck.gl'
+import type { ActorKind } from '../data/types'
 import {
+  ACTOR,
+  ACTOR_ORDER,
+  ACTOR_PRIORITY,
+  BOT_DASH,
+  BOT_MARKER_OPACITY,
+  BOT_MARKER_SCALE,
+  CASING_WIDTH,
+  COLOR,
+  DIM_OPACITY,
+  EVENT,
   EVENT_ORDER,
-  describeActor,
-  describeMarker,
-  type ActorInfo,
+  HIGHLIGHT_PRIORITY,
+  HOVER_SCALE,
+  MARKER_PRIORITY,
+  POSITION_SIZE,
+  WHITE,
+  badgeIcon,
+  positionIcon,
+  rgba,
   type EventType,
-  type JourneyData,
-  type MarkerDatum,
-  type PathDatum,
-  type PointDatum,
-} from './journeys'
+  type zoomStyle,
+} from './encoding'
+import type { ActorInfo, JourneyData, MarkerDatum, PathDatum, PointDatum } from './journeys'
 
-type Color = [number, number, number, number]
+const DASH = new PathStyleExtension({ dash: true })
+const POSITION_ICONS = Object.fromEntries(ACTOR_ORDER.map((k) => [k, positionIcon(k)])) as Record<
+  ActorKind,
+  ReturnType<typeof positionIcon>
+>
+const COLLISION = new CollisionFilterExtension()
+// badge and icon as one image, so the collision filter treats each marker as a whole
+const BADGE_ICONS = Object.fromEntries(
+  EVENT_ORDER.map((type) => [type, { ...badgeIcon(type), anchorY: 64, mask: false }]),
+) as Record<EventType, ReturnType<typeof badgeIcon> & { anchorY: number; mask: boolean }>
 
-// Okabe–Ito, without black (the minimaps are dark). At most 2 humans share a match today.
-const HUMAN_COLORS: Color[] = [
-  [230, 159, 0, 255],
-  [86, 180, 233, 255],
-  [0, 158, 115, 255],
-  [240, 228, 66, 255],
-  [0, 114, 178, 255],
-  [213, 94, 0, 255],
-  [204, 121, 167, 255],
-]
-const BOT_COLOR: Color = [200, 200, 200, 115]
-// Unknown journeys (EC-09): neutral, but brighter and wider than bots so they don't read as either kind.
-export const UNKNOWN_COLOR: Color = [255, 255, 255, 210]
-
-export function actorColor(a: ActorInfo): Color {
-  if (a.kind === 'unknown') return UNKNOWN_COLOR
-  return a.humanIndex === null ? BOT_COLOR : HUMAN_COLORS[a.humanIndex % HUMAN_COLORS.length]
+/** 1 for the highlighted actor (or when nothing is highlighted), DIM_OPACITY for the rest. */
+function emphasis(actor: ActorInfo, highlight: string | null): number {
+  return highlight === null || actor.id === highlight ? 1 : DIM_OPACITY
 }
 
-const PATH_WIDTH: Record<ActorInfo['kind'], number> = { human: 3, unknown: 2, bot: 1.25 }
-const POINT_RADIUS: Record<ActorInfo['kind'], number> = { human: 3, unknown: 2.5, bot: 2 }
-
-export const EVENT_STYLE: Record<EventType, { label: string; color: Color; size: number; svg: string }> = {
-  loot: { label: 'Loot', color: [250, 204, 21, 255], size: 7, svg: '<circle cx="32" cy="32" r="22" fill="#fff"/>' },
-  storm_death: { label: 'Storm death', color: [168, 85, 247, 255], size: 16, svg: '<path d="M32 4L60 32L32 60L4 32Z" fill="#fff"/>' },
-  death: {
-    label: 'Death',
-    color: [255, 255, 255, 255],
-    size: 16,
-    svg: '<path d="M12 12L52 52M52 12L12 52" stroke="#fff" stroke-width="12" stroke-linecap="round"/>',
-  },
-  kill: { label: 'Kill', color: [239, 68, 68, 255], size: 16, svg: '<path d="M32 6L58 54H6Z" fill="#fff"/>' },
+function markerScale(m: MarkerDatum, highlight: string | null): number {
+  return (m.actor.kind === 'bot' ? BOT_MARKER_SCALE : 1) * (m.actor.id === highlight ? HOVER_SCALE : 1)
 }
 
-export function iconUrl(type: EventType): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">${EVENT_STYLE[type].svg}</svg>`
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+function markerOpacity(m: MarkerDatum, highlight: string | null): number {
+  return (m.actor.kind === 'bot' ? BOT_MARKER_OPACITY : 1) * emphasis(m.actor, highlight)
 }
 
-const ICONS = Object.fromEntries(
-  EVENT_ORDER.map((type) => [type, { id: type, url: iconUrl(type), width: 64, height: 64, mask: true }]),
-) as Record<EventType, { id: string; url: string; width: number; height: number; mask: boolean }>
-
-// Markers from bot files are fainter: humans are the focus.
-const MARKER_ALPHA: Record<ActorInfo['kind'], number> = { human: 255, unknown: 200, bot: 150 }
-
-function markerColor(m: MarkerDatum): Color {
-  const [r, g, b] = EVENT_STYLE[m.type].color
-  return [r, g, b, MARKER_ALPHA[m.actor.kind]]
+function withAlpha([r, g, b]: number[], opacity: number): [number, number, number, number] {
+  return [r, g, b, Math.round(255 * opacity)]
 }
 
-export function journeyLayers(data: JourneyData): Layer[] {
-  const pathsOf = (kind: ActorInfo['kind']) => data.paths.filter((p) => p.actor.kind === kind)
-  const pathProps = {
-    getPath: (d: PathDatum) => d.path,
-    getColor: (d: PathDatum) => actorColor(d.actor),
-    getWidth: (d: PathDatum) => PATH_WIDTH[d.actor.kind],
-    widthUnits: 'pixels' as const,
-    capRounded: true,
-    jointRounded: true,
-    pickable: true,
-  }
-  return [
-    // bottom to top: bots, unknown, humans
-    new PathLayer<PathDatum>({ id: 'bot-paths', data: pathsOf('bot'), ...pathProps }),
-    new PathLayer<PathDatum>({ id: 'unknown-paths', data: pathsOf('unknown'), ...pathProps }),
-    new PathLayer<PathDatum>({ id: 'human-paths', data: pathsOf('human'), ...pathProps }),
-    new ScatterplotLayer<PointDatum>({
-      id: 'lone-samples',
-      data: data.lonePoints,
-      getPosition: (d) => d.position,
-      getFillColor: (d) => actorColor(d.actor),
-      getRadius: (d) => POINT_RADIUS[d.actor.kind],
-      radiusUnits: 'pixels',
-      pickable: true,
-    }),
-    new IconLayer<MarkerDatum>({
-      id: 'event-markers',
-      data: data.markers, // already in draw order: loot first, kills last
-      getPosition: (d) => d.position,
-      getIcon: (d) => ICONS[d.type],
-      getSize: (d) => EVENT_STYLE[d.type].size,
-      sizeUnits: 'pixels',
-      getColor: markerColor,
-      pickable: true,
-    }),
+/** H1, H2 at the start of each tagged human's journey. */
+function humanTags(data: JourneyData): { tag: string; position: [number, number]; actor: ActorInfo }[] {
+  const seen = new Set<string>()
+  const starts = [
+    ...data.paths.map((p) => ({ actor: p.actor, position: p.path[0] })),
+    ...data.lonePoints.map((p) => ({ actor: p.actor, position: p.position })),
   ]
+  return starts.flatMap(({ actor, position }) => {
+    if (!actor.tag || seen.has(actor.id)) return []
+    seen.add(actor.id)
+    return [{ tag: actor.tag, position, actor }]
+  })
 }
 
-export function journeyTooltip(info: PickingInfo): string | null {
-  const object = info.object as PathDatum | PointDatum | MarkerDatum | undefined
-  if (!object) return null
-  if ('type' in object) return describeMarker(object)
-  return describeActor(object.actor)
+/**
+ * Accessors give sizes at the reference zoom; `zoom` scales them through widthScale / sizeScale
+ * (uniforms), so zooming never recomputes per-object data.
+ */
+export function journeyLayers(
+  data: JourneyData,
+  highlight: string | null,
+  zoom: ReturnType<typeof zoomStyle> = { routeScale: 1, markerScale: 1 },
+): Layer[] {
+  const triggers = { getColor: highlight, getFillColor: highlight, getLineColor: highlight, getSize: highlight }
+  const pathsOf = (kind: ActorKind) => data.paths.filter((p) => p.actor.kind === kind)
+  const pathLayer = (kind: ActorKind) => {
+    const style = ACTOR[kind]
+    const base = rgba(COLOR[style.tone])
+    return new PathLayer<PathDatum>({
+      id: `${kind}-paths`,
+      data: pathsOf(kind),
+      getPath: (d) => d.path,
+      getColor: (d) => withAlpha(base, style.opacity * emphasis(d.actor, highlight)),
+      getWidth: (d) => style.pathWidth * (d.actor.id === highlight ? HOVER_SCALE : 1),
+      widthUnits: 'pixels',
+      widthScale: zoom.routeScale,
+      capRounded: !style.dashed,
+      jointRounded: true,
+      pickable: true,
+      updateTriggers: { ...triggers, getWidth: highlight },
+      ...(style.dashed && {
+        extensions: [DASH],
+        getDashArray: BOT_DASH,
+        dashJustified: true,
+      }),
+    })
+  }
+
+  const lonePoints = [...data.lonePoints].sort(
+    (a, b) => ACTOR_ORDER.indexOf(a.actor.kind) - ACTOR_ORDER.indexOf(b.actor.kind),
+  )
+  const markers = new IconLayer<MarkerDatum, CollisionFilterExtensionProps<MarkerDatum>>({
+    id: 'event-markers',
+    data: data.markers, // already in draw order: loot first, kills last
+    getPosition: (d) => d.position,
+    getIcon: (d) => BADGE_ICONS[d.type],
+    getSize: (d) => EVENT[d.type].size * markerScale(d, highlight),
+    sizeUnits: 'pixels',
+    sizeScale: zoom.markerScale,
+    // mask is off, so only the alpha is used: the badge's opacity
+    getColor: (d) => withAlpha(WHITE, markerOpacity(d, highlight)),
+    pickable: true,
+    // where markers overlap, the rarer event (and the human's, and the highlighted actor's) wins;
+    // zooming in pulls them apart and reveals the rest (FRONTEND_GUIDELINES §11 P14)
+    extensions: [COLLISION],
+    collisionGroup: 'event-markers',
+    getCollisionPriority: (d) =>
+      MARKER_PRIORITY[d.type] + ACTOR_PRIORITY[d.actor.kind] + (d.actor.id === highlight ? HIGHLIGHT_PRIORITY : 0),
+    updateTriggers: { ...triggers, getCollisionPriority: highlight },
+  })
+
+  return [
+    // bottom to top: bot paths, unknown paths, human casing and paths, positions, tags, loot … kills
+    pathLayer('bot'),
+    pathLayer('unknown'),
+    new PathLayer<PathDatum>({
+      id: 'human-casing',
+      data: pathsOf('human'),
+      getPath: (d) => d.path,
+      getColor: (d) => withAlpha(WHITE, 0.9 * emphasis(d.actor, highlight)),
+      getWidth: (d) => (ACTOR.human.pathWidth + 2 * CASING_WIDTH) * (d.actor.id === highlight ? HOVER_SCALE : 1),
+      widthUnits: 'pixels',
+      widthScale: zoom.routeScale,
+      capRounded: true,
+      jointRounded: true,
+      updateTriggers: { ...triggers, getWidth: highlight },
+    }),
+    pathLayer('human'),
+    new IconLayer<PointDatum>({
+      id: 'lone-samples',
+      data: lonePoints,
+      getPosition: (d) => d.position,
+      getIcon: (d) => POSITION_ICONS[d.actor.kind],
+      getSize: (d) => POSITION_SIZE[d.actor.kind],
+      sizeUnits: 'pixels',
+      sizeScale: zoom.routeScale,
+      getColor: (d) => withAlpha(WHITE, ACTOR[d.actor.kind].opacity * emphasis(d.actor, highlight)),
+      pickable: true,
+      updateTriggers: triggers,
+    }),
+    new TextLayer<ReturnType<typeof humanTags>[number]>({
+      id: 'human-tags',
+      data: humanTags(data),
+      getPosition: (d) => d.position,
+      getText: (d) => d.tag,
+      getSize: 12,
+      sizeUnits: 'pixels',
+      fontFamily: 'Inter, sans-serif',
+      fontWeight: 600,
+      characterSet: 'H0123456789',
+      getColor: (d) => withAlpha(rgba(COLOR.human), emphasis(d.actor, highlight)),
+      background: true,
+      getBackgroundColor: (d) => withAlpha(WHITE, emphasis(d.actor, highlight)),
+      backgroundPadding: [4, 2],
+      // side by side, so tags of humans who start together don't overlap
+      getPixelOffset: (d) => [(d.actor.humanIndex ?? 0) * 24, -14],
+      updateTriggers: triggers,
+    }),
+    markers,
+  ]
 }

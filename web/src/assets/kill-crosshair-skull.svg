@@ -2,7 +2,7 @@
   <title id="title">Kill event marker</title>
   <desc id="desc">Red crosshair around a bone-white skull with bold charcoal X-shaped eyes.</desc>
   <!-- Crosshair: simple solid red geometry, no effects. -->
-  <g fill="none" stroke="#F0444F" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
+  <g fill="none" stroke="#E5484D" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="64" cy="64" r="44"/>
     <path d="M64 7.5V20.5 M64 107.5V120.5 M7.5 64H20.5 M107.5 64H120.5"/>
   </g>

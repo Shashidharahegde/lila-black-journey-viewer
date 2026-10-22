@@ -39,3 +39,21 @@ export function fitZoom(viewWidth: number, viewHeight: number, map: MapInfo, mar
   const pixelsPerUnit = Math.min(viewWidth / SPACE_WIDTH, viewHeight / spaceHeight(map)) * margin
   return Math.log2(pixelsPerUnit)
 }
+
+/**
+ * Keeps the camera on the map: the view never shows more than a margin of black around the image.
+ * When the map is narrower (or shorter) than the screen it stays centred on that axis.
+ * `zoom` is deck.gl's (log2 screen px per unit); width/height are the canvas in screen px.
+ */
+export function clampTarget(
+  [x, y]: readonly number[],
+  zoom: number,
+  width: number,
+  height: number,
+  map: MapInfo,
+): [number, number] {
+  const scale = 2 ** zoom
+  const clampAxis = (value: number, visible: number, extent: number) =>
+    visible >= extent ? extent / 2 : Math.min(extent - visible / 2, Math.max(visible / 2, value))
+  return [clampAxis(x, width / scale, SPACE_WIDTH), clampAxis(y, height / scale, spaceHeight(map))]
+}
