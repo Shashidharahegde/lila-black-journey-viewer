@@ -1,6 +1,9 @@
-// Keyboard shortcuts (FRONTEND_GUIDELINES §6). Playback keys (Space, ← / →) arrive with feature 5.
+// Keyboard shortcuts (FRONTEND_GUIDELINES §6). The playback keys work while a match is open.
+import { SEEK_STEP_S } from '../state/playback'
 
 export const SHORTCUTS: { keys: string[]; action: string }[] = [
+  { keys: ['Space'], action: 'Play or pause the match' },
+  { keys: ['←', '→'], action: `Back or forward ${SEEK_STEP_S} s` },
   { keys: ['F'], action: 'Fit the map to the screen' },
   { keys: ['Esc'], action: 'Clear the selected actor' },
   { keys: ['?'], action: 'Show these shortcuts' },

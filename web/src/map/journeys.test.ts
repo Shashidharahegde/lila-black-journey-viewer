@@ -6,7 +6,6 @@ import {
   EVENT_ORDER,
   ID_MISMATCH_NOTE,
   KILL_KILLED_PAIR_NOTE,
-  SAMPLING_NOTE,
   actorStats,
   buildJourneys,
   describeActor,
@@ -185,35 +184,34 @@ describe('tooltips', () => {
   const find = (type: string, actorId: string) => describeMarker(markers.find((m) => m.type === type && m.actor.id === actorId)!)
 
   it('describe a human kill from the killer’s side', () => {
-    expect(find('kill', 'h1')).toBe('Killed a bot (BotKill) at 4:12 — human H1 h1\nMarker shows where the killer stood')
+    expect(find('kill', 'h1')).toBe('Killed a bot (BotKill) at 4:12 — human H1 h1')
   })
 
   it('describe a human death from the victim’s side', () => {
-    expect(find('death', 'h1')).toBe('Killed by a bot (BotKilled) at 1:50 — human H1 h1\nMarker shows where the victim fell')
+    expect(find('death', 'h1')).toBe('Killed by a bot (BotKilled) at 1:50 — human H1 h1')
   })
 
   it('describe bot events from the bot’s side and flag late events', () => {
-    expect(find('kill', 'b1')).toBe('Bot killed someone (BotKill) at 0:50 — bot b1\nMarker shows where the killer stood')
+    expect(find('kill', 'b1')).toBe('Bot killed someone (BotKill) at 0:50 — bot b1')
     expect(find('death', 'b1')).toBe(
-      `Bot was killed (BotKilled) at 1:20 — bot b1\nMarker shows where the victim fell\n${AFTER_DEATH_NOTE}`,
+      `Bot was killed (BotKilled) at 1:20 — bot b1\n${AFTER_DEATH_NOTE}`,
     )
   })
 
   it('label unknown journeys on markers and paths', () => {
     expect(find('storm_death', 'u1')).toBe(
-      `Killed by the storm (KilledByStorm) at 0:30 — unknown u1\nMarker shows where they died\n${ID_MISMATCH_NOTE}`,
+      `Killed by the storm (KilledByStorm) at 0:30 — unknown u1\n${ID_MISMATCH_NOTE}`,
     )
     const u1 = buildJourneys(sample, grandRift).paths.find((p) => p.actor.id === 'u1')!.actor
-    expect(describeActor(u1)).toBe(`Unknown actor u1\n${SAMPLING_NOTE}\n${ID_MISMATCH_NOTE}`)
+    expect(describeActor(u1)).toBe(`Unknown actor u1\n${ID_MISMATCH_NOTE}`)
   })
 
   it('show both halves of a Kill/Killed pair with neutral wording, never as a self-kill', () => {
-    const where = 'Marker shows where this player stood; both events of the pair carry that position'
     expect(find('kill', 'h2')).toBe(
-      `Kill logged (README: killed a human player) (Kill) at 1:30 — human H2 h2\n${where}\n${KILL_KILLED_PAIR_NOTE}`,
+      `Kill logged (README: killed a human player) (Kill) at 1:30 — human H2 h2\n${KILL_KILLED_PAIR_NOTE}`,
     )
     expect(find('death', 'h2')).toBe(
-      `Killed logged (README: killed by a human player) (Killed) at 1:30 — human H2 h2\n${where}\n${KILL_KILLED_PAIR_NOTE}`,
+      `Killed logged (README: killed by a human player) (Killed) at 1:30 — human H2 h2\n${KILL_KILLED_PAIR_NOTE}`,
     )
     const text = buildJourneys(sample, grandRift).markers.map(describeMarker).join('\n')
     expect(text).not.toMatch(/self-kill|killed themselves/i)
@@ -221,7 +219,7 @@ describe('tooltips', () => {
 
   it('mention gaps on a path with several pieces', () => {
     const h1 = buildJourneys(sample, grandRift).paths[0].actor
-    expect(describeActor(h1)).toBe(`Human H1 h1\n${SAMPLING_NOTE}\n3 path pieces: no line is drawn across gaps over 30 s`)
+    expect(describeActor(h1)).toBe(`Human H1 h1\n3 path pieces: no line is drawn across gaps over 30 s`)
   })
 })
 
@@ -238,10 +236,15 @@ describe('journey statistics', () => {
       kills: 1,
       deaths: 1,
       loot: 2,
+      killKilledPairs: 0,
       afterDeath: 0,
     })
     expect(actorStats(u1, grandRift).end).toBe('Killed by the storm at 0:30')
     expect(actorStats(h2, grandRift).end).toBe('Killed logged (README: killed by a human player) at 1:30')
+  })
+
+  it('count the Kill of a Kill/Killed pair as a pair, not a kill (EC-12)', () => {
+    expect(actorStats(h2, grandRift)).toMatchObject({ kills: 0, deaths: 1, killKilledPairs: 1 })
   })
 
   it('leave rows after death out of the counts and the ending, and never measure across a gap', () => {
@@ -262,8 +265,10 @@ describe('legend counts', () => {
     expect(layerCounts(sample)).toEqual({
       actors: { human: 2, unknown: 1, bot: 1 },
       events: { kill: 3, death: 3, storm_death: 1, loot: 2 },
+      pairKills: 1,
     })
     expect(layerCounts(sample, ['bots', 'loot']).events).toEqual({ kill: 2, death: 2, storm_death: 1, loot: 2 })
+    expect(layerCounts(sample, ['humans']).pairKills).toBe(0)
   })
 })
 
@@ -301,6 +306,29 @@ describe('every generated match file', () => {
     expect(actors.filter((a) => a.kind === 'unknown')).toHaveLength(17)
     const paired = actors.flatMap((a) => a.events.filter((e) => e.kill_killed_pair))
     expect(paired.map((e) => e.raw).sort()).toEqual(['Kill', 'Kill', 'Kill', 'Killed', 'Killed', 'Killed'])
+  })
+
+  it('agrees with the match card: human journeys add up to the human-file counts in the index', () => {
+    // the only difference: the card counts events logged after death (D2), the journey card leaves them out
+    const byId = new Map(index.matches.map((m) => [m.id, m]))
+    let lateKills = 0
+    for (const match of files) {
+      const map = index.maps[match.map]
+      const sum = { kill: 0, death: 0, loot: 0, pairs: 0 }
+      for (const a of match.actors.filter((a) => a.kind === 'human')) {
+        const s = actorStats(a, map)
+        const late = a.events.filter((e) => e.after_death && e.type === 'kill').length
+        expect(s.afterDeath).toBe(late)
+        lateKills += late
+        sum.kill += s.kills + late
+        sum.death += s.deaths
+        sum.loot += s.loot
+        sum.pairs += s.killKilledPairs
+      }
+      const c = byId.get(match.id)!.counts
+      expect(sum).toEqual({ kill: c.kill, death: c.death + c.storm_death, loot: c.loot, pairs: c.kill_killed_pair })
+    }
+    expect(lateKills).toBe(2)
   })
 
   it('uses only event types the map knows how to draw', () => {

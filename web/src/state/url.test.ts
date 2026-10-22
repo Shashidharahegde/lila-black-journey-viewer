@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index } from '../data/types'
-import { DEFAULT_MAP, LAYER_KEYS, parseSelection, serializeSelection } from './url'
+import { DEFAULT_MAP, LAYER_KEYS, parseSelection, parseTime, serializeSelection, urlTime } from './url'
 
 const index = indexJson as Index
 const parse = (query: string) => parseSelection(new URLSearchParams(query), index)
@@ -90,5 +90,31 @@ describe('serializeSelection', () => {
   it('round-trips through parseSelection', () => {
     const selection = { map: 'GrandRift', date: grandRift.date, match: grandRift.id, hide: [] }
     expect(parse(serializeSelection(selection))).toEqual(selection)
+  })
+})
+
+describe('playback time in the URL (t=)', () => {
+  const time = (query: string) => parseTime(new URLSearchParams(query), index, parse(query).match)
+  const selection = { map: 'GrandRift', date: null, match: grandRift.id, hide: [] }
+
+  it('opens a shared link at its time', () => {
+    expect(time(`match=${grandRift.id}&t=40`)).toBe(40)
+    expect(serializeSelection(selection, 40)).toBe(`map=GrandRift&match=${grandRift.id}&t=40`)
+  })
+
+  it('keeps the time within the match', () => {
+    expect(time(`match=${grandRift.id}&t=99999`)).toBe(Math.floor(grandRift.duration_s))
+  })
+
+  it('drops a time without a match, or one that is not whole seconds', () => {
+    expect(time('map=GrandRift&t=40')).toBeNull()
+    for (const t of ['abc', '-5', '4.5', '0', '']) expect(time(`match=${grandRift.id}&t=${t}`)).toBeNull()
+    expect(serializeSelection({ ...selection, match: null }, 40)).toBe('map=GrandRift')
+  })
+
+  it('writes whole seconds, and nothing at 00:00', () => {
+    expect(urlTime(selection, 80.9)).toBe(80)
+    expect(urlTime(selection, 0.4)).toBeNull()
+    expect(urlTime({ ...selection, match: null }, 80)).toBeNull()
   })
 })

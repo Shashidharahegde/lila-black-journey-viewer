@@ -2,38 +2,29 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { dataUrl, loadIndex } from './data/load'
-import MapView from './map/MapView'
-import { buildJourneys, type PathDatum } from './map/journeys'
-import { zoomStyle } from './map/encoding'
-import { journeyLayers } from './map/journeyLayers'
+import { buildJourneys } from './map/journeys'
 import { loadMinimap, prefetchMinimap } from './map/minimap'
 import { useStore } from './state/store'
 import { useMatchFile } from './state/useMatchFile'
 import { useUrlSync } from './state/useUrlSync'
-import JourneyTooltip from './ui/JourneyTooltip'
 import JourneyCard from './ui/JourneyCard'
+import MapStage from './ui/MapStage'
+import PlaybackDock from './ui/PlaybackDock'
 import SidePanel from './ui/SidePanel'
 import TopBar from './ui/TopBar'
 import { isTypingTarget } from './ui/shortcuts'
-
-/** The actor id of anything picked on the journey layers. */
-function pickedActor(object: unknown): string | null {
-  return (object as Partial<PathDatum> | null)?.actor?.id ?? null
-}
 
 export default function App() {
   const index = useStore((s) => s.index)
   const selection = useStore((s) => s.selection)
   const matchFile = useStore((s) => s.matchFile)
   const setIndex = useStore((s) => s.setIndex)
-  const hovered = useStore((s) => s.hoveredActor)
-  const pinned = useStore((s) => s.pinnedActor)
-  const hoverActor = useStore((s) => s.hoverActor)
   const pinActor = useStore((s) => s.pinActor)
   const [indexError, setIndexError] = useState<string | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
 
-  useEffect(() => {
+  const fetchIndex = useCallback(() => {
+    setIndexError(null)
     loadIndex()
       .then(setIndex)
       .catch((error: unknown) => {
@@ -41,6 +32,7 @@ export default function App() {
         toast.error('Could not load the match index')
       })
   }, [setIndex])
+  useEffect(fetchIndex, [fetchIndex])
   useUrlSync()
   useMatchFile()
 
@@ -74,15 +66,12 @@ export default function App() {
   }, [pinActor])
 
   const map = index && selection ? index.maps[selection.map] : null
-  const loaded = matchFile.status === 'ready' && matchFile.data.map === selection?.map ? matchFile.data : null
+  // only the selected match's own file: never a previous match's data while the next one loads
+  const loaded =
+    matchFile.status === 'ready' && matchFile.id === selection?.match && matchFile.data.map === selection.map ? matchFile.data : null
   const hide = selection?.hide
   const journeys = useMemo(() => (loaded && map && hide ? buildJourneys(loaded, map, hide) : null), [loaded, map, hide])
-  const overlays = useCallback(
-    (levelsIn: number) => (journeys ? journeyLayers(journeys, { hovered, pinned }, zoomStyle(levelsIn)) : []),
-    [journeys, hovered, pinned],
-  )
-  const onHoverObject = useCallback((object: unknown) => hoverActor(pickedActor(object)), [hoverActor])
-  const onClickObject = useCallback((object: unknown) => pinActor(pickedActor(object)), [pinActor])
+  const summary = index && selection?.match ? index.matches.find((m) => m.id === selection.match) : undefined
 
   // Every view says what it shows (FRONTEND_GUIDELINES §2, rule 1).
   const viewTitle = selection
@@ -97,6 +86,7 @@ export default function App() {
       selection={selection}
       indexError={indexError}
       onNavigate={() => setPanelOpen(false)}
+      onRetryIndex={fetchIndex}
     />
   )
 
@@ -116,27 +106,22 @@ export default function App() {
             {panel}
           </SheetContent>
         </Sheet>
-        <main className="relative min-w-0 flex-1 bg-stage">
-          {map && selection && (
-            <MapView
-              mapId={selection.map}
-              map={map}
-              overlays={overlays}
-              renderTooltip={(object) => <JourneyTooltip object={object} />}
-              onHoverObject={onHoverObject}
-              onClickObject={onClickObject}
-            />
-          )}
-          {viewTitle && (
-            <h2 className="pointer-events-none absolute top-3 left-3 rounded-md bg-card/90 px-2.5 py-1 font-medium text-card-foreground shadow-sm">
-              {viewTitle}
-            </h2>
-          )}
-          {loaded && map && (
-            <div className="absolute right-3 bottom-3 max-h-[calc(100%-9rem)] overflow-y-auto">
-              <JourneyCard match={loaded} map={map} />
-            </div>
-          )}
+        <main className="flex min-w-0 flex-1 flex-col bg-stage">
+          <div className="relative min-h-0 flex-1">
+            {map && selection && <MapStage mapId={selection.map} map={map} journeys={journeys} />}
+            {viewTitle && (
+              <h2 className="pointer-events-none absolute top-3 left-3 rounded-md bg-card/90 px-2.5 py-1 font-medium text-card-foreground shadow-sm">
+                {viewTitle}
+              </h2>
+            )}
+            {loaded && map && (
+              <div className="absolute right-3 bottom-3 max-h-[calc(100%-9rem)] overflow-y-auto">
+                <JourneyCard match={loaded} map={map} />
+              </div>
+            )}
+          </div>
+          {/* keyed by match, so nothing of the previous match's timeline survives a switch */}
+          {summary && <PlaybackDock key={summary.id} match={summary} markers={journeys?.markers ?? null} />}
         </main>
       </div>
     </div>

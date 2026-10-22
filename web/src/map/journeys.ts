@@ -4,6 +4,7 @@ import type { Actor, ActorKind, MapInfo, MatchEvent, MatchFile } from '../data/t
 import { durationLabel } from '../state/matches'
 import type { LayerKey } from '../state/url'
 import { EVENT_ORDER, type EventType } from './encoding'
+import type { HeadDatum } from './playback'
 import { uvToSpace } from './space'
 
 export { EVENT_ORDER, type EventType }
@@ -22,6 +23,8 @@ export interface ActorInfo {
 export interface PathDatum {
   actor: ActorInfo
   path: [number, number][]
+  /** match time (s) of each point of `path` */
+  times: number[]
 }
 
 export interface PointDatum {
@@ -38,6 +41,8 @@ export interface MarkerDatum {
   afterDeath: boolean
   killKilledPair: boolean
   position: [number, number]
+  /** playback: happened a while before the playback time, so drawn slightly faded */
+  faded?: boolean
 }
 
 /** Where a journey was first and last recorded (its first and last position samples). */
@@ -54,6 +59,8 @@ export interface ArrowDatum {
   position: [number, number]
   /** degrees, counter-clockwise on screen from pointing right (deck.gl IconLayer `getAngle`) */
   angle: number
+  /** match time (s) at the end of the step, when playback has drawn all of it */
+  t: number
 }
 
 export interface JourneyData {
@@ -116,8 +123,9 @@ export function buildJourneys(match: MatchFile, map: MapInfo, hide: readonly Lay
         lonePoints.push({ actor: info, position: uvToSpace(u, v, map), t })
       } else {
         const path = segment.map(([, u, v]) => uvToSpace(u, v, map))
-        paths.push({ actor: info, path })
-        arrows.push(...stepArrows(path, info))
+        const times = segment.map(([t]) => t)
+        paths.push({ actor: info, path, times })
+        arrows.push(...stepArrows(path, times, info))
       }
     }
     const first = actor.segments.at(0)?.at(0)
@@ -134,7 +142,7 @@ export function buildJourneys(match: MatchFile, map: MapInfo, hide: readonly Lay
 }
 
 /** Steps where the actor stood still have no direction, so they get no arrow. */
-function stepArrows(path: [number, number][], actor: ActorInfo): ArrowDatum[] {
+function stepArrows(path: [number, number][], times: number[], actor: ActorInfo): ArrowDatum[] {
   const arrows: ArrowDatum[] = []
   for (let i = 1; i < path.length; i++) {
     const [x0, y0] = path[i - 1]
@@ -142,7 +150,7 @@ function stepArrows(path: [number, number][], actor: ActorInfo): ArrowDatum[] {
     if (x0 === x1 && y0 === y1) continue
     // drawing-space Y points down the screen, so it is negated for a screen angle
     const angle = (Math.atan2(-(y1 - y0), x1 - x0) * 180) / Math.PI
-    arrows.push({ actor, position: [(x0 + x1) / 2, (y0 + y1) / 2], angle })
+    arrows.push({ actor, position: [(x0 + x1) / 2, (y0 + y1) / 2], angle, t: times[i] })
   }
   return arrows
 }
@@ -183,14 +191,6 @@ const RAW_WHAT: Partial<Record<string, string>> = {
   Killed: 'Killed logged (README: killed by a human player)',
 }
 
-const WHERE: Record<EventType, string> = {
-  kill: 'Marker shows where the killer stood',
-  death: 'Marker shows where the victim fell',
-  storm_death: 'Marker shows where they died',
-  loot: 'Marker shows where they picked it up',
-}
-const PAIR_WHERE = 'Marker shows where this player stood; both events of the pair carry that position'
-
 const KIND_LABEL: Record<ActorKind, string> = { human: 'Human', unknown: 'Unknown actor', bot: 'Bot' }
 
 export const ID_MISMATCH_NOTE =
@@ -199,12 +199,23 @@ export const AFTER_DEATH_NOTE = "Logged after this player's death; timing uncert
 export const KILL_KILLED_PAIR_NOTE =
   "Kill and Killed logged in the same second; the data can't show whether this was self-inflicted or a trade with an unrecorded player"
 
+// What each place that shows event counts is counting (map pass M4). The numbers differ on purpose.
+export const SCOPE = {
+  humanFiles: 'In human files',
+  humanFilesNote:
+    'Events logged by human players. Bot and unknown journeys aren’t counted, and the Kill of a Kill/Killed pair counts as a pair, not a kill.',
+  onMap: 'On the map',
+  onMapNote:
+    'Markers for the whole match, bot events included; playback shows each one from its time. Switching off humans or bots removes their markers from these counts.',
+  journey: 'This journey',
+} as const
+
 /** "human h1", or "human H1 h1" when humans are tagged */
 function actorLabel(a: ActorInfo): string {
   return [a.kind, a.tag, a.id].filter(Boolean).join(' ')
 }
 
-/** Tooltip text in the order §6 asks for: what happened, who and when, then position meaning and notes. */
+/** Tooltip text in the order §6 asks for: what happened, who and when, then notes. */
 export interface TooltipText {
   title: string
   who: string
@@ -214,17 +225,15 @@ export interface TooltipText {
 
 export function markerText(m: MarkerDatum): TooltipText {
   const what = RAW_WHAT[m.raw] ?? WHAT[m.actor.kind][m.type]
-  const notes = [m.killKilledPair ? PAIR_WHERE : WHERE[m.type]]
+  const notes: string[] = []
   if (m.killKilledPair) notes.push(KILL_KILLED_PAIR_NOTE)
   if (m.afterDeath) notes.push(AFTER_DEATH_NOTE)
   if (m.actor.idMismatch) notes.push(ID_MISMATCH_NOTE)
   return { title: `${what} (${m.raw})`, who: actorLabel(m.actor), when: durationLabel(m.t), notes }
 }
 
-export const SAMPLING_NOTE = 'Positions are sampled about every 5 s; lines are straight between samples'
-
 export function actorText(a: ActorInfo): TooltipText {
-  const notes = [SAMPLING_NOTE]
+  const notes: string[] = []
   if (a.segments > 1) notes.push(`${a.segments} path pieces: no line is drawn across gaps over 30 s`)
   if (a.idMismatch) notes.push(ID_MISMATCH_NOTE)
   return { title: [KIND_LABEL[a.kind], a.tag].filter(Boolean).join(' '), who: a.id, when: null, notes }
@@ -238,6 +247,18 @@ export function endpointText(e: EndpointDatum): TooltipText {
     who: actorLabel(e.actor),
     when: durationLabel(e.t),
     notes: [start ? 'First position sample of this journey' : 'Last position sample; the journey may have ended here or just after'],
+  }
+}
+
+export const ESTIMATED_POSITION_NOTE = 'Between two position samples: estimated on the straight line between them'
+
+/** Playback: where the actor is at the playback time, and whether that was recorded or estimated. */
+export function headText(h: HeadDatum): TooltipText {
+  return {
+    title: h.recorded ? 'Recorded position' : 'Estimated position',
+    who: actorLabel(h.actor),
+    when: durationLabel(h.t),
+    notes: h.recorded ? [] : [ESTIMATED_POSITION_NOTE],
   }
 }
 
@@ -262,9 +283,11 @@ export interface ActorStats {
   distance: number
   /** path pieces (a gap over 30 s starts a new one) */
   segments: number
+  /** the Kill of a Kill/Killed pair isn't a kill here (EC-12); it's counted in killKilledPairs */
   kills: number
   deaths: number
   loot: number
+  killKilledPairs: number
   /** events logged after death (EC-14); not counted above */
   afterDeath: number
 }
@@ -273,7 +296,7 @@ export interface ActorStats {
 export function actorStats(actor: Actor, map: MapInfo): ActorStats {
   const live = actor.events.filter((e) => !e.after_death)
   const death = live.find((e) => e.type === 'death' || e.type === 'storm_death')
-  const count = (type: string) => live.filter((e) => e.type === type).length
+  const count = (type: string) => live.filter((e) => e.type === type && !(type === 'kill' && e.kill_killed_pair)).length
   let distance = 0
   for (const segment of actor.segments)
     for (let i = 1; i < segment.length; i++) {
@@ -291,6 +314,7 @@ export function actorStats(actor: Actor, map: MapInfo): ActorStats {
     kills: count('kill'),
     deaths: count('death') + count('storm_death'),
     loot: count('loot'),
+    killKilledPairs: live.filter((e) => e.type === 'kill' && e.kill_killed_pair).length,
     afterDeath: actor.events.length - live.length,
   }
 }
@@ -303,10 +327,16 @@ export function actorStats(actor: Actor, map: MapInfo): ActorStats {
 export function layerCounts(match: MatchFile, hide: readonly LayerKey[] = []) {
   const actors: Record<ActorKind, number> = { human: 0, unknown: 0, bot: 0 }
   const events: Record<EventType, number> = { kill: 0, death: 0, storm_death: 0, loot: 0 }
+  // kill markers that are the Kill of a Kill/Killed pair: drawn, so in `events.kill`, but not kills (EC-12)
+  let pairKills = 0
   for (const a of match.actors) {
     actors[a.kind]++
     if (actorHidden(a.kind, hide)) continue
-    for (const e of a.events) if (isEventType(e.type)) events[e.type]++
+    for (const e of a.events) {
+      if (!isEventType(e.type)) continue
+      events[e.type]++
+      if (e.type === 'kill' && e.kill_killed_pair) pairKills++
+    }
   }
-  return { actors, events }
+  return { actors, events, pairKills }
 }

@@ -17,22 +17,26 @@ import {
   DIM_OPACITY,
   ENDPOINT_SIZE,
   EVENT,
+  HEAD_SIZE,
   EVENT_ORDER,
   HIGHLIGHT_PRIORITY,
   HOVER_SCALE,
   MARKER_PRIORITY,
+  PAST_EVENT_OPACITY,
   POSITION_SIZE,
   SELECTED_GLOW,
   SELECTED_SCALE,
   WHITE,
   badgeIcon,
   endpointIcon,
+  headIcon,
   positionIcon,
   rgba,
   type EventType,
   type zoomStyle,
 } from './encoding'
 import type { ActorInfo, ArrowDatum, EndpointDatum, JourneyData, MarkerDatum, PathDatum, PointDatum } from './journeys'
+import type { HeadDatum } from './playback'
 
 const DASH = new PathStyleExtension({ dash: true })
 const COLLISION = new CollisionFilterExtension()
@@ -40,6 +44,7 @@ const POSITION_ICONS = Object.fromEntries(ACTOR_ORDER.map((k) => [k, positionIco
   ActorKind,
   ReturnType<typeof positionIcon>
 >
+const HEAD_ICONS = Object.fromEntries(ACTOR_ORDER.map((k) => [k, headIcon(k)])) as Record<ActorKind, ReturnType<typeof headIcon>>
 const ENDPOINT_ICONS = Object.fromEntries(
   ACTOR_ORDER.flatMap((k) => (['start', 'end'] as const).map((w) => [`${w}-${k}`, endpointIcon(k, w)])),
 ) as Record<string, ReturnType<typeof endpointIcon>>
@@ -54,6 +59,13 @@ export interface Focus {
   pinned: string | null
 }
 
+/** Playback (spec 05): where each actor is now, and whether the paths are cut at the playback time. */
+export interface PlaybackLayers {
+  heads: HeadDatum[]
+  /** paths grow every frame, so bot dashes keep a fixed length instead of being stretched to fit */
+  growing: boolean
+}
+
 function withAlpha([r, g, b]: number[], opacity: number): [number, number, number, number] {
   return [r, g, b, Math.round(255 * opacity)]
 }
@@ -66,6 +78,7 @@ export function journeyLayers(
   data: JourneyData,
   { hovered, pinned }: Focus = { hovered: null, pinned: null },
   zoom: ReturnType<typeof zoomStyle> = { routeScale: 1, markerScale: 1 },
+  playback: PlaybackLayers | null = null,
 ): Layer[] {
   // hover wins over the pinned actor for dimming; the pinned actor alone gets the selected look
   const highlight = hovered ?? pinned
@@ -79,7 +92,8 @@ export function journeyLayers(
   // bots only when focused, so 14 bots don't add 28 endpoints and hundreds of arrows (P15)
   const detailed = (a: ActorInfo) => a.kind !== 'bot' || a.id === highlight || a.id === pinned
   const markerScale = (m: MarkerDatum) => (m.actor.kind === 'bot' ? BOT_MARKER_SCALE : 1) * (m.actor.id === highlight ? HOVER_SCALE : 1)
-  const markerOpacity = (m: MarkerDatum) => (m.actor.kind === 'bot' ? BOT_MARKER_OPACITY : 1) * emphasis(m.actor)
+  const markerOpacity = (m: MarkerDatum) =>
+    (m.actor.kind === 'bot' ? BOT_MARKER_OPACITY : 1) * (m.faded ? PAST_EVENT_OPACITY : 1) * emphasis(m.actor)
 
   const pathsOf = (kind: ActorKind) => data.paths.filter((p) => p.actor.kind === kind)
   const pathLayer = (kind: ActorKind) => {
@@ -101,7 +115,7 @@ export function journeyLayers(
       ...(style.dashed && {
         extensions: [DASH],
         getDashArray: BOT_DASH,
-        dashJustified: true,
+        dashJustified: !playback?.growing,
       }),
     })
   }
@@ -114,7 +128,7 @@ export function journeyLayers(
 
   return [
     // bottom to top: selected glow, bot / unknown / human paths, positions, direction arrows,
-    // start and end, H1/H2 tags, then event markers (loot … kills)
+    // start and end, H1/H2 tags, playback positions, then event markers (loot … kills)
     new PathLayer<PathDatum>({
       id: 'selected-glow',
       data: selectedPaths,
@@ -200,6 +214,25 @@ export function journeyLayers(
       getPixelOffset: (d) => [(d.actor.humanIndex ?? 0) * 24, -16],
       updateTriggers: triggers,
     }),
+    // playback: where each actor is now, above the routes and below the event markers, so the
+    // kill or death logged where an actor stands isn't hidden under it (rare events on top, §4);
+    // humans last so they win where they meet bots
+    ...(playback
+      ? [
+          new IconLayer<HeadDatum>({
+            id: 'playback-heads',
+            data: [...playback.heads].sort((a, b) => ACTOR_ORDER.indexOf(a.actor.kind) - ACTOR_ORDER.indexOf(b.actor.kind)),
+            getPosition: (d) => d.position,
+            getIcon: (d) => HEAD_ICONS[d.actor.kind],
+            getSize: (d) => HEAD_SIZE[d.actor.kind] * (d.actor.id === highlight || d.actor.id === pinned ? HOVER_SCALE : 1),
+            sizeUnits: 'pixels',
+            sizeScale: zoom.routeScale,
+            getColor: (d) => withAlpha(WHITE, emphasis(d.actor)),
+            pickable: true,
+            updateTriggers: triggers,
+          }),
+        ]
+      : []),
     new IconLayer<MarkerDatum, CollisionFilterExtensionProps<MarkerDatum>>({
       id: 'event-markers',
       data: data.markers, // already in draw order: loot first, kills last
