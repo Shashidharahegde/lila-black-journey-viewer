@@ -1,4 +1,4 @@
-import type { HeatmapFile, Index, MatchFile, ZonesFile } from './types'
+import type { HeatmapFile, Index, MatchFile, StatsFile, ZonesFile } from './types'
 
 export function dataUrl(path: string): string {
   return `${import.meta.env.BASE_URL}${path}`
@@ -24,4 +24,8 @@ export function loadHeatmap(map: string, signal?: AbortSignal): Promise<HeatmapF
 
 export function loadZones(map: string, signal?: AbortSignal): Promise<ZonesFile> {
   return getJson<ZonesFile>(`data/zones/${encodeURIComponent(map)}.json`, signal)
+}
+
+export function loadStats(signal?: AbortSignal): Promise<StatsFile> {
+  return getJson<StatsFile>('data/stats.json', signal)
 }

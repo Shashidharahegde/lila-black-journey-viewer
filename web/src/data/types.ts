@@ -158,3 +158,105 @@ export interface ZonesFile {
   rules: ZoneRules
   selections: Record<string, ZoneSelection>
 }
+
+// web/public/data/stats.json: overall statistics for every map scope × date scope (contract: docs/10_DASHBOARD.md).
+// The browser only reads and formats these; it never computes a statistic of its own.
+
+export type StatKind = 'count' | 'ratio' | 'rate' | 'distribution' | 'histogram' | 'breakdown' | 'score'
+
+export interface MetricInfo {
+  label: string
+  section: string
+  unit: string
+  kind: StatKind
+  definition: string
+  population: string
+  denominator: string
+  limitations: string[]
+  /** `per_map`: null for all maps */
+  scopes: 'all' | 'per_map'
+}
+
+export interface CountValue {
+  value: number
+}
+
+export interface RatioValue {
+  numerator: number
+  denominator: number
+  /** numerator ÷ denominator, 4 decimals */
+  value: number
+}
+
+/** Bins [edges[k], edges[k+1]); values at or above the last edge are in `overflow`. A split histogram has `series` instead of `counts`. */
+export interface HistogramValue {
+  edges: number[]
+  counts?: number[]
+  series?: Record<string, number[]>
+  overflow: number
+  n: number
+}
+
+/** With n = 0 the statistics are null and `sum` is 0. */
+export interface DistributionValue {
+  n: number
+  min: number | null
+  p25: number | null
+  median: number | null
+  p75: number | null
+  max: number | null
+  sum: number
+  /** n < thresholds.few_values */
+  few_values: boolean
+  histogram?: HistogramValue
+}
+
+export interface BreakdownValue {
+  value: number
+  parts: Record<string, number>
+}
+
+/** numerator per `per` units of the denominator (e.g. storm deaths per 100 journeys), 2 decimals */
+export interface RateValue {
+  numerator: number
+  denominator: number
+  per: number
+  value: number
+}
+
+/** map_score: the maps of one date compared; each part is 0 (worst map) to 1 (best map), `value` is their mean */
+export interface ScoreValue {
+  value: number
+  parts: Record<string, number>
+  /** how many maps were compared */
+  maps: number
+}
+
+export type StatValue = CountValue | RatioValue | RateValue | DistributionValue | HistogramValue | BreakdownValue | ScoreValue
+
+export interface StatsSlice {
+  sample: {
+    matches: number
+    matches_with_human: number
+    human_journeys: number
+    human_players: number
+    excluded: { bot_journeys: number; unknown_journeys: number }
+  }
+  flags: { empty: boolean; few_matches: boolean; partial_date: boolean; boundary_date: boolean }
+  /** every metric id; null for an empty slice, a per-map metric on all maps, days-observed on one date, or a map score with no other map to compare */
+  values: Record<string, StatValue | null>
+}
+
+export interface StatsFile {
+  schema_version: number
+  /** bumped whenever a definition changes; the dashboard refuses a version it wasn't written for */
+  metrics_version: number
+  source: { fingerprint: string; files: number }
+  thresholds: { few_matches: number; few_values: number }
+  grid: number
+  maps: string[]
+  dates: Omit<DateInfo, 'matches'>[]
+  metrics: Record<string, MetricInfo>
+  /** map scope ('all' or a map) → date scope ('all' or a date) → slice */
+  slices: Record<string, Record<string, StatsSlice>>
+}
