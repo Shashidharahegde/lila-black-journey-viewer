@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from lila_pipeline import export
+from lila_pipeline import export, stats
 from lila_pipeline.images import export_minimap, source_size, web_size
 from lila_pipeline.ingest import DEFAULT_DATA_DIR, IngestReport, load_journeys
 from lila_pipeline.journeys import MAX_PATH_GAP_S, DeathCutoffReport, apply_death_cutoff, categorize_events
@@ -49,7 +49,7 @@ def prepare(data_dir: Path = DEFAULT_DATA_DIR) -> Prepared:
     return Prepared(add_uv(events), ingest, doubled, cutoff, rows)
 
 
-def build_report(prepared: Prepared, index: dict) -> dict:
+def build_report(prepared: Prepared, index: dict, stats_file: Path) -> dict:
     """Every count needed to audit the cleaning. Player IDs are hashed."""
     events = prepared.events
     journeys = events.groupby("file").agg(kind=("actor_kind", "first"), mismatch=("id_mismatch", "first"))
@@ -89,6 +89,10 @@ def build_report(prepared: Prepared, index: dict) -> dict:
         "path_gaps_over_limit": {"limit_s": MAX_PATH_GAP_S, "gaps": int((gaps > MAX_PATH_GAP_S).sum())},
         "matches": len(index["matches"]),
         "dates": [{k: d[k] for k in ("date", "matches", "boundary", "partial")} for d in index["dates"]],
+        "stats": {
+            "bytes": stats_file.stat().st_size,
+            "slices": sum(len(by_date) for by_date in json.loads(stats_file.read_text(encoding="utf-8"))["slices"].values()),
+        },
     }
 
 
@@ -122,8 +126,12 @@ def write_outputs(prepared: Prepared, data_dir: Path, web_dir: Path, report_path
         _write_json(data_dir_out / "heatmaps" / f"{map_id}.json", heatmaps[map_id])
         _write_json(data_dir_out / "zones" / f"{map_id}.json", export.build_zones(map_id, events))
     _write_json(data_dir_out / "index.json", index)
+    # last: the fingerprint hashes the files written above, as they are on disk
+    stats_file = data_dir_out / "stats.json"
+    document = stats.build_stats(events, index, heatmaps, stats.fingerprint(data_dir_out))
+    stats_file.write_text(json.dumps(document, separators=(",", ":"), sort_keys=True), encoding="utf-8")
 
-    report = build_report(prepared, index)
+    report = build_report(prepared, index, stats_file)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return report
@@ -197,6 +205,7 @@ def main() -> None:
           f"rows removed: {sum(d['removed'] for d in report['doubled_journeys'])}")
     print(f"after death: {report['after_death']}")
     print(f"matches: {report['matches']}, journeys: {report['journeys']}")
+    print(f"stats: {report['stats']['slices']} slices, {report['stats']['bytes']:,} bytes")
     print(f"report: {args.report}")
     print(f"built {started:%Y-%m-%d %H:%M:%S} UTC in {(datetime.now(UTC) - started).total_seconds():.0f} s "
           "(printed only; the generated files hold no timestamp)")
