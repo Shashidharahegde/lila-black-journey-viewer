@@ -9,7 +9,7 @@ import { SHORTCUTS, isTypingTarget } from './shortcuts'
 
 const EDGE_CASES_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer/blob/main/EDGE_CASES.md'
 
-function TopBarButton({ label, children }: { label: string; children: ReactNode }) {
+export function TopBarButton({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -73,6 +73,7 @@ const NOTES: { badge?: string; text: string }[] = [
   { text: 'A Kill and a Killed logged by one player in the same second are both shown; the data can’t tell what caused them.' },
   { badge: 'Partial', text: 'Dates at the edge of the collection window cover less than a full day.' },
   { text: 'Event counts have three scopes: the match card counts events in human files; the legend counts markers on the map, bot events included; the journey card counts one journey.' },
+  { text: 'Heatmaps add up all recorded human journeys on a map and date. Traffic is an estimate of observed player time from positions about 5 s apart; a cell with no value means no observed human traffic, not that the area is unreachable. Telemetry covers recorded players only.' },
   { text: 'There is no extraction event, so any extraction view is inferred.' },
 ]
 

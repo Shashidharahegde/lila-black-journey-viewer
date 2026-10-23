@@ -8,8 +8,9 @@ import { dataUrl } from '../data/load'
 import type { MapInfo } from '../data/types'
 import { isTypingTarget } from '../ui/shortcuts'
 import { MapOverview } from './MapOverview'
+import { measureContent } from './content'
 import { useMinimap } from './minimap'
-import { SPACE_WIDTH, clampTarget, fitZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToWorld, viewportRect } from './space'
+import { SPACE_WIDTH, type SpaceRect, clampTarget, contentRect, fitRectZoom, fitZoom, focusZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToWorld, viewportRect } from './space'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: true })
 
@@ -50,9 +51,18 @@ interface Props {
   renderTooltip?: (object: unknown) => ReactNode
   /** the picked object under the pointer, or null */
   onHoverObject?: (object: unknown) => void
+  /** what is under a point of the map that deck.gl can't pick (a painted picture has no objects); used when nothing was picked */
+  pickAt?: (x: number, y: number) => unknown
   /** the clicked object, or null for a click on empty map */
   onClickObject?: (object: unknown) => void
+  /**
+   * Something to bring into view: when `id` changes to a new value the camera moves to `centre` (drawing space) and zooms in until
+   * `extent` (its width in drawing units) fills about a third of the view, never zooming out. Null changes nothing.
+   */
+  focus?: { id: string; centre: [number, number]; extent: number } | null
 }
+
+
 
 /**
  * Only what the camera needs. deck.gl hands back view states carrying transition settings
@@ -84,8 +94,11 @@ function bounded(map: MapInfo, size: Size, target: readonly number[], zoom: numb
   return { target: clampTarget(target, z, size.width, size.height, map), zoom: z }
 }
 
-function fitted(map: MapInfo, size: Size): Camera {
-  return bounded(map, size, [SPACE_WIDTH / 2, spaceHeight(map) / 2], -Infinity)
+/** The default view: the part of the map that has content, or the whole image until it is measured. */
+function fitted(map: MapInfo, size: Size, content: SpaceRect | null): Camera {
+  if (!content) return bounded(map, size, [SPACE_WIDTH / 2, spaceHeight(map) / 2], -Infinity)
+  const centre: [number, number] = [(content.left + content.right) / 2, (content.top + content.bottom) / 2]
+  return bounded(map, size, centre, fitRectZoom(size.width, size.height, content))
 }
 
 const CONTROLLER = {
@@ -137,7 +150,7 @@ function CoordinateReadout({ point }: { point: Signal<WorldPoint> }) {
     // fixed size, so the box doesn't change shape as the numbers change
     <div
       aria-hidden
-      className="pointer-events-none absolute bottom-3 left-3 flex h-5 w-36 items-center gap-2.5 rounded bg-black/35 px-2 font-mono text-[11px] whitespace-nowrap text-white/90 tabular-nums"
+      className="pointer-events-none absolute bottom-3 left-3 flex h-5 w-36 items-center gap-2.5 rounded bg-black/35 px-2 font-mono text-[11px] whitespace-nowrap text-white/90 tabular-nums [contain:layout_paint]"
     >
       <span className="w-[9ch]">
         <span className="text-white/55">x </span>
@@ -163,13 +176,18 @@ function HoverCard({ picked: signal, render }: { picked: Signal<Picked>; render?
   ) : null
 }
 
-export default function MapView({ mapId, map, overlays, renderTooltip, onHoverObject, onClickObject }: Props) {
+export default function MapView({ mapId, map, overlays, renderTooltip, onHoverObject, pickAt, onClickObject, focus }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<Size | null>(null)
   const [moved, setMoved] = useState<MovedCamera | null>(null)
   const [readout] = useState(() => createSignal<WorldPoint>(null))
   const [hoverCard] = useState(() => createSignal<Picked>(null))
   const minimap = useMinimap(dataUrl(map.image))
+  const image = minimap.status === 'ready' ? minimap.image : null
+  const content = useMemo(() => {
+    const bounds = image ? measureContent(image) : null
+    return bounds ? contentRect(bounds, map) : null
+  }, [image, map])
 
   useLayoutEffect(() => {
     const element = container.current
@@ -184,7 +202,7 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
 
   // Until the user zooms or pans, the map stays fitted (also after a resize or a map switch).
   // A moved camera is re-bounded on every render, so a resize can't push the map off screen.
-  const camera: Camera | null = !size ? null : moved?.mapId === mapId ? bounded(map, size, moved.target, moved.zoom) : fitted(map, size)
+  const camera: Camera | null = !size ? null : moved?.mapId === mapId ? bounded(map, size, moved.target, moved.zoom) : fitted(map, size, content)
   const limits = size ? zoomLimits(map, size) : null
 
   const fit = useCallback(() => setMoved(null), [])
@@ -205,26 +223,60 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
     if (size && camera) setMoved({ mapId, ...bounded(map, size, camera.target, camera.zoom + step) })
   }
 
-  const onHover = useCallback(
+  // Bring a newly selected thing into view. The jump is instant (no deck.gl transition: stored transition fields broke the +/− buttons).
+  const cameraNow = useRef({ camera, size })
+  cameraNow.current = { camera, size }
+  const focusId = focus?.id
+  const focusAt = useRef(focus)
+  focusAt.current = focus
+  useEffect(() => {
+    const target = focusAt.current
+    const { camera: now, size: view } = cameraNow.current
+    if (!focusId || !target || !now || !view) return
+    const wanted = focusZoom(view.width, view.height, target.extent)
+    setMoved({ mapId, ...bounded(map, view, target.centre, Math.max(now.zoom, wanted)) })
+  }, [focusId, mapId, map])
+
+  // Pointer events can arrive faster than frames; picking and the readout are done once per frame, for the latest position.
+  const pendingHover = useRef<PickingInfo | null>(null)
+  const hoverFrame = useRef(0)
+  const applyHover = useCallback(
     (info: PickingInfo) => {
-      const object = info.object ?? null
+      const [px, py] = info.coordinate ?? []
+      const inside = px !== undefined && py !== undefined && isInsideMap(px, py, map)
+      const object = info.object ?? (inside ? (pickAt?.(px, py) ?? null) : null)
       hoverCard.set(object ? { x: info.x, y: info.y, object } : null)
       onHoverObject?.(object)
-      const [x, y] = info.coordinate ?? []
-      if (x === undefined || y === undefined || !isInsideMap(x, y, map)) return readout.set(null)
-      const [u, v] = spaceToUv(x, y, map)
+      if (!inside) return readout.set(null)
+      const [u, v] = spaceToUv(px, py, map)
       readout.set(uvToWorld(u, v, map))
     },
-    [map, onHoverObject, readout, hoverCard],
+    [map, onHoverObject, pickAt, readout, hoverCard],
   )
+  const onHover = useCallback(
+    (info: PickingInfo) => {
+      pendingHover.current = info
+      if (hoverFrame.current) return
+      hoverFrame.current = requestAnimationFrame(() => {
+        hoverFrame.current = 0
+        const latest = pendingHover.current
+        pendingHover.current = null
+        if (latest) applyHover(latest)
+      })
+    },
+    [applyHover],
+  )
+  useEffect(() => () => cancelAnimationFrame(hoverFrame.current), [])
 
   const leave = () => {
+    cancelAnimationFrame(hoverFrame.current)
+    hoverFrame.current = 0
+    pendingHover.current = null
     readout.set(null)
     hoverCard.set(null)
     onHoverObject?.(null)
   }
 
-  const image = minimap.status === 'ready' ? minimap.image : null
   const background = useMemo(
     () => (image ? new BitmapLayer({ id: `minimap-${mapId}`, image, bounds: imageBounds(map) }) : null),
     [image, map, mapId],
@@ -248,7 +300,11 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
           controller={CONTROLLER}
           layers={layers}
           onHover={onHover}
-          onClick={(info) => onClickObject?.(info.object ?? null)}
+          onClick={(info) => {
+            const [px, py] = info.coordinate ?? []
+            const object = info.object ?? (px !== undefined && py !== undefined && isInsideMap(px, py, map) ? (pickAt?.(px, py) ?? null) : null)
+            onClickObject?.(object)
+          }}
           getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab')}
         />
       )}

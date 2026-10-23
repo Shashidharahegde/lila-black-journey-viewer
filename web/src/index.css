@@ -140,6 +140,14 @@
   #root {
     height: 100%;
   }
+  /* The app is a fixed-size shell: only its own panels scroll. Without this, anything that pokes past the viewport (a browser
+     extension's injected button, a tooltip at the edge, a fractional-pixel rounding at browser zoom) gives the page a scrollbar,
+     which shrinks the viewport, resizes the map and re-lays-out everything, and the wheel then scrolls the page instead of zooming. */
+  html,
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   html {
     @apply font-sans antialiased;
   }

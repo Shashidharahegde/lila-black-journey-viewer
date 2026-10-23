@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type { Index } from '@/data/types'
 import { useStore } from '@/state/store'
 import type { Selection } from '@/state/url'
+import HeatmapPanel from './HeatmapPanel'
 import Legend from './Legend'
 import MatchCard from './MatchCard'
 import MatchList from './MatchList'
@@ -39,6 +40,7 @@ export default function SidePanel({
 }: Props) {
   const selectMatch = useStore((s) => s.selectMatch)
   const matchFile = useStore((s) => s.matchFile)
+  const tab = useStore((s) => s.tab)
   const [browsing, setBrowsing] = useState(false)
   const [matchSearch, setMatchSearch] = useState('')
   const browserScrollTop = useRef(0)
@@ -95,6 +97,9 @@ export default function SidePanel({
     return <p role="status" className="p-4 text-sm text-muted-foreground">Restoring your map and match filters…</p>
   }
 
+  // the Heatmaps workspace has its own panel; it never shows a match, a path or a marker
+  if (tab === 'heatmaps') return <HeatmapPanel index={index} selection={selection} />
+
   const match = matchId ? index.matches.find((m) => m.id === matchId) : undefined
   if (matchId && !match) {
     return (
@@ -109,7 +114,7 @@ export default function SidePanel({
   }
 
   if (!match || browsing) {
-    return (
+    const list = (
       <MatchList
         index={index}
         selection={selection}
@@ -126,6 +131,7 @@ export default function SidePanel({
         }}
       />
     )
+    return list
   }
 
   // A stale response for another match must NEVER be shown as this match's data.
