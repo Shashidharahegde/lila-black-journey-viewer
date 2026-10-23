@@ -4,7 +4,7 @@ export type MatchSort = 'duration' | 'kills' | 'deaths' | 'loot' | 'recent'
 
 export const DEFAULT_SORT: MatchSort = 'kills'
 
-/** One sort option: `order` is the direction label next to the list title; `metric` is what the row leads with. */
+/** One sort option: `order` names the direction (every sort runs from the largest value down), for the sort icon's label. */
 export const SORTS: { value: MatchSort; label: string; order: string; explain: string }[] = [
   { value: 'duration', label: 'Duration', order: 'Longest first', explain: 'Time from the first to the last recorded event.' },
   { value: 'kills', label: 'Kills', order: 'Most kills first', explain: 'Kills logged by human journeys. The Kill of a Kill/Killed pair isn’t counted.' },
@@ -66,6 +66,25 @@ export function pickerMatches(
   return pickerGroups(matches, map, date, sort).flatMap((g) => g.matches)
 }
 
+/**
+ * The groups narrowed to matches whose ID or start date contains `query` and, with `botsOnly`, to matches with a bot journey
+ * (52 of 796); empty groups are dropped.
+ */
+export function filterGroups(groups: DateGroup[], query: string, botsOnly = false): DateGroup[] {
+  const q = query.trim().toLocaleLowerCase()
+  if (!q && !botsOnly) return groups
+  return groups
+    .map((group) => ({
+      ...group,
+      matches: group.matches.filter(
+        (m) =>
+          (!botsOnly || m.bots > 0) &&
+          (!q || m.id.toLocaleLowerCase().includes(q) || m.full_id.toLocaleLowerCase().includes(q) || m.date.includes(q)),
+      ),
+    }))
+    .filter((group) => group.matches.length > 0)
+}
+
 /** "Tue, Feb 10" for a UTC start date. */
 export function dateLabel(date: string): string {
   return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', {
@@ -117,13 +136,21 @@ export function signalLabels(m: MatchSummary, sort: MatchSort): string[] {
   return SIGNALS[sort].map((k) => text[k]).filter(Boolean).slice(0, 2)
 }
 
-/** "1 human journey · 6 bots": only the kinds that exist; the full breakdown is in the inspector. */
-export function compositionLabel(m: Pick<MatchSummary, 'humans' | 'unknown' | 'bots'>): string {
+/**
+ * "2 human journeys · 1 unknown": only the kinds that exist. One human journey is the usual case (743 of 796 matches have one
+ * recorded player), so it goes unsaid; the count appears only when a match has more. Bots get their own chip on the row
+ * (`botsLabel`), so they aren't repeated here. The full breakdown is in the inspector.
+ */
+export function compositionLabel(m: Pick<MatchSummary, 'humans' | 'unknown'>): string {
   const parts: string[] = []
-  if (m.humans) parts.push(plural(m.humans, 'human journey'))
+  if (m.humans > 1) parts.push(plural(m.humans, 'human journey'))
   if (m.unknown) parts.push(`${m.unknown} unknown`)
-  if (m.bots) parts.push(plural(m.bots, 'bot'))
   return parts.join(' · ')
+}
+
+/** "14 bots" for the row's bot chip, or '' when the match has no bot journey. */
+export function botsLabel(m: Pick<MatchSummary, 'bots'>): string {
+  return m.bots ? plural(m.bots, 'bot') : ''
 }
 
 /** Recorded journeys (humans + unknown + bots) in a match. */

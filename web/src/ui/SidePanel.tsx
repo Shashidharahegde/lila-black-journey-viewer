@@ -11,6 +11,7 @@ import HeatmapPanel from './HeatmapPanel'
 import Legend from './Legend'
 import MatchCard from './MatchCard'
 import MatchList from './MatchList'
+import { ContextRow } from './TopBar'
 
 interface Props {
   index: Index | null
@@ -131,7 +132,14 @@ export default function SidePanel({
         }}
       />
     )
-    return list
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="shrink-0 px-4 pt-4">
+          <ContextRow index={index} selection={selection} />
+        </div>
+        {list}
+      </div>
+    )
   }
 
   // A stale response for another match must NEVER be shown as this match's data.
@@ -141,7 +149,8 @@ export default function SidePanel({
 
   return (
     <section aria-labelledby="selected-match-title" className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 flex-col gap-2 border-b px-4 py-3">
+      <div className="flex shrink-0 flex-col gap-3 border-b px-4 py-3">
+        <ContextRow index={index} selection={selection} />
         <div className="flex items-center justify-between gap-2">
           <h2 id="selected-match-title" ref={inspectorHeading} tabIndex={-1} className="min-w-0 text-base font-semibold outline-none">
             Selected match

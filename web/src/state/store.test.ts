@@ -172,7 +172,7 @@ describe('heatmap state', () => {
 
 describe('selected region (interpretation layer)', () => {
   beforeEach(() => {
-    useStore.setState({ heatmapLayer: 'traffic', densityOn: true, outlinesOn: true, selectedZone: null, zonesExpanded: false, tab: 'heatmaps', zones: { status: 'idle' } })
+    useStore.setState({ heatmapLayer: 'traffic', densityOn: true, outlinesOn: true, selectedZone: null, tab: 'heatmaps', zones: { status: 'idle' } })
   })
 
   it('clicking a region selects it; clicking it again clears it', () => {
@@ -219,7 +219,7 @@ describe('tabs (Journeys & Playback, Heatmaps)', () => {
   const journeyTime = 95
 
   beforeEach(() => {
-    useStore.setState({ tab: 'journeys', selectedZone: null, zonesExpanded: false })
+    useStore.setState({ tab: 'journeys', selectedZone: null })
   })
 
   it('leaving the Journeys tab pauses playback and keeps the match and the time; returning stays paused at the same moment', () => {
@@ -260,16 +260,15 @@ describe('tabs (Journeys & Playback, Heatmaps)', () => {
     expect(useStore.getState().playback).toBe(before.playback)
   })
 
-  it('region expansion and selection are cleared by a new metric, date or map, not by a tab switch', () => {
-    const { setTab, setZonesExpanded, toggleZone } = useStore.getState()
+  it('the selected hotspot is cleared by a new metric, not by a tab switch', () => {
+    const { setTab, toggleZone } = useStore.getState()
     setTab('heatmaps')
-    setZonesExpanded(true)
     toggleZone('5,7')
     setTab('journeys')
     setTab('heatmaps')
-    expect([useStore.getState().zonesExpanded, useStore.getState().selectedZone]).toEqual([true, '5,7'])
+    expect(useStore.getState().selectedZone).toBe('5,7')
     useStore.getState().setHeatmapLayer('kills')
-    expect([useStore.getState().zonesExpanded, useStore.getState().selectedZone]).toEqual([false, null])
+    expect(useStore.getState().selectedZone).toBe(null)
   })
 })
 
@@ -279,5 +278,24 @@ describe('selectors give React a stable snapshot', () => {
     expect(currentHeatmap(state)).toBe(currentHeatmap(state))
     expect(currentZones(state)).toBe(currentZones(state))
     expect(currentHeatmap(state)).toEqual({ status: 'loading', map: 'Lockdown' })
+  })
+})
+
+describe('side panel', () => {
+  it('full paths are on when the app opens (S, 2026-10-23)', () => {
+    expect(useStore.getInitialState().fullPaths).toBe(true)
+  })
+
+  it('folding it away keeps the heatmap view, the selected region and the selection', () => {
+    const { setHeatmapLayer, setHeatmapMode, toggleZone, setPanelCollapsed } = useStore.getState()
+    setHeatmapLayer('kills')
+    setHeatmapMode('all')
+    toggleZone('5,7')
+    const before = useStore.getState()
+    setPanelCollapsed(true)
+    expect(useStore.getState().panelCollapsed).toBe(true)
+    setPanelCollapsed(false)
+    const after = useStore.getState()
+    expect([after.panelCollapsed, after.heatmapLayer, after.heatmapMode, after.selectedZone, after.selection]).toEqual([false, 'kills', 'all', '5,7', before.selection])
   })
 })

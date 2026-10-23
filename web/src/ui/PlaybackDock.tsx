@@ -184,19 +184,12 @@ export default function PlaybackDock({ match, markers }: Props) {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex shrink-0 items-center gap-2">
-              <Checkbox id={fullPathsId} checked={fullPaths} onCheckedChange={(checked) => setFullPaths(checked === true)} />
-              <label htmlFor={fullPathsId} className="cursor-pointer text-sm whitespace-nowrap">
-                Full paths
-              </label>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-64">
-            Show whole journeys and every event, as without playback. The timeline still moves the current positions.
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex shrink-0 items-center gap-2">
+          <Checkbox id={fullPathsId} checked={fullPaths} onCheckedChange={(checked) => setFullPaths(checked === true)} />
+          <label htmlFor={fullPathsId} className="cursor-pointer text-sm whitespace-nowrap">
+            Full paths
+          </label>
+        </div>
       </div>
     </section>
   )

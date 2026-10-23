@@ -4,11 +4,11 @@ import { cellOf } from '@/heatmap/grid'
 import { heatmapLayers, outlineLayers, type OutlinedRegion } from '@/heatmap/layers'
 import { cellLookup } from '@/heatmap/raster'
 import { layerDomain } from '@/heatmap/scale'
-import { insideOutline, visibleConsistent, zoneFootprint, zoneKey, zoneLayer, zoneOutline } from '@/heatmap/zones'
+import { insideOutline, passingZones, zoneFootprint, zoneKey, zoneLayer, zoneOutline } from '@/heatmap/zones'
 import { zoomStyle } from '@/map/encoding'
 import { journeyLayers } from '@/map/journeyLayers'
 import type { JourneyData, PathDatum } from '@/map/journeys'
-import MapView from '@/map/MapView'
+import MapView, { type Insets } from '@/map/MapView'
 import { playbackFrames } from '@/map/playback'
 import { isInsideMap, spaceToUv } from '@/map/space'
 import { currentHeatmap, currentZones, useStore } from '@/state/store'
@@ -25,6 +25,9 @@ interface Props {
   map: MapInfo
   /** the selected match's journeys on the Journeys tab, or null (no match, its file still loading, or the other tab) */
   journeys: JourneyData | null
+  /** room kept clear for the side panel and the dock, and where they cover the map now (see MapView) */
+  reserved: Insets
+  covered: Insets
 }
 
 /**
@@ -33,7 +36,7 @@ interface Props {
  * as a density overlay and/or hotspot outlines, never together with a match's paths or markers. The same MapView stays mounted
  * across tabs, so the minimap isn't reloaded and the camera stays where the user left it.
  */
-export default function MapStage({ mapId, map, journeys }: Props) {
+export default function MapStage({ mapId, map, journeys, reserved, covered }: Props) {
   const tab = useStore((s) => s.tab)
   const heatmapsTab = tab === 'heatmaps'
 
@@ -57,7 +60,6 @@ export default function MapStage({ mapId, map, journeys }: Props) {
   const heatmap = useStore(currentHeatmap)
   const zonesState = useStore(currentZones)
   const selectedZone = useStore((s) => s.selectedZone)
-  const expanded = useStore((s) => s.zonesExpanded)
   const selectZone = useStore((s) => s.selectZone)
   const [hoveredCell, setHoveredCell] = useState<HeatmapCell | null>(null)
 
@@ -68,23 +70,21 @@ export default function MapStage({ mapId, map, journeys }: Props) {
   const lookup = useMemo(() => cellLookup(cells, grid), [cells, grid])
   const showDensity = heatmapsTab && densityOn && heatmap.status === 'ready'
 
-  // the regions drawn: the strongest consistent ones when outlines are on, and whichever one the user selected in the list
+  // the hotspots drawn: every region that passes the checks when outlines are on, and the selected one even when they are off
   const regions = useMemo(() => {
     if (!heatmapsTab || zonesState.status !== 'ready') return [] as (OutlinedRegion & { zone: ZoneRecord })[]
     const result = zoneLayer(zonesState.data, date, layer)
     if (!result) return []
-    const consistent = result.zones.filter((z) => z.tier === 'consistent')
-    const shown = outlinesOn ? visibleConsistent(result, expanded) : []
-    const keys = new Set(shown.map(zoneKey))
-    const picked = selectedZone && !keys.has(selectedZone) ? result.zones.find((z) => zoneKey(z) === selectedZone) : undefined
-    return [...shown, ...(picked ? [picked] : [])].map((zone) => {
-      const rank = zone.tier === 'consistent' ? consistent.indexOf(zone) + 1 : 0 // observed regions get no number
+    const hotspots = passingZones(result)
+    const shown = outlinesOn ? hotspots : hotspots.filter((z) => zoneKey(z) === selectedZone)
+    return shown.map((zone) => {
+      const rank = hotspots.indexOf(zone) + 1
       const outline = zoneOutline(zoneFootprint(zone, map, zonesState.data.zone_cells, zonesState.data.grid))
       return { key: zoneKey(zone), rank, zone, ...outline }
     })
-  }, [heatmapsTab, zonesState, date, layer, outlinesOn, expanded, selectedZone, map])
+  }, [heatmapsTab, zonesState, date, layer, outlinesOn, selectedZone, map])
 
-  // selecting a region (an outline or a list row) brings it into view; closing the details leaves the camera where it is
+  // selecting a hotspot brings it into view; closing the details leaves the camera where it is
   const focus = useMemo(() => {
     const r = selectedZone ? regions.find((x) => x.key === selectedZone) : undefined
     return r ? { id: r.key, centre: [r.cx, r.cy] as [number, number], extent: r.radius * 2 } : null
@@ -165,6 +165,8 @@ export default function MapStage({ mapId, map, journeys }: Props) {
       onHoverObject={onHoverObject}
       onClickObject={onClickObject}
       focus={heatmapsTab ? focus : null}
+      frame={reserved}
+      covered={covered}
     />
   )
 }

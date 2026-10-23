@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index, MatchSummary } from '../data/types'
 import {
+  botsLabel,
   compositionLabel,
   dateLabel,
   durationLabel,
+  filterGroups,
   matchCountsLabel,
   pickerGroups,
   pickerMatches,
@@ -111,6 +113,25 @@ describe('match picker', () => {
     }
   })
 
+  it('the bots filter keeps only matches with a bot journey, and combines with the search', () => {
+    const groups = pickerGroups(sample, 'AmbroseValley', null)
+    expect(filterGroups(groups, '', false)).toBe(groups)
+    const ids = (q: string, botsOnly: boolean) => filterGroups(groups, q, botsOnly).flatMap((g) => g.matches.map((m) => m.id))
+    expect(ids('', true).sort()).toEqual(['b', 'd', 'e', 'g', 'h'])
+    expect(ids('d', true)).toEqual(['d'])
+    expect(ids('a', true)).toEqual([])
+    expect(ids('2026-02-11', true)).toEqual(['g'])
+    // a day left with no bot match drops out instead of showing an empty heading
+    expect(filterGroups(pickerGroups(sample, 'AmbroseValley', null), '', true).map((g) => g.date)).toEqual(['2026-02-11', '2026-02-10'])
+    expect(filterGroups(pickerGroups([match('x', 1, 0, 10)], 'AmbroseValley', null), '', true)).toEqual([])
+  })
+
+  it('on the real index, the bots filter finds the 52 matches with bot journeys (444 bots)', () => {
+    const found = Object.keys(index.maps).flatMap((map) => filterGroups(pickerGroups(index.matches, map, null), '', true).flatMap((g) => g.matches))
+    expect(found).toHaveLength(52)
+    expect(found.reduce((sum, m) => sum + m.bots, 0)).toBe(444)
+  })
+
   it('every date filter returns only matches whose start date is that date', () => {
     for (const { date } of index.dates) {
       for (const map of Object.keys(index.maps)) {
@@ -156,8 +177,12 @@ describe('labels', () => {
     expect(primaryLabel(m, 'kills')).toBe('16 kills')
     expect(primaryLabel(m, 'duration')).toBe('12:32 min')
     expect(primaryLabel(m, 'recent')).toBe('21:54 UTC')
-    expect(compositionLabel(m)).toBe('1 human journey')
-    expect(compositionLabel({ humans: 2, unknown: 1, bots: 6 })).toBe('2 human journeys · 1 unknown · 6 bots')
+    expect(compositionLabel(m)).toBe('')
+    expect(compositionLabel({ humans: 1, unknown: 0 })).toBe('')
+    expect(compositionLabel({ humans: 2, unknown: 1 })).toBe('2 human journeys · 1 unknown')
+    expect(botsLabel({ bots: 0 })).toBe('')
+    expect(botsLabel({ bots: 1 })).toBe('1 bot')
+    expect(botsLabel({ bots: 14 })).toBe('14 bots')
     expect(signalLabels(m, 'duration')).toEqual(['16 kills', '1 storm death'])
     expect(signalLabels(m, 'kills')).toEqual(['1 storm death', '12:32 min'])
     expect(signalLabels(m, 'loot')).toEqual(['16 kills', '12:32 min'])

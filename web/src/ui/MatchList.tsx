@@ -1,16 +1,18 @@
-import { InfoIcon, SearchIcon, XIcon } from 'lucide-react'
+import { ArrowDownWideNarrowIcon, SearchIcon, XIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Toggle } from '@/components/ui/toggle'
 import type { Index, MatchSummary } from '@/data/types'
 import { cn } from '@/lib/utils'
 import {
+  botsLabel,
   compositionLabel,
   dateLabel,
   durationLabel,
+  filterGroups,
   matchCountsLabel,
   pickerGroups,
   playersLabel,
@@ -22,6 +24,7 @@ import {
 } from '@/state/matches'
 import { useStore } from '@/state/store'
 import type { Selection } from '@/state/url'
+import ActorAvatar from './ActorAvatar'
 import { SORT_STYLE } from './sortStyle'
 
 function SortChip({ sort, className, children }: { sort: MatchSort; className?: string; children?: ReactNode }) {
@@ -37,84 +40,78 @@ function SortChip({ sort, className, children }: { sort: MatchSort; className?: 
 function SortSelect() {
   const matchSort = useStore((s) => s.matchSort)
   const setMatchSort = useStore((s) => s.setMatchSort)
+  const order = SORTS.find((s) => s.value === matchSort)?.order ?? 'Largest first'
   return (
-    <Select value={matchSort} onValueChange={(value) => setMatchSort(value as MatchSort)}>
-      <SelectTrigger aria-label="Sort matches by" className="h-8 w-full bg-card">
-        <span className="text-muted-foreground">Sort by</span>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent position="popper" align="start">
-        {SORTS.map(({ value, label }) => (
-          <SelectItem key={value} value={value}>
-            <SortChip sort={value} className="p-1" /> {label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-}
-
-function SortNote() {
-  const matchSort = useStore((s) => s.matchSort)
-  const sort = SORTS.find((s) => s.value === matchSort)
-  return (
-    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-      <span>{sort?.order ?? 'Sorted'} · grouped by UTC date</span>
-      <Popover>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label="How match counts and sorting work"
-            className="rounded-full p-1 hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <InfoIcon className="size-4" aria-hidden />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-72 space-y-2 text-xs">
-          <p><strong>{sort?.label ?? 'Sort'}:</strong> {sort?.explain}</p>
-          <p>Matches are grouped by UTC start date; sorting applies within each day.</p>
-          <p>Kill, death and loot totals use human-journey files only. Bot and unknown-journey events are excluded.</p>
-          <p>The map can show events from other actors, so its counts may differ.</p>
-        </PopoverContent>
-      </Popover>
+    <div className="flex items-center gap-2">
+      <Select value={matchSort} onValueChange={(value) => setMatchSort(value as MatchSort)}>
+        <SelectTrigger aria-label="Sort matches by" className="h-8 min-w-0 flex-1 bg-card">
+          <span className="text-muted-foreground">Sort by</span>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent position="popper" align="start">
+          {SORTS.map(({ value, label }) => (
+            <SelectItem key={value} value={value}>
+              <SortChip sort={value} className="p-1" /> {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {/* every sort runs from the largest value down, within each day; the icon says so instead of a sentence */}
+      <span role="img" aria-label={`${order}, within each day`} title={`${order}, within each day`} className="flex size-8 shrink-0 items-center justify-center rounded-md border text-muted-foreground">
+        <ArrowDownWideNarrowIcon className="size-4" aria-hidden />
+      </span>
     </div>
   )
 }
 
 interface RowProps {
+  /** position in the list as shown (1-based), across the date groups */
+  serial: number
   match: MatchSummary
   sort: MatchSort
   selected: boolean
   onPick: () => void
 }
 
-function MatchRow({ match: m, sort, selected, onPick }: RowProps) {
+function MatchRow({ serial, match: m, sort, selected, onPick }: RowProps) {
   const details = [compositionLabel(m), ...signalLabels(m, sort)].filter(Boolean).join(' · ')
   return (
-    <li className="[contain-intrinsic-size:auto_4.5rem] [content-visibility:auto]">
+    <li className="[contain-intrinsic-size:auto_3.75rem] [content-visibility:auto]">
       <button
         type="button"
         aria-pressed={selected}
-        aria-label={`${selected ? 'Selected match' : 'Select match'} ${m.id}. ${playersLabel(m)}. ${matchCountsLabel(m)}. Duration ${durationLabel(m.duration_s)}.`}
+        aria-label={`${serial}. ${selected ? 'Selected match' : 'Select match'} ${m.id}. ${playersLabel(m)}. ${matchCountsLabel(m)}. Duration ${durationLabel(m.duration_s)}.`}
         title={`${m.full_id} · ${playersLabel(m)} · ${matchCountsLabel(m)}`}
         onClick={onPick}
         className={cn(
-          'w-full min-w-0 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring',
-          selected && 'border-brand bg-brand/5 ring-1 ring-brand',
+          'grid w-full min-w-0 grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 rounded-lg border border-transparent px-2 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring',
+          selected && 'border-brand/60 bg-brand/10 hover:bg-brand/15',
         )}
       >
-        <div className="flex items-center justify-between gap-2">
+        <span aria-hidden className="row-span-2 self-start pt-0.5 text-right font-mono text-xs text-muted-foreground tabular-nums">
+          {serial}
+        </span>
+        <span className="flex min-w-0 items-center gap-1.5">
           <SortChip sort={sort} className="text-xs font-semibold tabular-nums">
             {primaryLabel(m, sort)}
           </SortChip>
-          <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
-            {sort === 'recent' ? `${durationLabel(m.duration_s)} long` : timeOfDay(m.start_utc)}
-          </span>
-        </div>
-        <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <span className="min-w-0 flex-1 truncate" title={details}>{details}</span>
-          <span className="max-w-[42%] shrink-0 truncate font-mono" title={m.full_id}>{m.id}</span>
-        </div>
+          {/* bots are in only 52 of 796 matches, so the few that have them are marked on the row (S, 2026-10-23) */}
+          {m.bots > 0 && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-bot/15 py-0.5 pr-1.5 pl-1 text-xs font-medium tabular-nums">
+              <ActorAvatar kind="bot" size="sm" />
+              {botsLabel(m)}
+            </span>
+          )}
+        </span>
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {sort === 'recent' ? `${durationLabel(m.duration_s)} long` : timeOfDay(m.start_utc)}
+        </span>
+        <span className="min-w-0 truncate text-xs text-muted-foreground" title={details || undefined}>
+          {details}
+        </span>
+        <span className="max-w-24 truncate font-mono text-[11px] text-muted-foreground/80" title={m.full_id}>
+          {m.id}
+        </span>
       </button>
     </li>
   )
@@ -152,6 +149,8 @@ export default function MatchList({
 }: Props) {
   const selectMatch = useStore((s) => s.selectMatch)
   const matchSort = useStore((s) => s.matchSort)
+  const botsOnly = useStore((s) => s.botsOnly)
+  const setBotsOnly = useStore((s) => s.setBotsOnly)
   const [localSearch, setLocalSearch] = useState('')
   const search = searchValue ?? localSearch
   const setSearch = onSearchChange ?? setLocalSearch
@@ -164,24 +163,19 @@ export default function MatchList({
     () => pickerGroups(index.matches, selection.map, selection.date, matchSort),
     [index.matches, selection.map, selection.date, matchSort],
   )
-  const filteredGroups = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase()
-    if (!query) return sortedGroups
-    return sortedGroups
-      .map((group) => ({
-        ...group,
-        matches: group.matches.filter((m) =>
-          m.id.toLocaleLowerCase().includes(query) ||
-          m.full_id.toLocaleLowerCase().includes(query) ||
-          m.date.includes(query),
-        ),
-      }))
-      .filter((group) => group.matches.length > 0)
-  }, [sortedGroups, search])
+  const filteredGroups = useMemo(() => filterGroups(sortedGroups, search, botsOnly), [sortedGroups, search, botsOnly])
   const availableCount = sortedGroups.reduce((sum, group) => sum + group.matches.length, 0)
   const shownCount = filteredGroups.reduce((sum, group) => sum + group.matches.length, 0)
-  const dateInfo = useMemo(() => new Map(index.dates.map((item) => [item.date, item])), [index.dates])
-  const { icon: SortIcon, chip } = SORT_STYLE[matchSort]
+  const narrowed = search.trim() !== '' || botsOnly
+  // serial numbers follow the list as shown: 1..n across the date groups, renumbered when the search, the filter or the sort changes
+  const firstSerial = useMemo(() => {
+    let next = 1
+    return filteredGroups.map((group) => {
+      const first = next
+      next += group.matches.length
+      return first
+    })
+  }, [filteredGroups])
 
   useEffect(() => {
     if (focusOnMount.current) headingRef.current?.focus({ preventScroll: true })
@@ -203,16 +197,28 @@ export default function MatchList({
   return (
     <section aria-labelledby="match-list-title" className="flex min-h-0 flex-1 flex-col pt-3">
       <div className="flex shrink-0 flex-col gap-2 px-4">
-        <h2 ref={headingRef} tabIndex={-1} id="match-list-title" className="flex items-center gap-2 text-base font-semibold outline-none">
-          <span className={cn('inline-flex rounded-md p-1', chip)}><SortIcon className="size-4" aria-hidden /></span>
-          Matches <span className="font-normal text-muted-foreground tabular-nums">({shownCount}{search ? ` of ${availableCount}` : ''})</span>
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 ref={headingRef} tabIndex={-1} id="match-list-title" className="flex items-baseline gap-1.5 text-base font-semibold outline-none">
+            Matches <span className="text-sm font-normal text-muted-foreground tabular-nums">{shownCount}{narrowed ? ` of ${availableCount}` : ''}</span>
+          </h2>
+          <Toggle
+            variant="outline"
+            size="sm"
+            pressed={botsOnly}
+            onPressedChange={setBotsOnly}
+            title="Show only matches with bot journeys"
+            className="data-[state=on]:border-bot/60 data-[state=on]:bg-bot/15"
+          >
+            <ActorAvatar kind="bot" size="sm" />
+            With bots
+          </Toggle>
+        </div>
         <div className="relative">
           <SearchIcon aria-hidden className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            aria-label="Search match IDs"
+            aria-label="Search matches by ID or start date"
             type="search"
-            placeholder="Search match ID"
+            placeholder="Search match ID or date"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 pl-9 pr-9"
@@ -229,44 +235,50 @@ export default function MatchList({
           )}
         </div>
         <SortSelect />
-        <SortNote />
       </div>
       {shownCount === 0 ? (
         <div role="status" className="flex flex-col gap-2 px-4 pt-4 text-sm text-muted-foreground">
-          <p>{search ? 'No matching match IDs.' : 'No matches on this map for the selected date.'}</p>
-          {search && <Button variant="outline" size="sm" className="self-start" onClick={() => setSearch('')}>Clear search</Button>}
+          <p>
+            {search
+              ? `No match ID or date matches the search${botsOnly ? ' among matches with bots' : ''}.`
+              : botsOnly
+                ? 'No match with bots on this map for the selected date.'
+                : 'No matches on this map for the selected date.'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {search && <Button variant="outline" size="sm" onClick={() => setSearch('')}>Clear search</Button>}
+            {botsOnly && <Button variant="outline" size="sm" onClick={() => setBotsOnly(false)}>Show all matches</Button>}
+          </div>
         </div>
       ) : (
         <ScrollArea className="mt-2 min-h-0 flex-1">
-          <ul ref={listRef} className="flex flex-col gap-3 px-4 pb-4">
-            {filteredGroups.map((group) => {
-              const coverage = dateInfo.get(group.date)
-              return (
-                <li key={group.date}>
-                  <h3 className="flex flex-wrap items-center gap-1 px-1 pb-1 text-xs font-medium">
-                    {dateLabel(group.date)}
-                    <span className="font-normal text-muted-foreground tabular-nums">
-                      · {group.matches.length} {group.matches.length === 1 ? 'match' : 'matches'}
-                    </span>
-                    {coverage?.partial && <span title="The recorded dataset covers only part of this UTC date" className="ml-1 rounded border px-1 text-[10px] text-muted-foreground">Partial coverage</span>}
-                  </h3>
-                  <ul className="flex flex-col gap-1">
-                    {group.matches.map((m) => (
-                      <MatchRow
-                        key={m.id}
-                        match={m}
-                        sort={matchSort}
-                        selected={m.id === selection.match}
-                        onPick={() => {
-                          selectMatch(m.id)
-                          onPick?.()
-                        }}
-                      />
-                    ))}
-                  </ul>
-                </li>
-              )
-            })}
+          <ul ref={listRef} className="flex flex-col pb-4">
+            {filteredGroups.map((group, g) => (
+              <li key={group.date}>
+                {/* the day stays pinned while its matches scroll, so it is always clear which date a row belongs to */}
+                <h3 className="sticky top-0 z-10 flex items-baseline justify-between gap-2 border-y bg-muted/90 px-4 py-1.5 backdrop-blur-sm">
+                  <span className="text-sm font-semibold">{dateLabel(group.date)}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {group.matches.length} {group.matches.length === 1 ? 'match' : 'matches'}
+                  </span>
+                </h3>
+                <ul className="flex flex-col gap-0.5 px-2 py-1.5">
+                  {group.matches.map((m, k) => (
+                    <MatchRow
+                      key={m.id}
+                      serial={firstSerial[g] + k}
+                      match={m}
+                      sort={matchSort}
+                      selected={m.id === selection.match}
+                      onPick={() => {
+                        selectMatch(m.id)
+                        onPick?.()
+                      }}
+                    />
+                  ))}
+                </ul>
+              </li>
+            ))}
           </ul>
         </ScrollArea>
       )}

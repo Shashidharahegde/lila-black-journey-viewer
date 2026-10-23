@@ -202,11 +202,7 @@ export const KILL_KILLED_PAIR_NOTE =
 // What each place that shows event counts is counting (map pass M4). The numbers differ on purpose.
 export const SCOPE = {
   humanFiles: 'In human files',
-  humanFilesNote:
-    'Events logged by human players. Bot and unknown journeys aren’t counted, and the Kill of a Kill/Killed pair counts as a pair, not a kill.',
   onMap: 'On the map',
-  onMapNote:
-    'Markers for the whole match, bot events included; playback shows each one from its time. Switching off humans or bots removes their markers from these counts.',
   journey: 'This journey',
 } as const
 

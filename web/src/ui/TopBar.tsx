@@ -47,48 +47,40 @@ function MapPicker({ index, selection }: { index: Index; selection: Selection })
   )
 }
 
-function DatePicker({ index, selection }: { index: Index; selection: Selection }) {
+/** Explore's date filter; it sits in the side panel, beside the theme toggle. Partial days are marked in its list only. */
+export function DatePicker({ index, selection }: { index: Index; selection: Selection }) {
   const setDate = useStore((s) => s.setDate)
-  const selected = index.dates.find((d) => d.date === selection.date)
-
   return (
-    <div className="flex shrink-0 items-center gap-2">
-      <Select
-        value={selection.date ?? ALL_DATES}
-        onValueChange={(value) => setDate(value === ALL_DATES ? null : value)}
-      >
-        <SelectTrigger aria-label="Match start date (UTC)" className="w-36 bg-card">
-          {/* the trigger shows only the date; counts and labels stay in the list */}
-          <SelectValue>
-            {selection.date ? <span className="font-mono tabular-nums">{selection.date}</span> : 'All dates'}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent position="popper" align="start">
-          <SelectGroup>
-            <SelectLabel>Match start date (UTC) · matches on all maps</SelectLabel>
-            <SelectItem value={ALL_DATES}>All dates</SelectItem>
-            {index.dates.map((d) => (
-              <SelectItem key={d.date} value={d.date} title={d.partial ? partialReason(d) : undefined}>
-                <span className="font-mono tabular-nums">{d.date}</span>
-                <span className="text-muted-foreground tabular-nums">
-                  {d.matches} {d.matches === 1 ? 'match' : 'matches'}
-                </span>
-                {d.partial && <Badge variant="outline">Partial</Badge>}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      {selected?.partial && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline" tabIndex={0}>
-              Partial
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>{partialReason(selected)}</TooltipContent>
-        </Tooltip>
-      )}
+    <Select value={selection.date ?? ALL_DATES} onValueChange={(value) => setDate(value === ALL_DATES ? null : value)}>
+      <SelectTrigger aria-label="Match start date (UTC)" className="h-8 min-w-0 flex-1 bg-card">
+        {/* the trigger shows only the date; counts and labels stay in the list */}
+        <SelectValue>{selection.date ? <span className="font-mono tabular-nums">{selection.date}</span> : 'All dates'}</SelectValue>
+      </SelectTrigger>
+      <SelectContent position="popper" align="start">
+        <SelectGroup>
+          <SelectLabel>Match start date (UTC)</SelectLabel>
+          <SelectItem value={ALL_DATES}>All dates</SelectItem>
+          {index.dates.map((d) => (
+            <SelectItem key={d.date} value={d.date} title={d.partial ? partialReason(d) : undefined}>
+              <span className="font-mono tabular-nums">{d.date}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {d.matches} {d.matches === 1 ? 'match' : 'matches'}
+              </span>
+              {d.partial && <Badge variant="outline">Partial</Badge>}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
+/** The date filter and the theme toggle, together at the top of the side panel on both tabs. */
+export function ContextRow({ index, selection }: { index: Index; selection: Selection }) {
+  return (
+    <div className="flex items-center gap-2">
+      <DatePicker index={index} selection={selection} />
+      <ThemeToggle />
     </div>
   )
 }
@@ -119,6 +111,28 @@ function GithubMark() {
   )
 }
 
+/** Copy link, GitHub, About the data and Keyboard shortcuts: Explore's utilities, in the primary nav's right-hand corner. */
+export function ExploreUtilities({ ready }: { ready: boolean }) {
+  return (
+    <div className="flex shrink-0 items-center gap-1">
+      <Button variant="outline" size="sm" className="shrink-0" onClick={copyLink} disabled={!ready}>
+        <LinkIcon data-icon="inline-start" />
+        <span className="hidden lg:inline">Copy link</span>
+        <span className="sr-only lg:hidden">Copy link</span>
+      </Button>
+      <Button variant="outline" size="sm" className="shrink-0" asChild>
+        <a href={REPO_URL} target="_blank" rel="noreferrer">
+          <GithubMark />
+          <span className="hidden lg:inline">GitHub</span>
+          <span className="sr-only lg:hidden">GitHub (opens in a new tab)</span>
+        </a>
+      </Button>
+      <AboutDataPopover />
+      <ShortcutsPopover />
+    </div>
+  )
+}
+
 interface Props {
   index: Index | null
   selection: Selection | null
@@ -134,36 +148,16 @@ export default function TopBar({ index, selection, onOpenPanel }: Props) {
       <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open side panel" onClick={onOpenPanel}>
         <PanelLeftIcon />
       </Button>
-      <h1 className="hidden shrink-0 text-xl font-bold md:block">LILA BLACK Journeys</h1>
+      <h1 className="sr-only">LILA BLACK Journeys · Explore</h1>
+      <span className="shrink-0 text-sm text-muted-foreground" aria-hidden="true">
+        Map
+      </span>
       {ready ? (
-        <>
-          <MapPicker index={index} selection={selection} />
-          <DatePicker index={index} selection={selection} />
-        </>
+        <MapPicker index={index} selection={selection} />
       ) : (
-        // same footprint as the controls, so nothing moves when the index arrives
-        <>
-          <Skeleton className="h-8 w-80 shrink-0" />
-          <Skeleton className="h-8 w-36 shrink-0" />
-        </>
+        // same footprint as the control, so nothing moves when the index arrives
+        <Skeleton className="h-8 w-80 shrink-0" />
       )}
-      <Button variant="outline" className="ml-auto shrink-0" onClick={copyLink} disabled={!ready}>
-        <LinkIcon data-icon="inline-start" />
-        <span className="hidden lg:inline">Copy link</span>
-        <span className="sr-only lg:hidden">Copy link</span>
-      </Button>
-      <Button variant="outline" className="shrink-0" asChild>
-        <a href={REPO_URL} target="_blank" rel="noreferrer">
-          <GithubMark />
-          <span className="hidden lg:inline">GitHub</span>
-          <span className="sr-only lg:hidden">GitHub (opens in a new tab)</span>
-        </a>
-      </Button>
-      <div className="flex shrink-0 items-center">
-        <ThemeToggle />
-        <AboutDataPopover />
-        <ShortcutsPopover />
-      </div>
     </header>
   )
 }

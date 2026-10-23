@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import type { ActorKind, MatchFile } from '@/data/types'
 import { cn } from '@/lib/utils'
 import { ACTOR, ARROW_ICON, EVENT, EVENT_ORDER, endpointIcon } from '@/map/encoding'
-import { ID_MISMATCH_NOTE, KILL_KILLED_PAIR_NOTE, SCOPE, layerCounts } from '@/map/journeys'
+import { SCOPE, layerCounts } from '@/map/journeys'
 import { useStore } from '@/state/store'
 import type { LayerKey, Selection } from '@/state/url'
 import ActorAvatar from './ActorAvatar'
@@ -67,10 +67,7 @@ export default function Legend({ selection, match }: { selection: Selection; mat
 
   return (
     <section aria-labelledby="legend-title" className="flex flex-col gap-2">
-      <div>
-        <h3 id="legend-title" className="font-semibold">{SCOPE.onMap}</h3>
-        <p className="text-xs text-muted-foreground">{counts ? SCOPE.onMapNote : 'Counts appear after this match loads.'}</p>
-      </div>
+      <h3 id="legend-title" className="font-semibold">{SCOPE.onMap}</h3>
       <h4 className="text-xs font-semibold text-muted-foreground">Journeys</h4>
       <ul>
         <Row layer="humans" hidden={hide} count={counts?.actors.human} label={ACTOR.human.plural} symbol={
@@ -85,6 +82,22 @@ export default function Legend({ selection, match }: { selection: Selection; mat
           } />
         )}
       </ul>
+      <p className="flex items-center gap-3 pl-6 text-xs text-muted-foreground">
+        {(
+          [
+            [endpointIcon('human', 'start').url, 'Start'],
+            [endpointIcon('human', 'end').url, 'End'],
+            [ARROW_ICON.url, 'Direction'],
+          ] as const
+        ).map(([src, label]) => (
+          <span key={label} className="flex items-center gap-1">
+            <span aria-hidden className="flex size-4 items-center justify-center rounded-sm bg-stage">
+              <img src={src} alt="" className="size-3" />
+            </span>
+            {label}
+          </span>
+        ))}
+      </p>
       <h4 className="text-xs font-semibold text-muted-foreground">Events</h4>
       <ul>
         {EVENT_ORDER.map((type) => (
@@ -106,23 +119,6 @@ export default function Legend({ selection, match }: { selection: Selection; mat
           />
         ))}
       </ul>
-      <details className="text-xs text-muted-foreground">
-        <summary className="cursor-pointer font-medium text-foreground">Symbols and data notes</summary>
-        <div className="mt-2 space-y-2">
-          <p className="flex items-center gap-2">
-            <span aria-hidden className="flex items-center gap-1 rounded-sm bg-stage px-1 py-0.5">
-              <img src={endpointIcon('human', 'start').url} alt="" className="size-3" />
-              <img src={endpointIcon('human', 'end').url} alt="" className="size-3" />
-              <img src={ARROW_ICON.url} alt="" className="size-3" />
-            </span>
-            Start, end and movement direction; bot endpoints show when hovered or selected.
-          </p>
-          <p>Kills show the killer's location; deaths show the victim's location. Bot events are smaller and fainter.</p>
-          <p>Positions are sampled roughly every 5 seconds. Paths are disconnected across gaps longer than 30 seconds.</p>
-          {counts && counts.actors.unknown > 0 && <p>{ID_MISMATCH_NOTE} Unknown actors currently cannot be hidden separately.</p>}
-          {counts && counts.pairKills > 0 && <p>{counts.pairKills} kill markers belong to Kill/Killed pairs. {KILL_KILLED_PAIR_NOTE}</p>}
-        </div>
-      </details>
     </section>
   )
 }

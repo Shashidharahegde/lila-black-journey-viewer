@@ -34,6 +34,8 @@ interface State {
   hoveredActor: string | null
   pinnedActor: string | null
   matchSort: MatchSort
+  /** the match list shows only matches with bot journeys (S, 2026-10-23); like the sort, kept in the store, not the URL */
+  botsOnly: boolean
   /** which heatmap layer the overview shows (spec 06) */
   heatmapLayer: HeatmapLayerKey
   /** the master switch; the layer, mode and opacity are remembered while it is off */
@@ -48,16 +50,16 @@ interface State {
   heatmapAttempt: number
   /** the selected map's region statistics (the interpretation layer); read through `currentZones` */
   zones: ZonesState
-  /** the region the user clicked in the concentrations list, as "i,j"; its footprint is outlined on the map */
+  /** the region the user clicked in the region list, as "i,j"; its footprint is outlined on the map */
   selectedZone: string | null
-  /** show every consistent region in the list and outlines, not just the strongest three */
-  zonesExpanded: boolean
   /** the workspace: Journeys & Playback or Heatmaps. Each keeps its own state while the other is shown */
   tab: Tab
   /** the selected match's clock (spec 05); reset to 00:00, paused, whenever the match changes */
   playback: Playback
-  /** show whole journeys instead of only what has happened by the playback time */
+  /** show whole journeys instead of only what has happened by the playback time; on by default (S, 2026-10-23) */
   fullPaths: boolean
+  /** the desktop side panel is folded away so the map takes its width; the panel stays mounted, so nothing in it is lost */
+  panelCollapsed: boolean
   setIndex: (index: Index) => void
   /** `time` also sets the playback time (a linked `t=`); without it a new match starts at 00:00 */
   setSelection: (selection: Selection, time?: number) => void
@@ -69,10 +71,10 @@ interface State {
   hoverActor: (id: string | null) => void
   pinActor: (id: string | null) => void
   setMatchSort: (sort: MatchSort) => void
+  setBotsOnly: (botsOnly: boolean) => void
   setHeatmapLayer: (layer: HeatmapLayerKey) => void
   setDensityOn: (on: boolean) => void
   setOutlinesOn: (on: boolean) => void
-  setZonesExpanded: (expanded: boolean) => void
   /** switch workspace; leaving Journeys & Playback pauses it, keeping its match and time */
   setTab: (tab: Tab) => void
   setHeatmapMode: (mode: HeatmapMode) => void
@@ -96,6 +98,7 @@ interface State {
   /** one animation frame of `elapsed` real seconds */
   tickPlayback: (elapsed: number) => void
   setFullPaths: (fullPaths: boolean) => void
+  setPanelCollapsed: (collapsed: boolean) => void
 }
 
 /** Observed duration of the selected match (s), from the index; 0 when none is selected. */
@@ -138,7 +141,7 @@ export function highlightedActor(s: Pick<State, 'hoveredActor' | 'pinnedActor'>)
 function withSelection(state: State, next: Selection): Partial<State> {
   const prev = state.selection
   // a region belongs to one map, date and layer: choosing another map or date clears the highlight
-  const zone: Partial<State> = prev?.map === next.map && prev?.date === next.date ? {} : { selectedZone: null, zonesExpanded: false }
+  const zone: Partial<State> = prev?.map === next.map && prev?.date === next.date ? {} : { selectedZone: null }
   if (prev?.match === next.match && prev?.map === next.map) return { selection: next, ...zone }
   return {
     ...zone,
@@ -159,6 +162,7 @@ export const useStore = create<State>((set, get) => ({
   hoveredActor: null,
   pinnedActor: null,
   matchSort: DEFAULT_SORT,
+  botsOnly: false,
   heatmapLayer: DEFAULT_HEATMAP_VIEW.layer,
   densityOn: DEFAULT_HEATMAP_VIEW.density,
   outlinesOn: DEFAULT_HEATMAP_VIEW.outlines,
@@ -168,10 +172,10 @@ export const useStore = create<State>((set, get) => ({
   heatmapAttempt: 0,
   zones: { status: 'idle' },
   selectedZone: null,
-  zonesExpanded: false,
   tab: 'heatmaps',
   playback: INITIAL_PLAYBACK,
-  fullPaths: false,
+  fullPaths: true,
+  panelCollapsed: false,
   setIndex: (index) => set({ index }),
   setSelection: (selection, time) => {
     const state = get()
@@ -218,17 +222,17 @@ export const useStore = create<State>((set, get) => ({
   setMatchSort: (matchSort) => {
     if (get().matchSort !== matchSort) set({ matchSort })
   },
+  setBotsOnly: (botsOnly) => {
+    if (get().botsOnly !== botsOnly) set({ botsOnly })
+  },
   setHeatmapLayer: (heatmapLayer) => {
-    if (get().heatmapLayer !== heatmapLayer && HEATMAP_LAYERS.includes(heatmapLayer)) set({ heatmapLayer, selectedZone: null, zonesExpanded: false })
+    if (get().heatmapLayer !== heatmapLayer && HEATMAP_LAYERS.includes(heatmapLayer)) set({ heatmapLayer, selectedZone: null })
   },
   setDensityOn: (densityOn) => {
     if (get().densityOn !== densityOn) set({ densityOn })
   },
   setOutlinesOn: (outlinesOn) => {
     if (get().outlinesOn !== outlinesOn) set({ outlinesOn })
-  },
-  setZonesExpanded: (zonesExpanded) => {
-    if (get().zonesExpanded !== zonesExpanded) set({ zonesExpanded })
   },
   setTab: (tab) => {
     const state = get()
@@ -247,7 +251,7 @@ export const useStore = create<State>((set, get) => ({
         densityOn: density,
         outlinesOn: outlines,
         heatmapMode: mode,
-        ...(s.heatmapLayer === layer ? {} : { selectedZone: null, zonesExpanded: false }),
+        ...(s.heatmapLayer === layer ? {} : { selectedZone: null }),
       })
     }
   },
@@ -303,5 +307,8 @@ export const useStore = create<State>((set, get) => ({
   },
   setFullPaths: (fullPaths) => {
     if (get().fullPaths !== fullPaths) set({ fullPaths })
+  },
+  setPanelCollapsed: (panelCollapsed) => {
+    if (get().panelCollapsed !== panelCollapsed) set({ panelCollapsed })
   },
 }))

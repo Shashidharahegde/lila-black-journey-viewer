@@ -1,5 +1,5 @@
 import { BitmapLayer, DeckGL, OrthographicView, type Layer, type OrthographicViewState, type PickingInfo } from 'deck.gl'
-import { MaximizeIcon, MinusIcon, PlusIcon } from 'lucide-react'
+import { LoaderCircleIcon, MaximizeIcon, MinusIcon, PlusIcon } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { MapTooltip } from '@/components/map-tooltip'
 import { Button } from '@/components/ui/button'
@@ -60,6 +60,39 @@ interface Props {
    * `extent` (its width in drawing units) fills about a third of the view, never zooming out. Null changes nothing.
    */
   focus?: { id: string; centre: [number, number]; extent: number } | null
+  /**
+   * Space kept clear for panels drawn over the map, in screen px: the camera fits, zooms and stops panning inside the rest. It should
+   * stay the same while panels open, close or change (it reserves their room instead), so the map never moves or rescales with them.
+   */
+  frame?: Insets
+  /** where panels cover the map right now, so the coordinate readout and the overview move out from under them */
+  covered?: Insets
+}
+
+export interface Insets {
+  left: number
+  bottom: number
+}
+
+const NO_INSETS: Insets = { left: 0, bottom: 0 }
+
+/** The part of the canvas inside the insets, where the camera frames the map. */
+function framed(size: Size, frame: Insets): Size {
+  return { width: Math.max(1, size.width - frame.left), height: Math.max(1, size.height - frame.bottom) }
+}
+
+/**
+ * The camera is kept for the framed part of the canvas; deck.gl's target is the centre of the whole canvas, which lies `left / 2` px to
+ * the left of the frame's centre and `bottom / 2` px lower (with flipY, lower on screen is larger y).
+ */
+function canvasTarget([x, y]: readonly number[], zoom: number, frame: Insets): [number, number] {
+  const scale = 2 ** zoom
+  return [x - frame.left / 2 / scale, y + frame.bottom / 2 / scale]
+}
+
+function frameTarget([x, y]: readonly number[], zoom: number, frame: Insets): [number, number] {
+  const scale = 2 ** zoom
+  return [x + frame.left / 2 / scale, y - frame.bottom / 2 / scale]
 }
 
 
@@ -176,14 +209,27 @@ function HoverCard({ picked: signal, render }: { picked: Signal<Picked>; render?
   ) : null
 }
 
-export default function MapView({ mapId, map, overlays, renderTooltip, onHoverObject, pickAt, onClickObject, focus }: Props) {
+export default function MapView({ mapId: wantedId, map: wantedMap, overlays, renderTooltip, onHoverObject, pickAt, onClickObject, focus, frame: frameProp, covered: coveredProp }: Props) {
   const container = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState<Size | null>(null)
+  const [canvas, setCanvas] = useState<Size | null>(null)
   const [moved, setMoved] = useState<MovedCamera | null>(null)
   const [readout] = useState(() => createSignal<WorldPoint>(null))
   const [hoverCard] = useState(() => createSignal<Picked>(null))
-  const minimap = useMinimap(dataUrl(map.image))
-  const image = minimap.status === 'ready' ? minimap.image : null
+  const minimap = useMinimap(dataUrl(wantedMap.image))
+  // The map on screen is the last one whose minimap has loaded: on a map switch the previous map stays (dimmed, without overlays)
+  // until the next one is ready, then the next one fades in. No black flash, and no overlay is ever drawn on another map's image.
+  const [shown, setShown] = useState<{ mapId: string; map: MapInfo; image: ImageBitmap } | null>(null)
+  if (minimap.status === 'ready' && shown?.image !== minimap.image) setShown({ mapId: wantedId, map: wantedMap, image: minimap.image })
+  const mapId = shown?.mapId ?? wantedId
+  const map = shown?.map ?? wantedMap
+  const image = shown?.image ?? null
+  const switching = shown !== null && shown.mapId !== wantedId
+  const frameLeft = frameProp?.left ?? 0
+  const frameBottom = frameProp?.bottom ?? 0
+  const frame = useMemo<Insets>(() => ({ left: frameLeft, bottom: frameBottom }), [frameLeft, frameBottom])
+  const covered = coveredProp ?? NO_INSETS
+  // every camera rule works in the framed part of the canvas, so panels can't move the map
+  const size = useMemo(() => (canvas ? framed(canvas, frame) : null), [canvas, frame])
   const content = useMemo(() => {
     const bounds = image ? measureContent(image) : null
     return bounds ? contentRect(bounds, map) : null
@@ -194,7 +240,7 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
     if (!element) return
     const observer = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect
-      if (width > 0 && height > 0) setSize({ width, height })
+      if (width > 0 && height > 0) setCanvas({ width, height })
     })
     observer.observe(element)
     return () => observer.disconnect()
@@ -283,7 +329,7 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
   )
   const levelsIn = camera && limits ? camera.zoom - limits.minZoom : 0
   // overlays appear with the minimap, so nothing floats on an empty stage
-  const drawn = useMemo(() => (overlays && background ? overlays(levelsIn) : []), [overlays, background, levelsIn])
+  const drawn = useMemo(() => (overlays && background && !switching ? overlays(levelsIn) : []), [overlays, background, switching, levelsIn])
   const layers = useMemo(() => (background ? [background, ...drawn] : []), [background, drawn])
 
   return (
@@ -291,11 +337,12 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
       {camera && size && limits && (
         <DeckGL
           views={VIEW}
-          viewState={{ ...camera, ...limits }}
+          viewState={{ target: canvasTarget(camera.target, camera.zoom, frame), zoom: camera.zoom, ...limits }}
           onViewStateChange={({ viewState: next }) => {
             // only user input reaches here, because the view is controlled
             const { target, zoom } = next as OrthographicViewState
-            setMoved({ mapId, ...bounded(map, size, target ?? camera.target, Number(zoom)) })
+            const z = Number(zoom)
+            setMoved({ mapId, ...bounded(map, size, target ? frameTarget(target, z, frame) : camera.target, z) })
           }}
           controller={CONTROLLER}
           layers={layers}
@@ -308,9 +355,19 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
           getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab')}
         />
       )}
+      {/* a switch: the previous map dims while the next loads; the next fades in from the stage colour */}
+      <div aria-hidden className={`pointer-events-none absolute inset-0 bg-stage transition-opacity duration-200 ${switching ? 'opacity-60' : 'opacity-0'}`} />
+      {shown && <div key={shown.mapId} aria-hidden className="pointer-events-none absolute inset-0 bg-stage animate-out fade-out fill-mode-forwards duration-300" />}
+      {(switching || (!shown && minimap.status === 'loading')) && (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center" style={{ left: frame.left, bottom: frame.bottom }}>
+          <p role="status" className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
+            <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden /> Loading {wantedId}…
+          </p>
+        </div>
+      )}
       {minimap.status === 'error' && (
         <p role="alert" className="absolute inset-x-0 top-1/2 text-center text-sm text-white">
-          Could not load the {mapId} minimap ({minimap.message}). Reload the page to try again.
+          Could not load the {wantedId} minimap ({minimap.message}). Reload the page to try again.
         </p>
       )}
       <HoverCard picked={hoverCard} render={renderTooltip} />
@@ -325,15 +382,17 @@ export default function MapView({ mapId, map, overlays, renderTooltip, onHoverOb
           <MaximizeIcon />
         </MapButton>
       </div>
-      {image && camera && size && levelsIn >= OVERVIEW_MIN_LEVELS && (
-        <MapOverview
-          map={map}
-          image={image}
-          viewport={viewportRect(camera.target, camera.zoom, size.width, size.height, map)}
-          onNavigate={(x, y) => setMoved({ mapId, ...bounded(map, size, [x, y], camera.zoom) })}
-        />
-      )}
-      <CoordinateReadout point={readout} />
+      <div className="pointer-events-none absolute inset-0 transition-[left,bottom] duration-200 *:pointer-events-auto" style={{ left: covered.left, bottom: covered.bottom }}>
+        {image && camera && size && levelsIn >= OVERVIEW_MIN_LEVELS && (
+          <MapOverview
+            map={map}
+            image={image}
+            viewport={viewportRect(camera.target, camera.zoom, size.width, size.height, map)}
+            onNavigate={(x, y) => setMoved({ mapId, ...bounded(map, size, [x, y], camera.zoom) })}
+          />
+        )}
+        <CoordinateReadout point={readout} />
+      </div>
     </div>
   )
 }

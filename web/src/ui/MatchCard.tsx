@@ -35,13 +35,6 @@ export default function MatchCard({ match }: { match: MatchSummary }) {
             {c.kill_killed_pair > 0 && <Stat label="Kill/Killed pairs" value={c.kill_killed_pair} />}
           </dl>
         </section>
-        <details className="text-xs text-muted-foreground">
-          <summary className="cursor-pointer font-medium text-foreground">About these counts</summary>
-          <p className="mt-1">{SCOPE.humanFilesNote}</p>
-          {c.kill_killed_pair > 0 && (
-            <p className="mt-1">The number of kills above excludes the Kill half of each Kill/Killed pair. Pairs are listed separately.</p>
-          )}
-        </details>
       </CardContent>
     </Card>
   )
