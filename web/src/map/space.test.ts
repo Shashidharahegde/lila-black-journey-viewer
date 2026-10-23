@@ -5,6 +5,7 @@ import {
   SPACE_WIDTH,
   clampTarget,
   fitZoom,
+  focusZoom,
   imageBounds,
   isInsideMap,
   overviewToSpace,
@@ -159,5 +160,28 @@ describe('camera bounds', () => {
 
   it('leaves a target that is already inside alone', () => {
     expect(clampTarget([500, 400], 1, 400, 300, map)).toEqual([500, 400])
+  })
+})
+
+describe('focusZoom (clicking a hotspot zooms in to it)', () => {
+  it('the focused thing fills the stated share of the shorter side, whatever the window shape', () => {
+    for (const [w, h] of [[1180, 708], [700, 900], [400, 400]]) {
+      const extent = 120
+      const pixelsPerUnit = 2 ** focusZoom(w, h, extent)
+      expect(extent * pixelsPerUnit).toBeCloseTo(0.33 * Math.min(w, h), 6)
+    }
+  })
+
+  it('a smaller thing needs a closer zoom, one level per halving', () => {
+    expect(focusZoom(1000, 800, 50) - focusZoom(1000, 800, 100)).toBeCloseTo(1, 9)
+  })
+
+  it.each(MAP_IDS)('%s: a regional hotspot (1/16 of the map wide) is a modest zoom in from the fitted view, not the closest level', (id) => {
+    const map = maps[id]
+    const view = { w: 1180, h: 708 }
+    const fitted = fitZoom(view.w, view.h, map)
+    const levels = focusZoom(view.w, view.h, (SPACE_WIDTH / 16) * Math.SQRT2) - fitted
+    expect(levels).toBeGreaterThan(0.5)
+    expect(levels).toBeLessThan(Math.log2(map.width / SPACE_WIDTH) + 2 - fitted)
   })
 })

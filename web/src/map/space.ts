@@ -2,6 +2,7 @@
 // X = u · 1000, Y = (1 − v) · 1000 · H/W. Y grows downward because image rows
 // count from the top; the H/W factor keeps non-square maps (GrandRift) in proportion.
 import type { MapInfo } from '../data/types'
+import type { ContentBounds } from './content'
 
 export const SPACE_WIDTH = 1000
 
@@ -38,6 +39,30 @@ export function uvToWorld(u: number, v: number, map: MapInfo): { x: number; z: n
 export function fitZoom(viewWidth: number, viewHeight: number, map: MapInfo, margin = 0.95): number {
   const pixelsPerUnit = Math.min(viewWidth / SPACE_WIDTH, viewHeight / spaceHeight(map)) * margin
   return Math.log2(pixelsPerUnit)
+}
+
+/** The part of the map that has content, as a drawing-space rectangle, with `pad` (a share of its size) added on each side and kept on the map. */
+export function contentRect(bounds: ContentBounds, map: MapInfo, pad = 0.03): SpaceRect {
+  const h = spaceHeight(map)
+  const padX = (bounds.right - bounds.left) * SPACE_WIDTH * pad
+  const padY = (bounds.bottom - bounds.top) * h * pad
+  return {
+    left: Math.max(0, bounds.left * SPACE_WIDTH - padX),
+    top: Math.max(0, bounds.top * h - padY),
+    right: Math.min(SPACE_WIDTH, bounds.right * SPACE_WIDTH + padX),
+    bottom: Math.min(h, bounds.bottom * h + padY),
+  }
+}
+
+/** deck.gl orthographic zoom that fits a drawing-space rectangle in the view. */
+export function fitRectZoom(viewWidth: number, viewHeight: number, rect: SpaceRect, margin = 0.95): number {
+  const pixelsPerUnit = Math.min(viewWidth / (rect.right - rect.left), viewHeight / (rect.bottom - rect.top)) * margin
+  return Math.log2(pixelsPerUnit)
+}
+
+/** The zoom at which something `extent` drawing units wide fills `share` of the view's shorter side. */
+export function focusZoom(viewWidth: number, viewHeight: number, extent: number, share = 0.33): number {
+  return Math.log2((share * Math.min(viewWidth, viewHeight)) / extent)
 }
 
 /** A rectangle in the drawing space. */

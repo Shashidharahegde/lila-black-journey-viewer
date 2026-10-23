@@ -75,3 +75,86 @@ export interface MatchFile {
   duration_s: number
   actors: Actor[]
 }
+
+export type HeatmapLayerKey = 'kills' | 'deaths' | 'traffic'
+
+/** [i, j, value]: i = column along u (west → east), j = row along v (south → north). Only non-zero cells are stored. */
+export type HeatmapCell = [number, number, number]
+
+/** One map's aggregates, per layer and per date key (`all` or a UTC date); human journeys only. */
+export interface HeatmapFile {
+  schema_version: number
+  map: string
+  grid: number
+  cells: string
+  units: Record<HeatmapLayerKey, string>
+  layers: Record<HeatmapLayerKey, Record<string, HeatmapCell[]>>
+  /** events for kills/deaths, seconds for traffic */
+  totals: Record<HeatmapLayerKey, Record<string, number>>
+  /** journeys, not rows: matches with a human journey and the human journeys in them */
+  samples: Record<string, { matches: number; human_journeys: number }>
+}
+
+/** The rules the regions were qualified under (pipeline `zones.Rules`); shown, never recomputed, in the browser. */
+export interface ZoneRules {
+  top_share: number
+  min_candidates: number
+  min_stability: number
+  min_matches: number
+  min_players: number
+  max_one_match_share: number
+  survival_rule: string
+  survival_share: number
+  required_shifts: number
+  bootstraps: number
+}
+
+/** A candidate region: a block of 4 × 4 heatmap cells (zone_cells), (i, j) counted from the south-west like the grid. */
+export interface ZoneRecord {
+  i: number
+  j: number
+  /** events for kills/deaths, seconds for traffic */
+  value: number
+  /** of the layer's total in this selection */
+  share: number
+  matches: number
+  players: number
+  /** the largest single match's share of the region's value */
+  largest_match_share: number
+  /** share of resamples of the matches in which the region is again a candidate */
+  stability: number
+  /** how many of the three half-region-shifted grids its geographic counterpart also qualifies on */
+  survived_shifts: number
+  tier: 'consistent' | 'observed'
+  /** traffic only: distinct human journeys with traced time in the region */
+  journeys?: number
+  /** deaths only: storm deaths among its value */
+  storm_deaths?: number
+}
+
+export interface ZoneLayer {
+  total: number
+  occupied_zones: number
+  candidates: number
+  consistent: number
+  /** deaths only: storm deaths among the deaths of the whole selection */
+  storm_deaths?: number
+  /** the candidates, strongest first */
+  zones: ZoneRecord[]
+}
+
+export interface ZoneSelection {
+  matches: number
+  players: number
+  layers: Record<HeatmapLayerKey, ZoneLayer>
+}
+
+export interface ZonesFile {
+  schema_version: number
+  map: string
+  grid: number
+  zone_cells: number
+  zones_per_side: number
+  rules: ZoneRules
+  selections: Record<string, ZoneSelection>
+}
