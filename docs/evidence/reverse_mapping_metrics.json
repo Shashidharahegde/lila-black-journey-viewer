@@ -1,0 +1,472 @@
+{
+  "ingest": "1243 files found, 1242 read, 1 duplicates skipped, 0 failed",
+  "dimensions": {
+    "AmbroseValley": {
+      "original_px": [
+        4320,
+        4320
+      ],
+      "web_webp_px": [
+        4096,
+        4096
+      ],
+      "index_json_px": [
+        4096,
+        4096
+      ],
+      "index_matches_webp": true,
+      "index_calibration_matches_pipeline": true,
+      "aspect_original": 1.0,
+      "aspect_web": 1.0,
+      "aspect_preserved": true,
+      "world_square": {
+        "x": [
+          -370,
+          530
+        ],
+        "z": [
+          -473,
+          427
+        ]
+      },
+      "world_units_per_px_original": {
+        "x": 0.20833,
+        "z": 0.20833
+      },
+      "world_units_per_px_web": {
+        "x": 0.21973,
+        "z": 0.21973
+      },
+      "axis_scale_mismatch_pct_web": 0.0,
+      "max_error_px_if_treated_as_square": 0
+    },
+    "GrandRift": {
+      "original_px": [
+        2160,
+        2158
+      ],
+      "web_webp_px": [
+        2160,
+        2158
+      ],
+      "index_json_px": [
+        2160,
+        2158
+      ],
+      "index_matches_webp": true,
+      "index_calibration_matches_pipeline": true,
+      "aspect_original": 1.000927,
+      "aspect_web": 1.000927,
+      "aspect_preserved": true,
+      "world_square": {
+        "x": [
+          -290,
+          291
+        ],
+        "z": [
+          -290,
+          291
+        ]
+      },
+      "world_units_per_px_original": {
+        "x": 0.26898,
+        "z": 0.26923
+      },
+      "world_units_per_px_web": {
+        "x": 0.26898,
+        "z": 0.26923
+      },
+      "axis_scale_mismatch_pct_web": 0.0926,
+      "max_error_px_if_treated_as_square": 2
+    },
+    "Lockdown": {
+      "original_px": [
+        9000,
+        9000
+      ],
+      "web_webp_px": [
+        4096,
+        4096
+      ],
+      "index_json_px": [
+        4096,
+        4096
+      ],
+      "index_matches_webp": true,
+      "index_calibration_matches_pipeline": true,
+      "aspect_original": 1.0,
+      "aspect_web": 1.0,
+      "aspect_preserved": true,
+      "world_square": {
+        "x": [
+          -500,
+          500
+        ],
+        "z": [
+          -500,
+          500
+        ]
+      },
+      "world_units_per_px_original": {
+        "x": 0.11111,
+        "z": 0.11111
+      },
+      "world_units_per_px_web": {
+        "x": 0.24414,
+        "z": 0.24414
+      },
+      "axis_scale_mismatch_pct_web": 0.0,
+      "max_error_px_if_treated_as_square": 0
+    }
+  },
+  "extent": {
+    "AmbroseValley": {
+      "positions": 48691,
+      "outside_calibrated_square": 0,
+      "u_range": [
+        0.05,
+        0.7464
+      ],
+      "v_range": [
+        0.1033,
+        0.9264
+      ],
+      "x_range": [
+        -324.97,
+        301.79
+      ],
+      "z_range": [
+        -380.01,
+        360.76
+      ]
+    },
+    "GrandRift": {
+      "positions": 5728,
+      "outside_calibrated_square": 0,
+      "u_range": [
+        0.1103,
+        0.9408
+      ],
+      "v_range": [
+        0.1652,
+        0.7919
+      ],
+      "x_range": [
+        -225.9,
+        256.62
+      ],
+      "z_range": [
+        -194.0,
+        170.11
+      ]
+    },
+    "Lockdown": {
+      "positions": 18577,
+      "outside_calibrated_square": 0,
+      "u_range": [
+        0.0934,
+        0.8484
+      ],
+      "v_range": [
+        0.2149,
+        0.829
+      ],
+      "x_range": [
+        -406.63,
+        348.36
+      ],
+      "z_range": [
+        -285.1,
+        329.05
+      ]
+    }
+  },
+  "roundtrip_real_points": {
+    "exported_points": 72676,
+    "no_parquet_row_found": 0,
+    "by_map": {
+      "AmbroseValley": {
+        "points": 48457,
+        "max_error_world_units": 0.0636,
+        "mean_error_world_units": 0.0345,
+        "rounding_bound_world_units": 0.0636,
+        "within_bound": true
+      },
+      "GrandRift": {
+        "points": 5712,
+        "max_error_world_units": 0.0409,
+        "mean_error_world_units": 0.0223,
+        "rounding_bound_world_units": 0.0411,
+        "within_bound": true
+      },
+      "Lockdown": {
+        "points": 18507,
+        "max_error_world_units": 0.0707,
+        "mean_error_world_units": 0.0381,
+        "rounding_bound_world_units": 0.0707,
+        "within_bound": true
+      }
+    }
+  },
+  "pixel_probes": {
+    "AmbroseValley": {
+      "probes": 2005,
+      "max_diff_vs_independent_formula_world_units": 1.17e-13,
+      "max_round_trip_error_px": 9.1e-13,
+      "all_inside_map": true,
+      "corners_world_xz": {
+        "top-left": [
+          -370.0,
+          427.0
+        ],
+        "top-right": [
+          530.0,
+          427.0
+        ],
+        "bottom-left": [
+          -370.0,
+          -473.0
+        ],
+        "bottom-right": [
+          530.0,
+          -473.0
+        ],
+        "centre": [
+          80.0,
+          -23.0
+        ]
+      },
+      "expected_corners_world_xz": {
+        "top-left": [
+          -370,
+          427
+        ],
+        "top-right": [
+          530,
+          427
+        ],
+        "bottom-left": [
+          -370,
+          -473
+        ],
+        "bottom-right": [
+          530,
+          -473
+        ],
+        "centre": [
+          80.0,
+          -23.0
+        ]
+      }
+    },
+    "GrandRift": {
+      "probes": 2005,
+      "max_diff_vs_independent_formula_world_units": 1.27e-13,
+      "max_round_trip_error_px": 5.12e-13,
+      "all_inside_map": true,
+      "corners_world_xz": {
+        "top-left": [
+          -290.0,
+          291.0
+        ],
+        "top-right": [
+          291.0,
+          291.0
+        ],
+        "bottom-left": [
+          -290.0,
+          -290.0
+        ],
+        "bottom-right": [
+          291.0,
+          -290.0
+        ],
+        "centre": [
+          0.5,
+          0.5
+        ]
+      },
+      "expected_corners_world_xz": {
+        "top-left": [
+          -290,
+          291
+        ],
+        "top-right": [
+          291,
+          291
+        ],
+        "bottom-left": [
+          -290,
+          -290
+        ],
+        "bottom-right": [
+          291,
+          -290
+        ],
+        "centre": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "Lockdown": {
+      "probes": 2005,
+      "max_diff_vs_independent_formula_world_units": 1.14e-13,
+      "max_round_trip_error_px": 6.43e-13,
+      "all_inside_map": true,
+      "corners_world_xz": {
+        "top-left": [
+          -500.0,
+          500.0
+        ],
+        "top-right": [
+          500.0,
+          500.0
+        ],
+        "bottom-left": [
+          -500.0,
+          -500.0
+        ],
+        "bottom-right": [
+          500.0,
+          -500.0
+        ],
+        "centre": [
+          0.0,
+          0.0
+        ]
+      },
+      "expected_corners_world_xz": {
+        "top-left": [
+          -500,
+          500
+        ],
+        "top-right": [
+          500,
+          500
+        ],
+        "bottom-left": [
+          -500,
+          -500
+        ],
+        "bottom-right": [
+          500,
+          -500
+        ],
+        "centre": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "same_point_original_vs_web": {
+    "AmbroseValley": {
+      "original_px": [
+        4320,
+        4320
+      ],
+      "web_px": [
+        4096,
+        4096
+      ],
+      "pixel_scale_factor": [
+        0.948148,
+        0.948148
+      ],
+      "max_fraction_difference": 1.11e-16,
+      "example": {
+        "world": [
+          -280.0,
+          337.0
+        ],
+        "original_px": [
+          432.0,
+          432.0
+        ],
+        "web_px": [
+          409.6,
+          409.6
+        ]
+      }
+    },
+    "GrandRift": {
+      "original_px": [
+        2160,
+        2158
+      ],
+      "web_px": [
+        2160,
+        2158
+      ],
+      "pixel_scale_factor": [
+        1.0,
+        1.0
+      ],
+      "max_fraction_difference": 0.0,
+      "example": {
+        "world": [
+          -231.9,
+          232.9
+        ],
+        "original_px": [
+          216.0,
+          215.8
+        ],
+        "web_px": [
+          216.0,
+          215.8
+        ]
+      }
+    },
+    "Lockdown": {
+      "original_px": [
+        9000,
+        9000
+      ],
+      "web_px": [
+        4096,
+        4096
+      ],
+      "pixel_scale_factor": [
+        0.455111,
+        0.455111
+      ],
+      "max_fraction_difference": 0.0,
+      "example": {
+        "world": [
+          -400.0,
+          400.0
+        ],
+        "original_px": [
+          900.0,
+          900.0
+        ],
+        "web_px": [
+          409.6,
+          409.6
+        ]
+      }
+    }
+  },
+  "pictures": {
+    "AmbroseValley": {
+      "overlay": "reverse_ambrosevalley_overlay.png",
+      "human_points": 35305,
+      "unknown_points": 587,
+      "bot_points": 12565
+    },
+    "GrandRift": {
+      "overlay": "reverse_grandrift_overlay.png",
+      "human_points": 3701,
+      "unknown_points": 23,
+      "bot_points": 1988
+    },
+    "Lockdown": {
+      "overlay": "reverse_lockdown_overlay.png",
+      "human_points": 11322,
+      "unknown_points": 26,
+      "bot_points": 7159
+    }
+  }
+}

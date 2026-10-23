@@ -1,241 +1,117 @@
-# CLAUDE.md — LILA BLACK Player Journey Visualization Tool
+# CLAUDE.md — LILA BLACK Player Journey Tool
 
-You are helping S (the owner of this repo) build a take-home assignment for LILA Games.
-S reviews and pushes every change himself. Read this whole file before doing anything.
+A browser tool for LILA's Level Designers to see how players move, fight, loot and die on the three LILA BLACK maps.
+Owner: S. S reviews and pushes everything.
 
----
+## Rules
+1. **Never commit or push.** S does that. Read-only git commands are fine.
+2. **One feature at a time** (list below). Within a feature, make one commit-sized change at a time as listed in its spec, and stop after each so S can review and commit. Don't start the next feature until S says so.
+3. **Only create files the current feature needs.** No placeholders for later features.
+4. **No invented numbers.** Any stat in docs or UI comes from running code on the data.
+5. **Raw data never goes in git** (`data/raw/` is gitignored).
+6. **Follow the Decisions table.** Don't change a decision on your own. If a new design choice comes up (a library, a data format, where logic lives), stop, give S 2–3 options with trade-offs and a recommendation, and after S decides, add a row to the table.
 
-## 0. Hard rules (never break these)
-
-1. **Never run `git commit`, `git push`, `git merge`, `git rebase`, `git reset --hard` or `gh pr create`.**
-   You may run read-only git commands (`git status`, `git diff`, `git log`). S stages, commits and pushes.
-2. **Work in chunks** (Section 6). Do one chunk, then STOP and hand over (Section 7). Never start the next chunk without S saying so.
-3. **Never invent data facts.** Every number in docs, UI copy or chat answers must come from code run against the data. If you state a number, say which script produced it.
-4. **Never fabricate insights.** INSIGHTS.md is written by S after using the tool. You may produce a stats report that supports his insights; you do not write the insights.
-5. **Raw data stays out of git.** `data/raw/` is gitignored. Never commit parquet files or original minimaps.
-6. **Core before extras.** The project has two tracks (Section 6). Extras (E1, E2) start only after the core track reaches the **submission-ready checkpoint**: deployed, documented and pushed. Never let extras work break or delay a core feature.
-   During core chunks, build only the **extension hooks** in Section 3.1, never extras features themselves.
-7. Keep the one-page limit for ARCHITECTURE.md. Prefer tables over paragraphs.
-8. Follow `COMMIT_CONVENTION.md` when proposing commit messages.
-9. **Build incrementally: one feature, one step at a time.**
-   - Create only the files the *current step* needs. The layout in Section 4 is the **target**, not a to-do list: never create empty placeholder files, empty folders or stub modules for later chunks.
-   - Before writing anything in a step, list the exact files you will create or change, and wait for S to say go.
-   - After each step, stop. Do not continue to the next step, the next chunk, or "while I'm here" extras.
-   - If a step seems to need something from a later chunk, say so and ask; don't build it early.
-
----
-
-## 1. The assignment (what is graded)
-
-Build and deploy a browser tool that lets a **Level Designer** (not a data scientist) explore player behaviour on LILA BLACK's three maps.
-
-Core requirements (all must work in the deployed build):
-- Load and parse the provided parquet data
-- Player journeys on the correct minimap, with world coordinates mapped correctly
-- Humans and bots visually distinct
-- Kills, deaths, loot, storm deaths as distinct markers
-- Filter by map, date and match
-- Timeline / playback of a match
-- Heatmaps: kill zones, death zones, high-traffic areas
-- Hosted at a shareable URL, usable without help
-
-Rubric: system design · attention to detail (coordinates, bytes, bots, timestamps, edge cases) · end-to-end execution · product thinking · code quality · communication (architecture doc, trade-offs).
-Guiding principle: **deeper, not bigger.** A few features done correctly and explained beat many half-done ones.
-
-Deliverables: repo · deployed URL · README.md · ARCHITECTURE.md (one page) · INSIGHTS.md (three insights, written by S).
-
----
-
-## 2. Data facts already established (audit of 2026-10-20)
-
-The README that ships with the data is wrong in several places. These findings come from a full audit of all 1,243 files.
-**Encode each one as an executable contract test** (Section 5) — do not just trust this list.
-
-| ID | Topic | Finding | Handling |
-|---|---|---|---|
-| A-01 | Clock | `ts` is stored as `timestamp[ms]` but the integer is **Unix epoch seconds**. Read as seconds, events fall on their folder dates (2026-02-09 23:58 → 02-14 15:01 UTC) and journeys last 13–890 s. Read as ms, matches last < 1 s. Resolution = 1 s. | `epoch_s = ts.astype(int64)`; match time `t = epoch_s − min(epoch_s in match)`. |
-| A-02 | Minimap size | README says 1024×1024. Actual: AmbroseValley 4320×4320 PNG, GrandRift **2160×2158** PNG, Lockdown 9000×9000 JPG (11.8 MB). | Project to UV (0–1); UV is image-relative so any resize is safe. Export WebP ≈ 4096 px for the web. Never hardcode 1024. |
-| A-03 | Coordinates | README formula is correct: `u=(x−ox)/scale`, `v=(z−oz)/scale`, `px=u·W`, `py=(1−v)·H`. `y` is elevation — ignore for 2D. Worked example (−301.45, −355.55) → (78, 890) at 1024 px, (329, 3756) at 4320 px. 0 out-of-bounds points. | Single projection function in the pipeline; frontend receives map-space coordinates only. |
-| A-04 | Calibration evidence | Share of positions on transparent/void pixels: AmbroseValley 0.46 %, GrandRift 0 % transparent (4.8 % on opaque black art inside the map — verify visually), Lockdown 0.08 % (+0.2 % water). With the Y-flip removed (a likely bug) the rate jumps to 7–12 %; random points 41–51 %. | Automated on-map test **with the no-flip version as a negative control that must fail**. |
-| A-05 | Bot detection | README: numeric `user_id` = bot. But 17 numeric-ID files (IDs 1379, 1402, 1429) emit human events (`Position`, `Loot`) and never `BotPosition`. Each is the only human-behaving actor in one of the 16 otherwise bot-only matches. | Classify by **behaviour** (`BotPosition` present → bot; human event vocabulary → human). Keep `id_says_bot` and flag mismatches (likely internal/test accounts). Result: 794 matches have exactly 1 human, 2 have 2. |
-| A-06 | Combat labels | Both humans and bots emit `BotKill`/`BotKilled`. An event's x/z is the **file owner's** position. | Kill marker = where the killer stood; death marker = where the victim fell. Keep raw labels plus a designer-facing meaning. |
-| A-07 | PvP | Only 3 `Kill` + 3 `Killed`; each pair is in the **same file, same second, same spot**, in single-human matches. Not PvP. | Show as "self-inflicted / unattributed death". No PvP heatmap; state why. |
-| A-08 | Coverage | 743/796 matches contain one file. Only 53 matches have bot files (5–16 files each). 566 AmbroseValley, 171 Lockdown, 59 GrandRift matches. | Aggregate views are the default; single-match playback is the drill-down. Match picker shows recorded-actor count and sorts richest first. |
-| A-09 | Sampling | Positions every 5 s (mode); gaps up to 518 s. | Break paths when the gap is > 30 s; interpolate only for playback; show sample dots. |
-| A-10 | Post-death rows | 174 human journeys have exactly one `Position` 1–3 s after death at the same spot. | Treat the journey as ending at death; keep the row, flag it. |
-| A-11 | Duplicates | One human file exists in both `February_10/` and `February_11/` (match spans midnight). ~1,400 other exact-duplicate rows, mostly `Loot` (several items picked up in the same second). | Ingest identical files once. Keep same-second Loot rows (legitimate). Tie-break ordering by `(epoch_s, source row index)`. |
-| A-12 | Extraction | No extraction event exists. 339 human journeys end without death; on AmbroseValley 68 % of them end in 6 of 400 grid cells. | "Likely extraction points" layer, always labelled **inferred**. |
-| A-13 | Storm | All 39 storm deaths occur 655–887 s into the match. | Storm-death markers coloured by match time. |
-| A-14 | Date | Folders match UTC days; one match crosses midnight. | Date filter = UTC date of match start; keep folder date as metadata. |
-| A-15 | Stats | 339 unique users (245 UUID + 94 numeric), 796 matches, 89,104 rows, 8 event types, `event` always bytes. | Contract test reproduces these. |
-
-Status vocabulary for the register: **Verified** (tested against the data) · **Inferred** (evidence-backed, labelled in the UI) · **Unknown** (cannot be determined; stated, not guessed).
-
----
-
-## 3. Architecture decisions (agreed)
-
-- **Build-time pipeline, static frontend.** The data is 8 MB and fixed, so all querying and aggregation runs in Python at build time and outputs static files. No always-on backend (avoids cold starts and a second thing to host). The logical layers (ingest → normalise → canonical model → query/aggregate → UI) stay separate modules.
-- **Extras add to the system; they never change the core.** The chatbot (extra E2) will be one serverless function (`/api/chat`) so the API key never reaches the browser, reading analytics files produced by a new pipeline stage (extra E1). The map must work fully if chat is down or absent.
-- **One projection.** The pipeline outputs map-space coordinates; the minimap image is drawn in the same coordinate space, so there's no second transform that could drift on zoom/pan.
-- **Generated data is committed** (`web/public/data/`), so Vercel builds the frontend only. The pipeline is reproducible locally from the raw zip.
-
-### 3.1 Extension hooks (build these during the core, so extras plug in later without rework)
-
-| Hook | Built in chunk | Why the extras need it |
-|---|---|---|
-| **Canonical events table** written to `pipeline/out/events.parquet` (one row per event: match, actor, actor_kind, map, epoch_s, t, event, raw_event, x, z, u, v, flags) | 02 | E1 computes backtraces and sequences from this one table instead of re-reading raw files. |
-| **Pipeline stages as separate functions** in `build.py` (`ingest → normalize → project → aggregate → [analytics] → report`), each taking and returning dataframes | 02 | E1 adds one stage without touching the others. |
-| **Pure query functions** in `aggregate.py` (e.g. `density(events, map, event, phase)`), not inline notebook-style code | 04 | The same functions can later back chat tools and their tests. |
-| **Versioned data contract**: every generated JSON has `schema_version` and `generated_at`; shapes documented in `web/src/lib/dataContract.ts` | 04 | Chat tools and the UI read the same files and can't silently disagree. |
-| **Grid zone IDs** (e.g. `C4` on an 8×8 grid per map) attached to every event | 04 | Backtracing and sequences need discrete zones; designers need names they can say aloud. |
-| **`docs/corpus/`** folder holding README, DATA_QUALITY, metric definitions | 08 | E2's retrieval indexes this folder; no code change needed when documents are added. |
-| **`api/` reserved** in `vercel.json`; the UI layout has a collapsible side-panel slot (empty in the core) | 07 | E2 adds `api/chat.ts` and a panel component only. |
-| **URL state** for every view | 05 | Chat answers can link to the exact map view as evidence. |
-
-### Stack
-| Layer | Choice |
-|---|---|
-| Pipeline | Python 3.11+, `uv`, DuckDB and/or pandas, pyarrow, numpy, scipy, Pillow |
-| Tests | pytest (pipeline), Vitest (frontend logic only, if useful) |
-| Frontend | Vite + React + TypeScript, Tailwind CSS v4 (`@tailwindcss/vite`, utility classes for all UI styling; no CSS-in-JS, no `tailwind.config.js`), deck.gl (`OrthographicView`, `BitmapLayer`, `PathLayer`, `TripsLayer`, `ScatterplotLayer`/`IconLayer`), Zustand, state mirrored to the URL |
-| Hosting | Vercel |
-| *Extras only:* analytics | Same Python pipeline (pandas/numpy); no new heavy dependencies |
-| *Extras only:* chat | Vercel serverless function (TypeScript), Anthropic SDK with tool use, model from env var `ANTHROPIC_MODEL`; BM25 retrieval (e.g. MiniSearch) over an index built at build time |
-
-Colour: Okabe–Ito for categorical markers, viridis/magma for heatmaps. Event types differ by **shape and colour** (colour-blind safe). Humans = solid coloured paths; bots = thin grey dashed, hideable.
-
----
-
-## 4. Repository layout (the TARGET, not a to-do list — see hard rule 9)
-
-Files appear only when the chunk that needs them is being built.
-
+## Architecture (follows S's HLD; query layer runs at build time)
 ```
-.
-├── CLAUDE.md
-├── COMMIT_CONVENTION.md
-├── README.md
-├── ARCHITECTURE.md
-├── INSIGHTS.md                  # written by S
-├── DATA_QUALITY.md              # generated by the pipeline
-├── Makefile                     # make data | make test | make web | make all
-├── pipeline/
-│   ├── pyproject.toml
-│   ├── src/lila_pipeline/
-│   │   ├── config.py            # map calibration table, paths, thresholds
-│   │   ├── ingest.py            # read + decode + file dedupe
-│   │   ├── normalize.py         # clock, ordering, actor classification, flags
-│   │   ├── projection.py        # world → UV → map space (the ONLY place this happens)
-│   │   ├── aggregate.py         # match index, tracks, density grids, zone IDs
-│   │   ├── analytics.py         # EXTRA E1: action abstraction, backtraces, sequences, group comparison
-│   │   ├── images.py            # minimap → WebP
-│   │   ├── report.py            # DATA_QUALITY.md + assumptions register
-│   │   └── build.py             # CLI entry point
-│   └── tests/
-│       ├── test_contracts.py    # one test per assumption ID
-│       ├── test_projection.py   # README example + on-map test + negative control
-│       └── test_aggregate.py
-├── web/
-│   ├── public/data/             # generated JSON (committed)
-│   ├── public/data/analytics/   # EXTRA E1 output (committed)
-│   ├── public/maps/             # generated WebP (committed)
-│   └── src/ (components/, layers/, state/, lib/)
-├── docs/
-│   ├── calibration/             # overlay evidence images
-│   └── corpus/                  # documents the chatbot retrieves from
-├── ROADMAP.md                   # chunk 08
-├── api/chat.ts                  # EXTRA E2
-├── evals/                       # EXTRA E2: chat eval questions + runner
-└── data/raw/                    # gitignored: player_data.zip unpacked here
+data/raw/ (parquet + minimaps)
+   → pipeline/ (Python, run locally with `make data`):
+       ingest + validate → normalize → convert coordinates → query & aggregate
+   → web/public/data/*.json + web/public/maps/*.webp      (committed to git)
+   → web/ (React + deck.gl) loads those files and filters in the browser
+   → deployed on Vercel as a static site
+Later, optional: api/chat (one serverless function) whose tools read the same JSON files.
 ```
 
----
-
-## 5. Engineering standards
-
-- **Executable assumptions register:** every row in Section 2 becomes a test in `test_contracts.py` named after its ID (e.g. `test_A01_ts_is_epoch_seconds`). If the data changes and an assumption breaks, `make test` fails and names it.
-- **The register is generated:** `report.py` writes `DATA_QUALITY.md` with the ID, finding, evidence (computed numbers), handling and status. ARCHITECTURE.md links to it instead of repeating it.
-- **No silent failure:** never `except: continue`. Count and report any skipped file or row.
-- **Traffic heatmap** = occupancy weighted by time between samples, capped at the gap threshold, then log-scaled. Never raw row counts.
-- **Danger ratio** = deaths ÷ traffic per cell, hidden below a minimum sample size, always shown alongside counts.
-- **Every view states its sample size**, e.g. "142 matches · 318 deaths".
-- Readable code: small modules, typed functions, docstrings explaining *why*. No dead code, no commented-out blocks.
-- Keep web data small: per-match files loaded on demand; the index plus heatmap grids load upfront.
-
----
-
-## 6. Chunks (one reviewable push each)
-
-Each chunk ends with S reviewing and pushing. Suggested branch per chunk: `chunk/NN-short-name` (core) or `extra/EN-short-name` (extras).
-
-### Track 1 — CORE (graded requirements; priority 1)
-
-| # | Chunk | Done when |
-|---|---|---|
-| 01 | **Scaffold, in four separate steps (one commit each, S approves between steps):** **01a** `.gitignore` + README skeleton · **01b** Python pipeline package: `pyproject.toml` and one passing smoke test only · **01c** Vite + React + TypeScript app shell in `web/` · **01d** Makefile with `test` and `web` targets only | After each step the thing it adds runs; no files exist for later chunks |
-| 02 | **Ingest + normalise + contract tests** (A-01, A-05–A-11, A-14, A-15); canonical events table; staged pipeline (hooks) | All contract tests pass; skipped-file count reported; `events.parquet` written |
-| 03 | **Projection + calibration tests + WebP minimaps** (A-02–A-04) | README example test, on-map test and negative control pass; overlay PNGs saved to `docs/calibration/` |
-| 04 | **Aggregates + DATA_QUALITY.md**: match index, per-match tracks, density grids (traffic, kills, deaths, storm, danger, unvisited, inferred extraction) by map × date × match phase; zone IDs; versioned data contract (hooks) | Generated files committed; DATA_QUALITY.md generated |
-| 05 | **Map viewer**: deck.gl map, map/date/match filters, URL state, legend, sample sizes, hover shows world coordinates | Every map renders with the correct image; filters work; a URL reproduces the view |
-| 06 | **Journeys + markers**: human/bot styles, event shapes, path breaks at gaps | Spot-check one match against its raw rows (document it) |
-| 07 | **Playback + heatmaps + deploy**: timeline scrubber, 1×/4×/16×, event ticks, fading trails; heatmap toggles; Vercel config with `api/` reserved; empty side-panel slot (hooks) | Deployed URL works in a private window; README has the URL |
-| 08 | **Docs**: ARCHITECTURE.md (one page), README final, ROADMAP.md, `docs/corpus/`, `scripts/insight_stats.py` producing numbers S can cite | S writes INSIGHTS.md from the tool and stats report |
-
-**✅ SUBMISSION-READY CHECKPOINT** — after chunk 08 the repo is a complete submission on its own. S may submit here. Extras are added only after this point.
-
-### Track 2 — EXTRAS (not graded requirements; only after the checkpoint)
-
-| # | Extra | Done when |
-|---|---|---|
-| E1 | **Analytics layer** (Section 8.1): action abstraction, death backtraces, event context, died-vs-survived comparison, sequence frequencies — a new pipeline stage writing `public/data/analytics/` | Unit tests for thresholds, backtracing and n-gram counts pass; register A-16+ added; core tests still pass |
-| E2 | **Data chatbot** (Section 8.2): `/api/chat` with tools over E1 output + BM25 retrieval over `docs/corpus/`; chat panel in the side-panel slot; eval set + runner | Eval runner passes; the deployed map works with the API key removed |
-| E3 | **Docs update**: add extras to ARCHITECTURE.md (stay at one page), README env vars, ROADMAP.md | S approves wording |
-
-If time runs short, cut in this order: sequence frequencies (in E1) → E2 → E1. Never cut core.
-
----
-
-## 7. End-of-chunk handover (always use this format)
-
-When a chunk is done, stop and reply with:
-
-1. **What changed:** files added/modified, one line each.
-2. **How to verify (2–5 steps):** exact commands and what S should see. Include at least one thing for S to check by eye or against raw data, not just "tests pass".
-3. **Assumptions touched:** register IDs added or changed.
-4. **Open questions / risks:** anything S must decide.
-5. **Proposed commit message(s):** following COMMIT_CONVENTION.md, ready to copy. Split into several commits if the chunk mixes concerns.
-6. **Suggested `git add` paths** (S runs them himself).
-
-Then wait.
-
----
-
-## 8. Extras specification (read only when S starts E1)
-
-### 8.1 E1 — Analytics layer
-
-The research basis, as S has framed it. Cite each method this way in docs and chat answers; do **not** claim the papers validate this extraction-shooter adaptation.
-
-| Method | Source | Our adaptation | Status |
+## Decisions
+| Decision | Chosen | Alternatives considered | Why |
 |---|---|---|---|
-| Event context / action sequences | Moura et al., 2011 — player behaviour visualization | What players did in the N seconds before a death or kill | Build |
-| Backward tracing from critical events | Teng et al., 2026 — interactive process visualization | Most common zone paths leading into deaths, per map / zone | Build |
-| Player-group comparison | Teng et al., 2026 | **Journey** groups: died vs survived, map vs map, early vs late. Not player groups: median 2 journeys per player | Build |
-| Grouping low-level actions into patterns | Teng et al., 2026 | Each 5 s step → `Travel` / `Loot` / `Combat` / `Idle`, run-length merged | Build |
-| Sliding-window frequency of recurring sequences | Xu et al., 2026 — open-world mission design analysis | n-gram frequencies over action sequences, **contrasted** between died and survived | Build (first to cut) |
-| Behavioural embeddings / playstyle clusters | Wang et al., 2024 — player2vec | Not viable: 798 human journeys, 248 players, 5 meaningful event types | **Skip** → ROADMAP.md with the data needed to make it viable |
+| Backend | None for the core; static files on Vercel | FastAPI + DuckDB as serverless functions; always-on server | Data is ~8 MB and fixed, so every query is known in advance. Static has the fewest ways to fail on a reviewer's first visit. Revisit if data becomes live or much larger. |
+| Where parquet is parsed | Python pipeline, before deploy | In the browser (DuckDB-WASM) | Parsing 1,243 files on every visit would be slow; pipeline code stays in the repo and is reproducible with `make data`. |
+| Data storage | Generated JSON + WebP committed to git; no database | Postgres/Supabase, SQLite | Read-only data needs no database server. |
+| Coordinate conversion | One function in the pipeline; the site only gets map positions | Converting in the browser | One place to test; paths, markers and heatmaps can't disagree. |
+| Actor classification (EC-09) | Classify only when the README's two rules agree: `human` = UUID ID + `Position`; `bot` = numeric ID + `BotPosition`; anything else is `unknown` (17 journeys, 3 actors: numeric IDs that log `Position`/`Loot`). Unknown journeys stay in match files with a neutral style and an "Unknown" label, and are left out of human counts and human heatmaps | Bot by behaviour only (the 17 counted as human, the earlier rule); bot by ID only (README) | The data shows player-client events but not that a person played; one of the three actors is a bot in 3 other matches. Excluding them changes heatmap totals by ≤ 1.63 % and no top-10 cell. Evidence: `docs/evidence/event_forensics/` |
+| Kill/Killed pairs (EC-12) | Keep both rows of each same-file, same-second `Kill`/`Killed` pair, flagged `kill_killed_pair`, with their original labels, times and positions. The `Killed` counts as a death; the `Kill` is left out of kill counts and the kill heatmap and counted as a pair instead | Merge each pair into one `self_kill` (the earlier rule); count both as an ordinary kill and death | The rows can't tell a self-inflicted death from a trade with an unrecorded player, so no cause is claimed and nothing is deleted. Evidence: `docs/evidence/event_forensics/` |
+| Frontend | React + TypeScript + Vite + deck.gl | Streamlit, plain JS, Leaflet | deck.gl handles paths, animated playback and heatmaps on an image well. |
+| Frontend state and URL (feature 3) | One Zustand store holds the selection; the existing React Router syncs it with `?map=&date=&match=`. User changes push a history entry; invalid or incomplete URLs are corrected with a replace | Zustand + plain `history.replaceState` (drop React Router); React Router search params as the only store | One source of truth, Back/Forward work, and React Router from feature 1 stays |
+| Frontend tests (feature 3) | Vitest for pure functions (drawing space, cursor → world, filtering, sorting, URL parsing, store actions); tests read the real `index.json` | No frontend tests, browser checks only | Same runner as Vite; catches coordinate and fallback mistakes without a browser |
+| Gameplay visual encoding (UI pass) | S's design system: humans blue `#2589F5` (all humans one colour), bots amber `#E99124` dashed, S's icons for events on badges (loot gold and bot amber both kept, told apart by shape; the self-kill icon was dropped with the self-kill category, see EC-12); details in `docs/FRONTEND_GUIDELINES.md` §4, which replaces spec 04's look | Spec 04: Okabe–Ito colour per human, grey bots, triangle/X/diamond shapes | One consistent visual language across map, legend, tooltips and timeline; at most 2 humans share a match, so per-human colours add little |
+| UI components (UI pass) | shadcn/ui on Radix, copied into `web/src/components/ui/` and themed with the design tokens; `lucide-react` for interface icons; shadcn `Sonner` replaces `react-hot-toast`; rules in `docs/FRONTEND_GUIDELINES.md` | Build every control from scratch; a packaged library (MUI, Mantine); Base UI primitives | Accessible, keyboard-ready controls without writing them ourselves; the code lives in the repo, so the look follows our design system instead of a library's |
+| Fonts (UI pass) | Inter and Geist Mono bundled with `@fontsource` | Google Fonts `<link>` | No third-party request on a reviewer's first visit; versions pinned in the lockfile |
+| Gameplay icon files (UI pass) | 128 px WebP copies committed in `web/src/assets/` and imported by components; S's original PNGs kept in gitignored `data/raw/icons/`; converted once, no pipeline step; the kill icon stays an SVG | Pipeline step exporting to `web/public/icons/` (the earlier rule); commit the PNGs (7.7 MB); hand-convert to SVG | The icons are fixed art, not data, so a pipeline step adds nothing; 9 files total 62 KB; shaded raster art doesn't trace cleanly to SVG |
+| Default view (UI pass) | The app opens on the Heatmaps tab (feature 6c: the aggregate over all matches); a match opens on demand in Journeys & Playback | Bare map | Overview first: patterns before individual journeys |
+| Map camera (map pass) | Zoom out stops at the whole map; panning stops at the map edge; buttons zoom one level around the centre; wheel zoom without smoothing (speed 0.02); only `target` and `zoom` are stored | Free pan and zoom (the earlier behaviour); smooth wheel zoom | S, 2026-10-22: users got lost in the black margin, and the stored deck.gl transition fields made the +/− buttons stop working |
+| Theme (map pass) | Dark by default with a light toggle; every token defined for both themes | Light only (the earlier rule); dark only; follow the OS | S, 2026-10-22: one cohesive look around the dark minimaps, with light kept as an option |
+| Legend and journey details (map pass) | The legend and layer toggles sit in the side panel under the match card, replacing the per-actor journey list. The map's bottom-right corner shows statistics for the clicked route (until Esc, close or a click on empty map) | Legend card on the map; collapsible "Layers" chip (decided, then replaced the same day); a journey list in the side panel | S, 2026-10-22: the card covered the map, and a row per actor (up to 16) added little over clicking the route itself |
+| Marker clutter (map pass) | Priority hiding with deck.gl's `CollisionFilterExtension`: kills, deaths and storm deaths win over loot where markers overlap; zooming in reveals all | Clusters with counts (new library); hide loot below a zoom | S, 2026-10-22: no new library, and event types stay visible |
+| Playback (feature 5) | The static view's deck.gl `PathLayer`, cut at the playback time on the CPU each frame; the whole path so far stays visible; speeds 0.5×–8× (default 4×); `t=` in the URL written with a replace once the time settles | spec 05: `TripsLayer` with a 30 s fading trail, speeds 1×/4×/16×; `t=` pushed as history | S, 2026-10-22: playback felt too slow, so 8× was added. Playback reuses the static view's styling (casing, dashed bots, arrows), so the two views can't disagree, and a replace keeps Back for real navigation. See `docs/05_PLAYBACK.md`, guidelines P16–P19 |
+| Bots vs humans (map pass) | Bots stay clearly visible; humans get priority (drawn on top, wider, with casing and start/end markers) | Bots faint until focused; bots hidden by default | S, 2026-10-22: "Both Bot and Human are important. Human gets more priority" |
+| Match list (UI pass) | Grouped by start date (newest first), sorted inside each day by Duration, Kills, Deaths, Loot or Recent; the sorted metric leads each row on a tinted chip (row itself stays neutral); zero categories hidden, up to two other signals; list stays visible with the inspector (match card, legend) below; sort kept in the store, not the URL | One flat list sorted across all days; per-row full statistics; a popover list inside the match view | S, 2026-10-22: rows told the whole story at once; designers pick by one metric and read detail in the inspector |
+| Hosting | Vercel | Netlify, GitHub Pages, Render | Free, deploys from GitHub, can host the later chat function. |
+| Python dependencies | `uv.lock` is the source of truth; `pipeline/requirements.txt` is generated from it with `make requirements` | Hand-written requirements.txt; uv only | Lets people without uv install with pip, and the two can't drift if it's always regenerated. |
+| Edge-case tracking | `EDGE_CASES.md`: one row per data issue (ID, evidence, handling, status); tests are named after the ID | Notes only in the specs; a generated report | One place for reviewers and for ARCHITECTURE.md to link to; the status shows what's built. |
+| Overall statistics (dashboard, later) | Python `pipeline/src/lila_pipeline/stats.py` computes every statistic for all 28 map × date slices at build time into `web/public/data/stats.json` (with `metrics_version` and a data fingerprint); the dashboard and the chat tools only read it; nothing is summed or averaged across slices | Shared TypeScript module (browser + `api/chat`); dashboard computes in the browser, chat separately | S, 2026-10-22: one canonical implementation, testable against index, match files and heatmaps; static site, no analytics API. Spec: `docs/10_DASHBOARD.md` |
+| Dashboard route and sample flags (spec 10, O1/O2) | Path `/stats` (served by feature 7's rewrite of every path to `index.html`). No "Limited sample" level: only "Few matches" (< 10 matches with a human) is flagged, and every slice carries its sample size. Metrics with bins store the histogram inside their distribution; days-observed bins run from 1 to the number of dates in the data | `?view=stats` on the map page; a second level at < 100 or < 50 matches; separate histogram metric IDs; fixed 1–5 day bins | S, 2026-10-23: statistics always come from the full data; the sample size speaks for itself; the date list is never hardcoded (D1) |
+| Dashboard UI (later) | shadcn/ui `Card`, `Tabs`, `Select`, `ToggleGroup`, `Tooltip`, `Skeleton`, `Badge` and shadcn Chart (Recharts), themed with the existing tokens | Recharts directly; hand-drawn SVG charts | S, 2026-10-22: same kit and look as the map, no second styling system |
+| Chatbot (later) | One serverless function; LLM calls tools that compute from the JSON; retrieval over the docs | Feeding the JSON into the prompt; a vector database | Keeps the API key off the browser; code computes numbers, the LLM explains them. |
+| Player IDs | Hashed in generated files | Real UUIDs | The tool doesn't need real IDs; avoids exposing them. |
+| Match date (D1) | UTC date of the match's first recorded event, labelled as the observed start date. The date list is generated from the data, with separate `boundary` (first/last date) and `partial` (observed collection window covers < 24 h of the day) flags; the frontend never hardcodes dates | Folder date; UTC start folded into the 5 folder days | A match crossing midnight appears under one date only. Verified: match `e325a53a` really starts 2026-02-09 23:58:55 UTC (one continuous journey), so 2026-02-09 is kept with 1 match. |
+| Rows after death (D2) | Drop post-death `Position` rows from paths, playback and traffic; keep death markers. Keep other post-death events (the 2 `BotKill`s), flagged `after_death` with uncertain timing; count all exclusions | Drop all rows after death; treat late events as invalid | Playback must not show a dead player moving, but a late kill isn't assumed to be false. |
+| Duplicates (D3) | Read identical files once. A journey whose second half is an exact copy of its first half (all 8 source columns, file order) keeps its first half; the copy is discarded (3 journeys, 190 rows). No row is ever removed only because it looks identical to another | One copy per unique record (would also delete 2 legitimate same-second pickups); remove all exact duplicates | Duplicated journeys inflate counts and heatmaps, but several loot pickups or kills in one second are real. |
+| Alignment checks (D4) | Mathematical tests (`test_projection.py`) are the mandatory pass/fail check; the production mapping is kept while they pass. Diagnostic overlays (`docs/evidence/`) are evidence for S to review. No pixel-colour threshold. Final rendered alignment is checked in feature 3 | Near-black pixel threshold; overlays only | Dark roads and art on GrandRift make pixel colour unreliable; maths tests are exact and repeatable. |
+| Traffic between samples (D5) | Trace a straight line between consecutive samples (≤ 30 s apart) and spread the time across the cells it crosses | Credit the time to the sample's cell only | Players cover about one 64×64 cell per 5 s sample, so sample-only counting leaves crossed cells empty. Still an approximation of the real route. |
+| Heatmap rendering (feature 6, visual pass) | A painted picture, not cells: the 64×64 grid stays the numbers, and `heatmap/raster.ts` paints each non-zero cell as a soft bump (Gaussian, σ = 1 cell, cut off at 2.4σ) whose peak opacity and colour come from that cell's own value; overlapping bumps keep the stronger opacity and blend colours. Drawn as a deck.gl `BitmapLayer` over the minimap's own bounds from an `ImageData` (uploaded as is, not premultiplied). Hover reads the cell grid, never pixels, and outlines the hovered cell. Pictures are cached per map, layer, mode and date | `SolidPolygonLayer` per cell (the earlier choice, D1: read as a mosaic); `GridCellLayer`; blurring the whole image; deck.gl `HeatmapLayer` (re-aggregates points, which we don't have) | S, 2026-10-23: the cell mosaic hid the minimap and made hotspots hard to find. Smoothing is display-only and small, and never adds up neighbours, so no peak is invented |
+| Heatmap colour and opacity (feature 6, visual pass) | Traffic: one palette (teal → cyan → yellow), log1p on a scale fixed per map and layer. Kills and deaths: count classes (see below), replacing the earlier amber → red and indigo → magenta linear ramps. Opacity rises with intensity. Two views, Focused (default; see the feature 6c row: weak traffic hidden or faint, the top stands out) and All activity (every observed cell clearly visible); curves are in `heatmap/scale.ts`, kills and deaths each with their own floor so a single event stays identifiable | Viridis with one opacity for every cell (D2, replaced: it read as a mosaic); hiding weak cells | S, 2026-10-23. Nothing is removed in Hotspots: faint cells stay on the map and in the hover |
+| Low-evidence badge (feature 6, D3; guidelines P7) | "Few matches" when the layer's contributing matches are below 10; events stay visible beside it | Below 5 (flags 10 of 57 selections); below 20 (flags 25); a rule on event counts | S, 2026-10-22: below 10 covers 17 of 57 selections (16 get the badge; one has no events and shows the empty state), all of them thin days, and no all-dates view |
+| Heatmap switch and fit (feature 6, visual pass) | (The master On/Off switch and the heatmap under an open match were replaced by the tabs and switches in the next rows.) The default map view fits the part of each minimap that has content (measured from the image at load, threshold 40 of 255), so GrandRift's island fills the view; zoom-out still stops at the whole map | Heatmap in the overview only (the earlier rule; S, 2026-10-23: "the toggle disappears once I click any match"); fitting the whole image (the earlier rule) | S, 2026-10-23: GrandRift's island filled about 60 % of its image |
+| Interpretation layer (feature 6b) | A separate layer of 16×16 regions (4×4 heatmap cells). Candidates = top decile of occupied regions per selection; stability = share of 300 seeded match-resamples in which a region stays a candidate; checks: stability >= 0.8, >= 5 matches, >= 3 recorded players, no match over 50%; a region must also survive grids shifted by half a region in three directions (its geographic counterpart must pass the same checks). Result: *consistent concentration* or *observed concentration* (measurements kept). Region statistics are computed in the pipeline into `zones/<map>.json`; the browser only reads them. The 64×64 grids stay the numerical source and the picture | Rank the strongest 64×64 cells; fixed "top 3" hotspots; compute in the browser; skip the grid-shift check | S, 2026-10-23, after `docs/evidence/spatial_analysis/REPORT.md`: 64×64 cells are mostly single events and not stable (AmbroseValley kills: split-half overlap 0.0 at 64×64, 0.8 at 16×16); the shift check removes regions that exist only because of where grid lines fall. Thresholds are provisional; stability is internal to this sample, not population significance |
+| Count classes for kills and deaths (feature 6b) | The 64×64 kill and death cells are coloured by absolute count: 1 / 2–3 / 4–9 / 10+, identical on every date and map, stepping in lightness and opacity as well as hue; never applied to the 16×16 regions. Focused / All activity apply to traffic only | Continuous ramp scaled to each map's maximum (the earlier rule); the same hues cut into bands (collapse under colour-vision deficiency) | S, 2026-10-23: the continuous look was 0.7–8 dE between neighbouring counts (0 dE for GrandRift deaths); lightness-ordered classes stay >= 18.9 dE (kills) and >= 7.0 dE (deaths) under colour-vision deficiency (`count_bands.json`) |
+| Tabs and independent switches (feature 6c) | Two top-level tabs on one shared map: Journeys & Playback (match, paths, markers, timeline) and Heatmaps (aggregate, one metric at a time, no match or playback). Heatmaps has two independent switches, "Show density overlay" and "Show hotspot outlines". Map and date are shared; match, hidden layers and playback time are kept while away; playback pauses when Journeys is left and returns paused. `?tab=journeys|heatmaps` plus only that tab's parameters (`match hide t` / `layer density=off outlines=off intensity=all`); old links keep working (`match` → Journeys, else Heatmaps; `heatmap=off` → `density=off`) | The master On/Off switch and the heatmap under an open match (the earlier rule); two pages; outlines and density as one exclusive mode | S, 2026-10-23: heatmaps are an aggregate across matches and don't belong in a match view; each layer must be switchable alone. Spec 06, Stage 6c |
+| Hotspot outlines (feature 6c) | A double-stroke circle through the corners of each validated 16×16 region's footprint, in map coordinates; only consistent regions, numbered 1–3 first; clicking an outline or a list row zooms in (the region fills about a third of the view; never zooms out; instant) and opens a details card on the map; an honest "No consistent concentration detected" when none qualifies. Described as an approximate mark, not a boundary | A filled or blurred area; a rectangle; ranking the smoothed picture | S, 2026-10-23: readable on every minimap and honest about the 16×16 resolution; tests check the circle contains the footprint and stays inside the map |
+| Traffic contrast, Focused view (feature 6c) | Per 64×64 cell in estimated player-seconds, absolute: under 30 s not drawn; 30 s to under 60 s a faint trace (opacity 0.03–0.06); 60 s and over opacity 0.10 + 0.85·x^1.5, x = ln(v/60)/ln(max/60), max = the map's largest cell over all dates. Kills and Deaths keep count classes. Values are never altered | A per-map percentile threshold; the earlier "Hotspots" curve | S, 2026-10-23. Open: absolute thresholds hide 84 % of GrandRift's cells (31 % of AmbroseValley's), so a single GrandRift day is nearly empty; "All activity" shows everything |
+| Storm deaths (feature 6b) | Stay in the Deaths layer; their count is shown separately in summaries and region details. No fourth heatmap | Separate them from combat deaths; a Storm layer | S, 2026-10-23: 17–18% of deaths on GrandRift and Lockdown are storm deaths, which answer a different question from where fights are lost, so the number is visible without splitting the layer |
+| Docs and evidence in git (feature 6b) | `docs/` and `pipeline/tests/` are tracked (removed from `.gitignore`); evidence is sanitised (counts, hashed or case IDs only); `make check-ids` scans everything trackable for real player IDs and key-like secrets | Keep `docs` ignored | S, 2026-10-23. `GLOBAL_CONTEXT.md` (already committed) still contains the data README's example user ID; the check reports it and does not fail on it |
+| Selected-match heatmap (feature 6, D4) | Not built. Heatmaps are map + date aggregates only | Kills/deaths-only "This match" mode; full mode with a TypeScript port of the D5 tracing | S, 2026-10-22: traffic would duplicate the D5 logic, a typical match has about 2 kills and deaths, and the journey view already shows each exactly |
 
-Rules:
-- Action thresholds (movement distance for `Travel`, look-back window, combat window) live in `config.py` and become register entries **A-16+**, each with the evidence used to pick it.
-- Every analytics output includes its sample size. Results based on fewer than a configured minimum (e.g. 30 events) carry `low_sample: true`.
-- Inferred concepts (extraction, actions) keep the word "inferred" in every output label.
+## Edge cases
+`EDGE_CASES.md` is the register of every data issue. When you find a new one, add a row (with evidence from code). When you handle one, add its test (`test_ecNN_…`) and set the status to **Handled** in the same commit. Rows marked **Decide** wait for S.
 
-### 8.2 E2 — Data chatbot
+## Data facts (from the audit — the README is wrong on some of these; full detail and evidence in `docs/02_DATA_PIPELINE.md`)
+- **Timestamps:** `ts` is Unix **seconds** stored in a millisecond column. Match time = `ts − earliest ts in that match`. Matches last up to ~15 min.
+- **Minimap sizes:** not 1024 px. AmbroseValley 4320², GrandRift 2160×2158, Lockdown 9000². Convert to 0–1 first, then multiply by the real width/height. Export WebP at `min(original, 4096)` px for the web.
+- **Coordinates:** README formula is correct — `u=(x−origin_x)/scale`, `v=(z−origin_z)/scale`, `px=u·W`, `py=(1−v)·H`. Ignore `y` (height).
+- **Event column** is bytes → decode to text.
+- **Actors:** human = UUID + `Position`, bot = numeric ID + `BotPosition`. 17 files (3 actors) have numeric IDs but log `Position`/`Loot` → `unknown`: shown in matches, left out of human counts and heatmaps. Journeys: 781 human, 444 bot, 17 unknown.
+- **Kill locations:** an event's x/z is where the *file's owner* was standing. Kill marker = where the killer stood; death marker = where the victim fell.
+- **`Kill`/`Killed`:** only 3 of each, always as a same-file, same-second pair; cause unknown (self-inflicted or a trade with an unrecorded player). Keep both events, flagged `kill_killed_pair`; never call them self-kills, and don't claim the data has or lacks PvP.
+- **Most matches have one recorded player** (743 of 796). Match picker shows player count, busiest first.
+- **Positions every ~5 s,** gaps up to 8 min → break paths when the gap is over 30 s.
+- **One file appears in two date folders** → load it once. Files from one match can sit in different folders → group by `match_id`.
+- **Three journeys were logged twice in full** (the second half of each file repeats the first) → keep the first half (D3). Never drop a row just because it looks identical to another.
+- **Rows after death:** 174 human journeys log a row 1–6 s after dying → drop those positions from paths; keep and flag the 2 late `BotKill`s (D2).
+- **Storm deaths** (39) all happen 11–15 min into a match.
+- **No extraction event.** Journeys ending without a death probably extracted; label any such layer "inferred".
 
-- **Role:** answers designers' questions from the data. It does **not** control the map. It may include a link to the matching map view (the URL state) as evidence.
-- **Structured tools** (TypeScript, reading E1 + core JSON): `death_backtrace(map, zone?, window_s)`, `event_context(event, map, zone?)`, `compare_groups(map, metric)`, `frequent_sequences(map, group, n)`, `match_summary(match_id)`, `map_overview(map, date?)`.
-- **Retrieval:** BM25 over chunked `docs/corpus/` (README, DATA_QUALITY, metric and method definitions with citations), index built at build time. No vector database. ARCHITECTURE.md states honestly that the corpus is small today and the layer exists for growth (design docs, patch notes).
-- **Answer rules (system prompt):** every number comes from a tool result; every answer states sample size and which method produced it; inferred things are labelled; questions the data can't answer (PvP, playstyles, extraction certainty) get a clear "can't tell from this data" with the reason from the register.
-- **Safety and cost:** API key only in Vercel env vars; per-IP rate limit; max tokens per answer; graceful message if the key or quota is missing.
-- **Evals:** `evals/questions.yaml` with 15–20 cases (expected tool calls and key numbers), including a small-sample case (GrandRift deaths ≈ 30) and must-refuse cases. `npm run evals` scores them.
+## Features (in order)
+**Each feature has a spec in `docs/`. Read it fully before starting the feature, and follow its commit plan.**
+**`docs/FRONTEND_GUIDELINES.md` is the master for the frontend.** Read it before any change under `web/`. Specs say what to build; the guidelines say how it looks and behaves, and win if they differ (then update the spec).
+
+| # | Feature | Spec |
+|---|---|---|
+| 1 | Project setup | `docs/01_PROJECT_SETUP.md` |
+| 2 | Data pipeline (defines the data format all later features use) | `docs/02_DATA_PIPELINE.md` |
+| 3 | Map and filters | `docs/03_MAP_AND_FILTERS.md` |
+| 4 | Journeys and markers | `docs/04_JOURNEYS_AND_MARKERS.md` |
+| 5 | Playback | `docs/05_PLAYBACK.md` |
+| 6 | Heatmaps | `docs/06_HEATMAPS.md` |
+| 7 | Deploy | `docs/07_DEPLOY.md` |
+| 8 | Docs and submission | `docs/08_DOCS_AND_SUBMISSION.md` |
+
+After feature 8 the submission is complete. **Later, optional, in this order:** overall statistics dashboard, `docs/10_DASHBOARD.md`; then chatbot, `docs/09_CHATBOT.md` (it reads the dashboard's `stats.json`).
+If a spec is wrong or unclear once you're in the code, stop and tell S rather than working around it; update the spec once S agrees.
+
+## After each commit-sized step, reply with
+1. What changed (one line per file)
+2. How S can check it (1–3 steps)
+3. The commit message in the full format from COMMIT_CONVENTION.md (subject from the spec, plus What / Why / How it was checked / Notes)
+
+Then stop. At the end of a feature, also run the spec's "How to verify" list and report the results.

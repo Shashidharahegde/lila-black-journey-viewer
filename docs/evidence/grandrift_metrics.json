@@ -1,0 +1,581 @@
+{
+  "ingest": "1243 files found, 1242 read, 1 duplicates skipped, 0 failed",
+  "image": {
+    "file": "GrandRift_Minimap.png",
+    "width": 2160,
+    "height": 2158,
+    "source_mode": "RGBA",
+    "alpha_min": 255,
+    "share_pixels_not_fully_opaque": 0.0,
+    "meaningful_transparency": false
+  },
+  "calibration": {
+    "scale": 581,
+    "origin_x": -290,
+    "origin_z": -290
+  },
+  "selection_rule": "human journeys (Position rows) on GrandRift with >= 30 positions; score = path length / max + total turning / max (lines only across gaps <= 30 s); highest score first, ties by file name; at most one journey per player and per match",
+  "candidates": 47,
+  "all_grandrift_human_journeys": 59,
+  "selected": [
+    {
+      "number": 1,
+      "start_end_px": {
+        "production": {
+          "start": [
+            681,
+            837
+          ],
+          "end": [
+            1188,
+            667
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            681,
+            1321
+          ],
+          "end": [
+            1188,
+            1491
+          ]
+        }
+      },
+      "player": "c3c2dee5",
+      "match": "5955ad0c",
+      "positions": 125,
+      "segments": 1,
+      "path_length_world_units": 1709.1,
+      "turning_deg": 7996,
+      "duration_s": 729,
+      "max_gap_s": 25,
+      "colour_rgb": [
+        255,
+        59,
+        48
+      ]
+    },
+    {
+      "number": 2,
+      "start_end_px": {
+        "production": {
+          "start": [
+            1700,
+            518
+          ],
+          "end": [
+            1754,
+            505
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            1700,
+            1640
+          ],
+          "end": [
+            1754,
+            1653
+          ]
+        }
+      },
+      "player": "13a425dd",
+      "match": "4930d515",
+      "positions": 126,
+      "segments": 1,
+      "path_length_world_units": 2038.0,
+      "turning_deg": 5472,
+      "duration_s": 719,
+      "max_gap_s": 26,
+      "colour_rgb": [
+        52,
+        199,
+        89
+      ]
+    },
+    {
+      "number": 3,
+      "start_end_px": {
+        "production": {
+          "start": [
+            670,
+            832
+          ],
+          "end": [
+            1103,
+            1245
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            670,
+            1326
+          ],
+          "end": [
+            1103,
+            913
+          ]
+        }
+      },
+      "player": "4452e1fd",
+      "match": "a0599e40",
+      "positions": 110,
+      "segments": 2,
+      "path_length_world_units": 1600.6,
+      "turning_deg": 6801,
+      "duration_s": 684,
+      "max_gap_s": 35,
+      "colour_rgb": [
+        0,
+        170,
+        255
+      ]
+    },
+    {
+      "number": 4,
+      "start_end_px": {
+        "production": {
+          "start": [
+            681,
+            838
+          ],
+          "end": [
+            581,
+            1502
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            681,
+            1320
+          ],
+          "end": [
+            581,
+            656
+          ]
+        }
+      },
+      "player": "93b855f8",
+      "match": "1d360601",
+      "positions": 109,
+      "segments": 1,
+      "path_length_world_units": 1544.3,
+      "turning_deg": 6592,
+      "duration_s": 664,
+      "max_gap_s": 30,
+      "colour_rgb": [
+        255,
+        204,
+        0
+      ]
+    },
+    {
+      "number": 5,
+      "start_end_px": {
+        "production": {
+          "start": [
+            248,
+            923
+          ],
+          "end": [
+            653,
+            749
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            248,
+            1235
+          ],
+          "end": [
+            653,
+            1409
+          ]
+        }
+      },
+      "player": "9b2783cf",
+      "match": "c3a6fc96",
+      "positions": 112,
+      "segments": 1,
+      "path_length_world_units": 1249.0,
+      "turning_deg": 7606,
+      "duration_s": 714,
+      "max_gap_s": 25,
+      "colour_rgb": [
+        255,
+        45,
+        200
+      ]
+    },
+    {
+      "number": 6,
+      "start_end_px": {
+        "production": {
+          "start": [
+            1682,
+            513
+          ],
+          "end": [
+            1953,
+            1161
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            1682,
+            1645
+          ],
+          "end": [
+            1953,
+            997
+          ]
+        }
+      },
+      "player": "a2d8b9fd",
+      "match": "b084348a",
+      "positions": 106,
+      "segments": 2,
+      "path_length_world_units": 1249.6,
+      "turning_deg": 6635,
+      "duration_s": 729,
+      "max_gap_s": 40,
+      "colour_rgb": [
+        0,
+        230,
+        210
+      ]
+    },
+    {
+      "number": 7,
+      "start_end_px": {
+        "production": {
+          "start": [
+            1681,
+            513
+          ],
+          "end": [
+            1753,
+            490
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            1681,
+            1645
+          ],
+          "end": [
+            1753,
+            1668
+          ]
+        }
+      },
+      "player": "5a8a3683",
+      "match": "9b049757",
+      "positions": 94,
+      "segments": 3,
+      "path_length_world_units": 1163.2,
+      "turning_deg": 6544,
+      "duration_s": 613,
+      "max_gap_s": 35,
+      "colour_rgb": [
+        255,
+        140,
+        0
+      ]
+    },
+    {
+      "number": 8,
+      "start_end_px": {
+        "production": {
+          "start": [
+            2009,
+            1234
+          ],
+          "end": [
+            572,
+            1502
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            2009,
+            924
+          ],
+          "end": [
+            572,
+            656
+          ]
+        }
+      },
+      "player": "08289848",
+      "match": "46a1ace9",
+      "positions": 90,
+      "segments": 2,
+      "path_length_world_units": 1491.0,
+      "turning_deg": 4746,
+      "duration_s": 613,
+      "max_gap_s": 126,
+      "colour_rgb": [
+        170,
+        120,
+        255
+      ]
+    },
+    {
+      "number": 9,
+      "start_end_px": {
+        "production": {
+          "start": [
+            244,
+            944
+          ],
+          "end": [
+            594,
+            1532
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            244,
+            1214
+          ],
+          "end": [
+            594,
+            626
+          ]
+        }
+      },
+      "player": "cbb0558d",
+      "match": "61a3159e",
+      "positions": 90,
+      "segments": 1,
+      "path_length_world_units": 1393.7,
+      "turning_deg": 4957,
+      "duration_s": 533,
+      "max_gap_s": 25,
+      "colour_rgb": [
+        190,
+        255,
+        60
+      ]
+    },
+    {
+      "number": 10,
+      "start_end_px": {
+        "production": {
+          "start": [
+            1712,
+            464
+          ],
+          "end": [
+            972,
+            1336
+          ]
+        },
+        "no_flip_control": {
+          "start": [
+            1712,
+            1694
+          ],
+          "end": [
+            972,
+            822
+          ]
+        }
+      },
+      "player": "248ee9af",
+      "match": "faa11b06",
+      "positions": 84,
+      "segments": 1,
+      "path_length_world_units": 1002.7,
+      "turning_deg": 5785,
+      "duration_s": 518,
+      "max_gap_s": 25,
+      "colour_rgb": [
+        255,
+        255,
+        255
+      ]
+    }
+  ],
+  "inspected": {
+    "journeys": 10,
+    "positions": 1046
+  },
+  "bounds": {
+    "selected": {
+      "positions": 1046,
+      "outside_0_1": 0,
+      "outside_pct": 0.0,
+      "u_range": [
+        0.1132,
+        0.934
+      ],
+      "v_range": [
+        0.2036,
+        0.79
+      ],
+      "x_range": [
+        -224.26,
+        252.65
+      ],
+      "z_range": [
+        -171.74,
+        168.97
+      ]
+    },
+    "all_grandrift_positions": {
+      "positions": 3740,
+      "outside_0_1": 0,
+      "outside_pct": 0.0,
+      "u_range": [
+        0.1103,
+        0.934
+      ],
+      "v_range": [
+        0.1652,
+        0.7919
+      ],
+      "x_range": [
+        -225.9,
+        252.65
+      ],
+      "z_range": [
+        -194.0,
+        170.09
+      ]
+    }
+  },
+  "pixels_under_positions": {
+    "selected": {
+      "production": {
+        "over_transparent_pct": 0.0,
+        "over_near_black_pct_descriptive": 4.207
+      },
+      "no_flip_control": {
+        "over_transparent_pct": 0.0,
+        "over_near_black_pct_descriptive": 11.472
+      }
+    },
+    "all_grandrift_positions": {
+      "production": {
+        "over_transparent_pct": 0.0,
+        "over_near_black_pct_descriptive": 4.011
+      },
+      "no_flip_control": {
+        "over_transparent_pct": 0.0,
+        "over_near_black_pct_descriptive": 12.086
+      }
+    }
+  },
+  "crops": {
+    "area_A_burnt_zone": {
+      "left": 1440,
+      "top": 300,
+      "right": 1980,
+      "bottom": 840
+    },
+    "area_B_south_east": {
+      "left": 1440,
+      "top": 1380,
+      "right": 1980,
+      "bottom": 1920
+    },
+    "area_C_engineers_quarters": {
+      "left": 1620,
+      "top": 800,
+      "right": 2160,
+      "bottom": 1340
+    }
+  },
+  "math_checks": [
+    {
+      "check": "README example (AmbroseValley, 1024 px)",
+      "actual": [
+        77.995,
+        890.368
+      ],
+      "expected": [
+        78,
+        890
+      ],
+      "pass": true
+    },
+    {
+      "check": "south-west world corner -> bottom-left",
+      "actual": [
+        0.0,
+        2158.0
+      ],
+      "expected": [
+        0,
+        2158
+      ],
+      "pass": true
+    },
+    {
+      "check": "south-east world corner -> bottom-right",
+      "actual": [
+        2160.0,
+        2158.0
+      ],
+      "expected": [
+        2160,
+        2158
+      ],
+      "pass": true
+    },
+    {
+      "check": "north-west world corner -> top-left",
+      "actual": [
+        0.0,
+        0.0
+      ],
+      "expected": [
+        0,
+        0
+      ],
+      "pass": true
+    },
+    {
+      "check": "north-east world corner -> top-right",
+      "actual": [
+        2160.0,
+        0.0
+      ],
+      "expected": [
+        2160,
+        0
+      ],
+      "pass": true
+    },
+    {
+      "check": "world centre -> image centre (non-square: 1080, 1079)",
+      "actual": [
+        1080.0,
+        1079.0
+      ],
+      "expected": [
+        1080.0,
+        1079.0
+      ],
+      "pass": true
+    },
+    {
+      "check": "orientation: +x moves right, +z moves up",
+      "actual": [
+        [
+          1117.177,
+          1079.0
+        ],
+        [
+          1080.0,
+          1041.857
+        ]
+      ],
+      "expected": "x grows, row shrinks",
+      "pass": true
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-.PHONY: setup requirements data test web
+.PHONY: setup requirements data test web check-ids
 
 setup:
 	cd pipeline && uv sync
@@ -15,3 +15,6 @@ test:
 
 web:
 	cd web && npm run dev
+
+check-ids:
+	cd pipeline && uv run python tools/check_ids.py

@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "files": {
+    "found": 1243,
+    "read": 1242,
+    "duplicates_skipped": [
+      {
+        "skipped": "February_11/d8b813c3_ac049b28",
+        "identical_to": "February_10/d8b813c3_ac049b28"
+      }
+    ],
+    "failed": []
+  },
+  "rows": {
+    "read": 89016,
+    "after_removing_doubled_journeys": 88826,
+    "final": 88653
+  },
+  "doubled_journeys": [
+    {
+      "journey": "51b60c09_0954f788",
+      "rows": 8,
+      "removed": 4,
+      "removed_by_event": {
+        "BotKilled": 1,
+        "Position": 3
+      }
+    },
+    {
+      "journey": "13a425dd_d3a3297e",
+      "rows": 294,
+      "removed": 147,
+      "removed_by_event": {
+        "BotKill": 3,
+        "Loot": 34,
+        "Position": 110
+      }
+    },
+    {
+      "journey": "da9a800a_fc797a67",
+      "rows": 78,
+      "removed": 39,
+      "removed_by_event": {
+        "BotKill": 1,
+        "BotKilled": 1,
+        "Loot": 3,
+        "Position": 34
+      }
+    }
+  ],
+  "kill_killed_pairs": 3,
+  "after_death": {
+    "positions_dropped": 173,
+    "journeys_with_dropped_positions": 172,
+    "after_death_events": {
+      "BotKill": 2
+    }
+  },
+  "journeys": {
+    "human": 781,
+    "bot": 444,
+    "unknown": 17,
+    "id_mismatch": 17,
+    "matches_by_human_count": {
+      "0": 16,
+      "1": 779,
+      "2": 1
+    }
+  },
+  "events_by_category": {
+    "death": 700,
+    "kill": 2409,
+    "loot": 12829,
+    "position": 72676,
+    "storm_death": 39
+  },
+  "path_gaps_over_limit": {
+    "limit_s": 30,
+    "gaps": 311
+  },
+  "matches": 796,
+  "dates": [
+    {
+      "date": "2026-02-09",
+      "matches": 1,
+      "boundary": true,
+      "partial": true
+    },
+    {
+      "date": "2026-02-10",
+      "matches": 287,
+      "boundary": false,
+      "partial": false
+    },
+    {
+      "date": "2026-02-11",
+      "matches": 197,
+      "boundary": false,
+      "partial": false
+    },
+    {
+      "date": "2026-02-12",
+      "matches": 162,
+      "boundary": false,
+      "partial": false
+    },
+    {
+      "date": "2026-02-13",
+      "matches": 112,
+      "boundary": false,
+      "partial": false
+    },
+    {
+      "date": "2026-02-14",
+      "matches": 37,
+      "boundary": true,
+      "partial": true
+    }
+  ],
+  "stats": {
+    "bytes": 75932,
+    "slices": 28
+  }
+}
