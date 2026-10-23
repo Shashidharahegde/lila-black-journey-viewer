@@ -117,8 +117,10 @@ def write_outputs(prepared: Prepared, data_dir: Path, web_dir: Path, report_path
         _write_json(staged / f"{document['id']}.json", document)
     _check_staged_matches(staged, index)
     _swap_in(staged, matches_dir)  # old match files are deleted only after the new set is complete
+    heatmaps = {map_id: export.build_heatmap(map_id, events) for map_id in MAPS}
     for map_id in MAPS:
-        _write_json(data_dir_out / "heatmaps" / f"{map_id}.json", export.build_heatmap(map_id, events))
+        _write_json(data_dir_out / "heatmaps" / f"{map_id}.json", heatmaps[map_id])
+        _write_json(data_dir_out / "zones" / f"{map_id}.json", export.build_zones(map_id, events))
     _write_json(data_dir_out / "index.json", index)
 
     report = build_report(prepared, index)

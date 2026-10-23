@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
 
+from lila_pipeline import zones
 from lila_pipeline.heatmaps import GRID, count_grid, sparse_cells, traffic_grid
 from lila_pipeline.journeys import DEATH_CATEGORIES, counted_kills, path_segments
 from lila_pipeline.projection import MAPS
@@ -205,3 +207,122 @@ def build_heatmap(map_id: str, events: pd.DataFrame) -> dict:
         "totals": totals,
         "samples": samples,
     }
+
+
+@dataclass
+class ZoneInputs:
+    """One map's human journeys as per-journey grids, with the labels the region statistics need."""
+
+    tensors: dict[str, np.ndarray]  # layer -> (journeys, 64, 64)
+    storm: np.ndarray  # storm deaths per journey and cell
+    match_of: np.ndarray
+    player_of: np.ndarray
+    date_of: np.ndarray
+
+
+def zone_inputs(map_id: str, events: pd.DataFrame) -> ZoneInputs:
+    humans = events[(events["map_id"] == map_id) & (events["actor_kind"] == "human")]
+    dates = match_dates(events)
+    files = sorted(humans["file"].unique())
+    index = {f: k for k, f in enumerate(files)}
+    first = humans.groupby("file").first()
+    match_of = first.loc[files, "match_id"].to_numpy()
+
+    def by_journey(rows: pd.DataFrame) -> np.ndarray:
+        out = np.zeros((len(files), GRID, GRID))
+        i = np.clip(np.floor(rows["u"].to_numpy(dtype=float) * GRID).astype(int), 0, GRID - 1)
+        j = np.clip(np.floor(rows["v"].to_numpy(dtype=float) * GRID).astype(int), 0, GRID - 1)
+        np.add.at(out, (rows["file"].map(index).to_numpy(), i, j), 1)
+        return out
+
+    traffic = np.zeros((len(files), GRID, GRID))
+    for file, journey in humans[humans["category"] == "position"].groupby("file", sort=False):
+        traffic[index[file]] = traffic_grid(journey)
+    return ZoneInputs(
+        tensors={
+            "kills": by_journey(humans[counted_kills(humans)]),
+            "deaths": by_journey(humans[humans["category"].isin(DEATH_CATEGORIES)]),
+            "traffic": traffic,
+        },
+        storm=by_journey(humans[humans["category"] == "storm_death"]),
+        match_of=match_of,
+        player_of=first.loc[files, "user_id"].to_numpy(),
+        date_of=np.array([dates[m] for m in match_of]),
+    )
+
+
+def selection_keys(inputs: ZoneInputs) -> list[str]:
+    return ["all", *sorted(set(inputs.date_of))]
+
+
+def selected_journeys(inputs: ZoneInputs, key: str) -> np.ndarray:
+    return np.arange(len(inputs.match_of)) if key == "all" else np.flatnonzero(inputs.date_of == key)
+
+
+def build_zones(map_id: str, events: pd.DataFrame, rules: zones.Rules = zones.RULES) -> dict:
+    """Region statistics for the interpretation layer: 16 x 16 regions of 4 x 4 cells, per selection (all dates and each date).
+
+    Definitions, rules and the shifted-grid check are in `lila_pipeline.zones`. Only counts are written: no player or
+    match IDs. The same human events as the heatmap, so region values add up to the heatmap's totals.
+    """
+    inputs = zone_inputs(map_id, events)
+    selections: dict[str, dict] = {}
+    for key in selection_keys(inputs):
+        chosen = selected_journeys(inputs, key)
+        layers = {}
+        for layer in zones.LAYERS:
+            evidence = zones.collect(
+                inputs.tensors[layer][chosen],
+                inputs.match_of[chosen],
+                inputs.player_of[chosen],
+                key=f"{map_id}|{layer}|{key}",
+                rules=rules,
+                count_journeys=layer == "traffic",
+                storm=inputs.storm[chosen].sum(axis=0) if layer == "deaths" else None,
+            )
+            layers[layer] = _rounded_zones(zones.classify(evidence, rules), layer)
+        selections[key] = {
+            "matches": int(len(set(inputs.match_of[chosen]))),
+            "players": int(len(set(inputs.player_of[chosen]))),
+            "layers": layers,
+        }
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "map": map_id,
+        "grid": GRID,
+        "zone_cells": zones.ZONE_CELLS,
+        "zones_per_side": zones.ZONES,
+        "rules": zones.rules_as_dict(rules),
+        "selections": selections,
+    }
+
+
+def _rounded_zones(result: dict, layer: str) -> dict:
+    """Compact numbers for the file: whole numbers for counts, one decimal for seconds."""
+    decimals = 1 if layer == "traffic" else 0
+
+    def value(x: float) -> float | int:
+        return round(x, 1) if decimals else int(round(x))
+
+    zone_list = []
+    for z in result["zones"]:
+        row = {
+            "i": z["i"], "j": z["j"], "value": value(z["value"]), "share": round(z["share"], 4), "matches": z["matches"], "players": z["players"],
+            "largest_match_share": round(z["largest_match_share"], 3), "stability": round(z["stability"], 2),
+            "survived_shifts": z["survived_shifts"], "tier": z["tier"],
+        }
+        if "journeys" in z:
+            row["journeys"] = z["journeys"]
+        if "storm_deaths" in z:
+            row["storm_deaths"] = int(round(z["storm_deaths"]))
+        zone_list.append(row)
+    out = {
+        "total": value(result["total"]),
+        "occupied_zones": result["occupied_zones"],
+        "candidates": result["candidates"],
+        "consistent": result["consistent"],
+        "zones": zone_list,
+    }
+    if "storm_deaths" in result:
+        out["storm_deaths"] = int(round(result["storm_deaths"]))
+    return out

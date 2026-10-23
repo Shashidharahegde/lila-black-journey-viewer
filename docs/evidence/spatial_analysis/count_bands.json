@@ -1,0 +1,3801 @@
+{
+ "edges": [
+  2,
+  4,
+  10
+ ],
+ "labels": [
+  "1",
+  "2-3",
+  "4-9",
+  "10+"
+ ],
+ "distributions": {
+  "AmbroseValley": {
+   "kills": {
+    "all": {
+     "cells": [
+      178,
+      137,
+      109,
+      36
+     ],
+     "events": [
+      178,
+      330,
+      622,
+      526
+     ]
+    },
+    "2026-02-09": {
+     "cells": [
+      3,
+      1,
+      0,
+      0
+     ],
+     "events": [
+      3,
+      2,
+      0,
+      0
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      142,
+      92,
+      48,
+      6
+     ],
+     "events": [
+      142,
+      215,
+      253,
+      67
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      123,
+      59,
+      24,
+      1
+     ],
+     "events": [
+      123,
+      136,
+      131,
+      13
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      110,
+      47,
+      11,
+      0
+     ],
+     "events": [
+      110,
+      104,
+      53,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      85,
+      49,
+      5,
+      0
+     ],
+     "events": [
+      85,
+      110,
+      25,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      46,
+      9,
+      3,
+      0
+     ],
+     "events": [
+      46,
+      25,
+      13,
+      0
+     ]
+    }
+   },
+   "deaths": {
+    "all": {
+     "cells": [
+      149,
+      45,
+      13,
+      1
+     ],
+     "events": [
+      149,
+      100,
+      56,
+      10
+     ]
+    },
+    "2026-02-09": {
+     "cells": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      78,
+      13,
+      0,
+      0
+     ],
+     "events": [
+      78,
+      27,
+      0,
+      0
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      62,
+      6,
+      0,
+      0
+     ],
+     "events": [
+      62,
+      13,
+      0,
+      0
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      66,
+      6,
+      0,
+      0
+     ],
+     "events": [
+      66,
+      13,
+      0,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      32,
+      6,
+      0,
+      0
+     ],
+     "events": [
+      32,
+      12,
+      0,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      12,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      12,
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "GrandRift": {
+   "kills": {
+    "all": {
+     "cells": [
+      65,
+      33,
+      9,
+      0
+     ],
+     "events": [
+      65,
+      71,
+      43,
+      0
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      34,
+      10,
+      2,
+      0
+     ],
+     "events": [
+      34,
+      23,
+      10,
+      0
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      41,
+      11,
+      2,
+      0
+     ],
+     "events": [
+      41,
+      24,
+      10,
+      0
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      12,
+      3,
+      0,
+      0
+     ],
+     "events": [
+      12,
+      8,
+      0,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      5,
+      1,
+      0,
+      0
+     ],
+     "events": [
+      5,
+      2,
+      0,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      7,
+      1,
+      0,
+      0
+     ],
+     "events": [
+      7,
+      3,
+      0,
+      0
+     ]
+    }
+   },
+   "deaths": {
+    "all": {
+     "cells": [
+      26,
+      2,
+      0,
+      0
+     ],
+     "events": [
+      26,
+      4,
+      0,
+      0
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      13,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      13,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      5,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      5,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      4,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      4,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      4,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      4,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      4,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      4,
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "Lockdown": {
+   "kills": {
+    "all": {
+     "cells": [
+      129,
+      66,
+      18,
+      1
+     ],
+     "events": [
+      129,
+      159,
+      88,
+      12
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      83,
+      33,
+      7,
+      0
+     ],
+     "events": [
+      83,
+      74,
+      36,
+      0
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      59,
+      26,
+      3,
+      0
+     ],
+     "events": [
+      59,
+      59,
+      14,
+      0
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      28,
+      3,
+      0,
+      0
+     ],
+     "events": [
+      28,
+      6,
+      0,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      18,
+      1,
+      0,
+      0
+     ],
+     "events": [
+      18,
+      2,
+      0,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      9,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      9,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "deaths": {
+    "all": {
+     "cells": [
+      63,
+      12,
+      2,
+      0
+     ],
+     "events": [
+      63,
+      25,
+      9,
+      0
+     ]
+    },
+    "2026-02-10": {
+     "cells": [
+      29,
+      4,
+      0,
+      0
+     ],
+     "events": [
+      29,
+      8,
+      0,
+      0
+     ]
+    },
+    "2026-02-11": {
+     "cells": [
+      20,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      20,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-12": {
+     "cells": [
+      15,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      15,
+      0,
+      0,
+      0
+     ]
+    },
+    "2026-02-13": {
+     "cells": [
+      16,
+      3,
+      0,
+      0
+     ],
+     "events": [
+      16,
+      6,
+      0,
+      0
+     ]
+    },
+    "2026-02-14": {
+     "cells": [
+      3,
+      0,
+      0,
+      0
+     ],
+     "events": [
+      3,
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "perceptual": {
+  "AmbroseValley": {
+   "kills": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        5.2,
+        7.4,
+        17.8
+       ],
+       "min_adjacent_dE": 5.2
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        4.9,
+        6.5,
+        10.9
+       ],
+       "min_adjacent_dE": 4.9
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        4.7,
+        5.7,
+        7.3
+       ],
+       "min_adjacent_dE": 4.7
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        5.3,
+        7.6,
+        18.0
+       ],
+       "min_adjacent_dE": 5.3
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        5.1,
+        6.6,
+        11.1
+       ],
+       "min_adjacent_dE": 5.1
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        4.7,
+        5.8,
+        7.3
+       ],
+       "min_adjacent_dE": 4.7
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        4.6,
+        6.8,
+        17.1
+       ],
+       "min_adjacent_dE": 4.6
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        4.5,
+        6.0,
+        10.4
+       ],
+       "min_adjacent_dE": 4.5
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        4.3,
+        5.5,
+        8.2
+       ],
+       "min_adjacent_dE": 4.3
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        18.9,
+        23.8,
+        27.4
+       ],
+       "min_adjacent_dE": 18.9,
+       "weakest_vs_map_dE": 35.9,
+       "lightness_L": [
+        43.9,
+        50.8,
+        54.1,
+        54.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        14.2,
+        9.5,
+        3.8
+       ],
+       "min_adjacent_dE": 3.8,
+       "weakest_vs_map_dE": 36.1,
+       "lightness_L": [
+        44.8,
+        52.7,
+        57.5,
+        59.5
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        11.2,
+        2.2,
+        8.7
+       ],
+       "min_adjacent_dE": 2.2,
+       "weakest_vs_map_dE": 35.2,
+       "lightness_L": [
+        42.5,
+        47.8,
+        48.4,
+        44.5
+       ],
+       "lightness_rises": false
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        19.3,
+        23.9,
+        27.3
+       ],
+       "min_adjacent_dE": 19.3,
+       "weakest_vs_map_dE": 37.0,
+       "lightness_L": [
+        40.6,
+        48.6,
+        53.0,
+        53.9
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        14.5,
+        9.9,
+        4.2
+       ],
+       "min_adjacent_dE": 4.2,
+       "weakest_vs_map_dE": 37.0,
+       "lightness_L": [
+        41.4,
+        50.4,
+        56.3,
+        59.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        11.2,
+        2.3,
+        8.6
+       ],
+       "min_adjacent_dE": 2.3,
+       "weakest_vs_map_dE": 36.0,
+       "lightness_L": [
+        39.1,
+        45.6,
+        47.2,
+        44.1
+       ],
+       "lightness_rises": false
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        17.5,
+        23.6,
+        28.4
+       ],
+       "min_adjacent_dE": 17.5,
+       "weakest_vs_map_dE": 30.7,
+       "lightness_L": [
+        60.0,
+        61.7,
+        59.9,
+        55.9
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        13.3,
+        8.8,
+        4.1
+       ],
+       "min_adjacent_dE": 4.1,
+       "weakest_vs_map_dE": 31.2,
+       "lightness_L": [
+        60.9,
+        63.5,
+        63.2,
+        61.1
+       ],
+       "lightness_rises": false
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        11.2,
+        5.5,
+        10.7
+       ],
+       "min_adjacent_dE": 5.5,
+       "weakest_vs_map_dE": 30.4,
+       "lightness_L": [
+        58.5,
+        58.6,
+        54.2,
+        46.1
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        31.2,
+        34.8,
+        44.6
+       ],
+       "min_adjacent_dE": 31.2,
+       "weakest_vs_map_dE": 32.7,
+       "lightness_L": [
+        29.9,
+        47.3,
+        69.3,
+        91.7
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        29.9,
+        25.6,
+        40.3
+       ],
+       "min_adjacent_dE": 25.6,
+       "weakest_vs_map_dE": 20.8,
+       "lightness_L": [
+        31.9,
+        50.3,
+        71.3,
+        92.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        28.3,
+        33.5,
+        44.2
+       ],
+       "min_adjacent_dE": 28.3,
+       "weakest_vs_map_dE": 12.0,
+       "lightness_L": [
+        26.6,
+        42.1,
+        65.9,
+        90.7
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        31.3,
+        35.3,
+        45.0
+       ],
+       "min_adjacent_dE": 31.3,
+       "weakest_vs_map_dE": 34.4,
+       "lightness_L": [
+        26.8,
+        45.5,
+        68.4,
+        91.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        30.0,
+        26.2,
+        40.6
+       ],
+       "min_adjacent_dE": 26.2,
+       "weakest_vs_map_dE": 21.7,
+       "lightness_L": [
+        28.8,
+        48.5,
+        70.4,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        28.4,
+        33.8,
+        44.7
+       ],
+       "min_adjacent_dE": 28.4,
+       "weakest_vs_map_dE": 12.6,
+       "lightness_L": [
+        23.4,
+        40.3,
+        65.1,
+        90.5
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        29.6,
+        32.6,
+        43.0
+       ],
+       "min_adjacent_dE": 29.6,
+       "weakest_vs_map_dE": 28.3,
+       "lightness_L": [
+        44.8,
+        56.3,
+        73.4,
+        92.8
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        28.5,
+        22.9,
+        39.0
+       ],
+       "min_adjacent_dE": 22.9,
+       "weakest_vs_map_dE": 18.3,
+       "lightness_L": [
+        46.7,
+        59.2,
+        75.4,
+        93.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        26.7,
+        31.7,
+        42.1
+       ],
+       "min_adjacent_dE": 26.7,
+       "weakest_vs_map_dE": 13.7,
+       "lightness_L": [
+        41.7,
+        51.3,
+        70.0,
+        91.8
+       ],
+       "lightness_rises": true
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        31.2,
+        34.8,
+        44.6
+       ],
+       "min_adjacent_dE": 31.2,
+       "weakest_vs_map_dE": 32.7,
+       "lightness_L": [
+        29.9,
+        47.3,
+        69.3,
+        91.7
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        29.9,
+        25.6,
+        40.3
+       ],
+       "min_adjacent_dE": 25.6,
+       "weakest_vs_map_dE": 20.8,
+       "lightness_L": [
+        31.9,
+        50.3,
+        71.3,
+        92.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        28.3,
+        33.5,
+        44.2
+       ],
+       "min_adjacent_dE": 28.3,
+       "weakest_vs_map_dE": 12.0,
+       "lightness_L": [
+        26.6,
+        42.1,
+        65.9,
+        90.7
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        31.3,
+        35.3,
+        45.0
+       ],
+       "min_adjacent_dE": 31.3,
+       "weakest_vs_map_dE": 34.4,
+       "lightness_L": [
+        26.8,
+        45.5,
+        68.4,
+        91.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        30.0,
+        26.2,
+        40.6
+       ],
+       "min_adjacent_dE": 26.2,
+       "weakest_vs_map_dE": 21.7,
+       "lightness_L": [
+        28.8,
+        48.5,
+        70.4,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        28.4,
+        33.8,
+        44.7
+       ],
+       "min_adjacent_dE": 28.4,
+       "weakest_vs_map_dE": 12.6,
+       "lightness_L": [
+        23.4,
+        40.3,
+        65.1,
+        90.5
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        29.6,
+        32.6,
+        43.0
+       ],
+       "min_adjacent_dE": 29.6,
+       "weakest_vs_map_dE": 28.3,
+       "lightness_L": [
+        44.8,
+        56.3,
+        73.4,
+        92.8
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        28.5,
+        22.9,
+        39.0
+       ],
+       "min_adjacent_dE": 22.9,
+       "weakest_vs_map_dE": 18.3,
+       "lightness_L": [
+        46.7,
+        59.2,
+        75.4,
+        93.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        26.7,
+        31.7,
+        42.1
+       ],
+       "min_adjacent_dE": 26.7,
+       "weakest_vs_map_dE": 13.7,
+       "lightness_L": [
+        41.7,
+        51.3,
+        70.0,
+        91.8
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   },
+   "deaths": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        9.4,
+        16.0,
+        40.3
+       ],
+       "min_adjacent_dE": 9.4
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        5.7,
+        8.2,
+        31.7
+       ],
+       "min_adjacent_dE": 5.7
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.6,
+        10.2,
+        11.3
+       ],
+       "min_adjacent_dE": 6.6
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        9.5,
+        16.2,
+        40.7
+       ],
+       "min_adjacent_dE": 9.5
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        5.9,
+        8.5,
+        32.3
+       ],
+       "min_adjacent_dE": 5.9
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.7,
+        10.4,
+        11.9
+       ],
+       "min_adjacent_dE": 6.7
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        9.1,
+        16.0,
+        38.8
+       ],
+       "min_adjacent_dE": 9.1
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        5.4,
+        7.8,
+        28.4
+       ],
+       "min_adjacent_dE": 5.4
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.3,
+        10.1,
+        8.7
+       ],
+       "min_adjacent_dE": 6.3
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        26.3,
+        21.4,
+        20.7
+       ],
+       "min_adjacent_dE": 20.7,
+       "weakest_vs_map_dE": 44.4,
+       "lightness_L": [
+        35.0,
+        40.7,
+        47.3,
+        55.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        16.9,
+        9.0,
+        16.4
+       ],
+       "min_adjacent_dE": 9.0,
+       "weakest_vs_map_dE": 37.0,
+       "lightness_L": [
+        35.0,
+        41.1,
+        48.7,
+        58.9
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.1,
+        11.4,
+        6.1
+       ],
+       "min_adjacent_dE": 6.1,
+       "weakest_vs_map_dE": 39.4,
+       "lightness_L": [
+        35.3,
+        40.5,
+        45.4,
+        50.3
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        26.8,
+        21.8,
+        21.0
+       ],
+       "min_adjacent_dE": 21.0,
+       "weakest_vs_map_dE": 46.9,
+       "lightness_L": [
+        31.7,
+        38.6,
+        46.2,
+        55.2
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        17.5,
+        9.9,
+        16.8
+       ],
+       "min_adjacent_dE": 9.9,
+       "weakest_vs_map_dE": 39.4,
+       "lightness_L": [
+        31.6,
+        39.0,
+        47.7,
+        58.5
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.7,
+        11.9,
+        6.6
+       ],
+       "min_adjacent_dE": 6.6,
+       "weakest_vs_map_dE": 42.0,
+       "lightness_L": [
+        32.0,
+        38.4,
+        44.4,
+        49.9
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        25.1,
+        20.9,
+        19.6
+       ],
+       "min_adjacent_dE": 19.6,
+       "weakest_vs_map_dE": 37.7,
+       "lightness_L": [
+        50.5,
+        50.7,
+        52.4,
+        57.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        15.6,
+        6.0,
+        14.3
+       ],
+       "min_adjacent_dE": 6.0,
+       "weakest_vs_map_dE": 31.3,
+       "lightness_L": [
+        50.5,
+        51.1,
+        53.9,
+        60.6
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        18.2,
+        10.5,
+        4.0
+       ],
+       "min_adjacent_dE": 4.0,
+       "weakest_vs_map_dE": 33.4,
+       "lightness_L": [
+        50.6,
+        50.3,
+        50.5,
+        52.0
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        21.1,
+        36.1,
+        65.9
+       ],
+       "min_adjacent_dE": 21.1,
+       "weakest_vs_map_dE": 48.4,
+       "lightness_L": [
+        30.3,
+        44.2,
+        51.0,
+        83.4
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        18.2,
+        10.0,
+        51.9
+       ],
+       "min_adjacent_dE": 10.0,
+       "weakest_vs_map_dE": 42.8,
+       "lightness_L": [
+        29.8,
+        43.7,
+        52.6,
+        84.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        18.8,
+        15.1,
+        56.7
+       ],
+       "min_adjacent_dE": 15.1,
+       "weakest_vs_map_dE": 43.6,
+       "lightness_L": [
+        31.3,
+        45.1,
+        48.8,
+        81.8
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        21.9,
+        36.3,
+        66.1
+       ],
+       "min_adjacent_dE": 21.9,
+       "weakest_vs_map_dE": 51.1,
+       "lightness_L": [
+        27.6,
+        42.4,
+        50.1,
+        83.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.1,
+        10.8,
+        52.2
+       ],
+       "min_adjacent_dE": 10.8,
+       "weakest_vs_map_dE": 45.1,
+       "lightness_L": [
+        27.0,
+        41.9,
+        51.8,
+        84.2
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.7,
+        15.4,
+        56.9
+       ],
+       "min_adjacent_dE": 15.4,
+       "weakest_vs_map_dE": 46.2,
+       "lightness_L": [
+        28.6,
+        43.4,
+        48.1,
+        81.6
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        18.4,
+        36.2,
+        64.9
+       ],
+       "min_adjacent_dE": 18.4,
+       "weakest_vs_map_dE": 42.8,
+       "lightness_L": [
+        43.5,
+        52.6,
+        55.1,
+        84.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        15.1,
+        6.8,
+        50.3
+       ],
+       "min_adjacent_dE": 6.8,
+       "weakest_vs_map_dE": 38.7,
+       "lightness_L": [
+        43.1,
+        52.3,
+        56.8,
+        85.6
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        15.7,
+        15.1,
+        55.5
+       ],
+       "min_adjacent_dE": 15.1,
+       "weakest_vs_map_dE": 38.8,
+       "lightness_L": [
+        44.3,
+        53.4,
+        52.7,
+        83.0
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        24.8,
+        24.1,
+        63.6
+       ],
+       "min_adjacent_dE": 24.1,
+       "weakest_vs_map_dE": 52.6,
+       "lightness_L": [
+        25.2,
+        44.0,
+        55.8,
+        88.7
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        23.0,
+        14.4,
+        52.5
+       ],
+       "min_adjacent_dE": 14.4,
+       "weakest_vs_map_dE": 46.4,
+       "lightness_L": [
+        24.6,
+        43.2,
+        56.8,
+        89.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        23.5,
+        9.8,
+        55.9
+       ],
+       "min_adjacent_dE": 9.8,
+       "weakest_vs_map_dE": 46.4,
+       "lightness_L": [
+        26.5,
+        45.4,
+        54.6,
+        87.7
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        25.6,
+        24.5,
+        63.9
+       ],
+       "min_adjacent_dE": 24.5,
+       "weakest_vs_map_dE": 55.1,
+       "lightness_L": [
+        22.7,
+        42.4,
+        55.1,
+        88.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        23.8,
+        15.2,
+        52.8
+       ],
+       "min_adjacent_dE": 15.2,
+       "weakest_vs_map_dE": 48.2,
+       "lightness_L": [
+        22.2,
+        41.7,
+        56.1,
+        89.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        24.4,
+        10.6,
+        56.2
+       ],
+       "min_adjacent_dE": 10.6,
+       "weakest_vs_map_dE": 48.7,
+       "lightness_L": [
+        24.1,
+        43.9,
+        53.8,
+        87.6
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        21.7,
+        22.9,
+        62.2
+       ],
+       "min_adjacent_dE": 21.7,
+       "weakest_vs_map_dE": 48.2,
+       "lightness_L": [
+        37.3,
+        51.4,
+        59.3,
+        89.4
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.7,
+        10.5,
+        50.7
+       ],
+       "min_adjacent_dE": 10.5,
+       "weakest_vs_map_dE": 44.0,
+       "lightness_L": [
+        36.7,
+        50.8,
+        60.4,
+        90.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        20.1,
+        6.5,
+        54.3
+       ],
+       "min_adjacent_dE": 6.5,
+       "weakest_vs_map_dE": 43.4,
+       "lightness_L": [
+        38.3,
+        52.7,
+        58.1,
+        88.4
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   }
+  },
+  "GrandRift": {
+   "kills": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        8.2,
+        19.0,
+        36.5
+       ],
+       "min_adjacent_dE": 8.2
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        5.7,
+        4.9,
+        2.7
+       ],
+       "min_adjacent_dE": 2.7
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        4.2,
+        2.2,
+        20.6
+       ],
+       "min_adjacent_dE": 2.2
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        9.4,
+        19.4,
+        35.6
+       ],
+       "min_adjacent_dE": 9.4
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.4,
+        7.0,
+        0.7
+       ],
+       "min_adjacent_dE": 0.7
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        5.8,
+        0.8,
+        18.1
+       ],
+       "min_adjacent_dE": 0.8
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        7.6,
+        19.7,
+        38.2
+       ],
+       "min_adjacent_dE": 7.6
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        4.0,
+        3.3,
+        5.3
+       ],
+       "min_adjacent_dE": 3.3
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        2.4,
+        4.8,
+        23.5
+       ],
+       "min_adjacent_dE": 2.4
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        14.0,
+        19.6,
+        25.1
+       ],
+       "min_adjacent_dE": 14.0,
+       "weakest_vs_map_dE": 27.1,
+       "lightness_L": [
+        50.2,
+        55.3,
+        56.8,
+        55.2
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        10.4,
+        6.0,
+        0.9
+       ],
+       "min_adjacent_dE": 0.9,
+       "weakest_vs_map_dE": 26.8,
+       "lightness_L": [
+        51.8,
+        57.6,
+        60.4,
+        60.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        8.1,
+        0.9,
+        11.2
+       ],
+       "min_adjacent_dE": 0.9,
+       "weakest_vs_map_dE": 28.0,
+       "lightness_L": [
+        47.5,
+        51.4,
+        50.5,
+        45.2
+       ],
+       "lightness_rises": false
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        16.3,
+        20.2,
+        24.6
+       ],
+       "min_adjacent_dE": 16.3,
+       "weakest_vs_map_dE": 34.1,
+       "lightness_L": [
+        40.6,
+        48.9,
+        53.4,
+        54.2
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        13.5,
+        8.9,
+        3.2
+       ],
+       "min_adjacent_dE": 3.2,
+       "weakest_vs_map_dE": 33.8,
+       "lightness_L": [
+        42.1,
+        51.2,
+        57.0,
+        59.5
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        11.0,
+        2.4,
+        9.1
+       ],
+       "min_adjacent_dE": 2.4,
+       "weakest_vs_map_dE": 35.3,
+       "lightness_L": [
+        38.1,
+        45.0,
+        47.1,
+        44.2
+       ],
+       "lightness_rises": false
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        12.8,
+        20.3,
+        26.4
+       ],
+       "min_adjacent_dE": 12.8,
+       "weakest_vs_map_dE": 20.3,
+       "lightness_L": [
+        57.8,
+        60.5,
+        59.5,
+        55.9
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.3,
+        3.6,
+        1.9
+       ],
+       "min_adjacent_dE": 1.9,
+       "weakest_vs_map_dE": 20.1,
+       "lightness_L": [
+        59.4,
+        62.7,
+        63.0,
+        61.2
+       ],
+       "lightness_rises": false
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        4.8,
+        4.1,
+        13.8
+       ],
+       "min_adjacent_dE": 4.1,
+       "weakest_vs_map_dE": 20.7,
+       "lightness_L": [
+        55.3,
+        56.6,
+        53.3,
+        46.0
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        25.2,
+        33.4,
+        46.0
+       ],
+       "min_adjacent_dE": 25.2,
+       "weakest_vs_map_dE": 22.7,
+       "lightness_L": [
+        36.6,
+        51.4,
+        70.9,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        24.2,
+        21.5,
+        41.0
+       ],
+       "min_adjacent_dE": 21.5,
+       "weakest_vs_map_dE": 12.3,
+       "lightness_L": [
+        39.2,
+        54.8,
+        73.1,
+        92.7
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        23.7,
+        29.9,
+        44.7
+       ],
+       "min_adjacent_dE": 23.7,
+       "weakest_vs_map_dE": 5.7,
+       "lightness_L": [
+        32.0,
+        45.5,
+        67.2,
+        91.0
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        27.9,
+        35.7,
+        46.3
+       ],
+       "min_adjacent_dE": 27.9,
+       "weakest_vs_map_dE": 27.0,
+       "lightness_L": [
+        28.1,
+        46.2,
+        68.5,
+        91.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        27.2,
+        24.4,
+        41.1
+       ],
+       "min_adjacent_dE": 24.4,
+       "weakest_vs_map_dE": 20.3,
+       "lightness_L": [
+        30.7,
+        49.6,
+        70.6,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        26.8,
+        32.8,
+        45.0
+       ],
+       "min_adjacent_dE": 26.8,
+       "weakest_vs_map_dE": 13.5,
+       "lightness_L": [
+        23.4,
+        40.2,
+        64.8,
+        90.4
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        22.2,
+        30.8,
+        45.9
+       ],
+       "min_adjacent_dE": 22.2,
+       "weakest_vs_map_dE": 22.8,
+       "lightness_L": [
+        43.4,
+        55.6,
+        72.9,
+        92.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        20.9,
+        18.9,
+        41.1
+       ],
+       "min_adjacent_dE": 18.9,
+       "weakest_vs_map_dE": 5.6,
+       "lightness_L": [
+        45.9,
+        58.9,
+        75.1,
+        93.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.9,
+        26.8,
+        45.0
+       ],
+       "min_adjacent_dE": 19.9,
+       "weakest_vs_map_dE": 4.1,
+       "lightness_L": [
+        39.0,
+        49.8,
+        69.2,
+        91.6
+       ],
+       "lightness_rises": true
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        25.2,
+        33.4,
+        46.0
+       ],
+       "min_adjacent_dE": 25.2,
+       "weakest_vs_map_dE": 22.7,
+       "lightness_L": [
+        36.6,
+        51.4,
+        70.9,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        24.2,
+        21.5,
+        41.0
+       ],
+       "min_adjacent_dE": 21.5,
+       "weakest_vs_map_dE": 12.3,
+       "lightness_L": [
+        39.2,
+        54.8,
+        73.1,
+        92.7
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        23.7,
+        29.9,
+        44.7
+       ],
+       "min_adjacent_dE": 23.7,
+       "weakest_vs_map_dE": 5.7,
+       "lightness_L": [
+        32.0,
+        45.5,
+        67.2,
+        91.0
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        27.9,
+        35.7,
+        46.3
+       ],
+       "min_adjacent_dE": 27.9,
+       "weakest_vs_map_dE": 27.0,
+       "lightness_L": [
+        28.1,
+        46.2,
+        68.5,
+        91.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        27.2,
+        24.4,
+        41.1
+       ],
+       "min_adjacent_dE": 24.4,
+       "weakest_vs_map_dE": 20.3,
+       "lightness_L": [
+        30.7,
+        49.6,
+        70.6,
+        92.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        26.8,
+        32.8,
+        45.0
+       ],
+       "min_adjacent_dE": 26.8,
+       "weakest_vs_map_dE": 13.5,
+       "lightness_L": [
+        23.4,
+        40.2,
+        64.8,
+        90.4
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        22.2,
+        30.8,
+        45.9
+       ],
+       "min_adjacent_dE": 22.2,
+       "weakest_vs_map_dE": 22.8,
+       "lightness_L": [
+        43.4,
+        55.6,
+        72.9,
+        92.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        20.9,
+        18.9,
+        41.1
+       ],
+       "min_adjacent_dE": 18.9,
+       "weakest_vs_map_dE": 5.6,
+       "lightness_L": [
+        45.9,
+        58.9,
+        75.1,
+        93.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.9,
+        26.8,
+        45.0
+       ],
+       "min_adjacent_dE": 19.9,
+       "weakest_vs_map_dE": 4.1,
+       "lightness_L": [
+        39.0,
+        49.8,
+        69.2,
+        91.6
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   },
+   "deaths": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        34.0,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        29.2,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        11.9,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        35.3,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        32.1,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        14.0,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        33.4,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        26.1,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        9.2,
+        0.0,
+        0.0
+       ],
+       "min_adjacent_dE": 0.0
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        26.5,
+        21.3,
+        18.8
+       ],
+       "min_adjacent_dE": 18.8,
+       "weakest_vs_map_dE": 44.6,
+       "lightness_L": [
+        40.5,
+        44.3,
+        49.3,
+        56.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.8,
+        10.1,
+        13.2
+       ],
+       "min_adjacent_dE": 10.1,
+       "weakest_vs_map_dE": 42.0,
+       "lightness_L": [
+        41.2,
+        45.3,
+        51.1,
+        59.8
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        21.6,
+        13.2,
+        4.4
+       ],
+       "min_adjacent_dE": 4.4,
+       "weakest_vs_map_dE": 44.6,
+       "lightness_L": [
+        39.3,
+        43.1,
+        46.8,
+        50.8
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        25.4,
+        20.5,
+        19.7
+       ],
+       "min_adjacent_dE": 19.7,
+       "weakest_vs_map_dE": 45.2,
+       "lightness_L": [
+        31.5,
+        38.8,
+        46.5,
+        55.4
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        18.8,
+        10.6,
+        15.6
+       ],
+       "min_adjacent_dE": 10.6,
+       "weakest_vs_map_dE": 42.8,
+       "lightness_L": [
+        32.1,
+        39.6,
+        48.2,
+        58.8
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        20.3,
+        12.6,
+        6.5
+       ],
+       "min_adjacent_dE": 6.5,
+       "weakest_vs_map_dE": 44.4,
+       "lightness_L": [
+        30.8,
+        37.8,
+        44.2,
+        49.9
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        29.3,
+        23.6,
+        18.6
+       ],
+       "min_adjacent_dE": 18.6,
+       "weakest_vs_map_dE": 47.2,
+       "lightness_L": [
+        47.5,
+        48.6,
+        51.5,
+        57.0
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        22.1,
+        11.5,
+        10.9
+       ],
+       "min_adjacent_dE": 10.9,
+       "weakest_vs_map_dE": 43.8,
+       "lightness_L": [
+        48.3,
+        49.7,
+        53.3,
+        60.5
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        24.5,
+        15.4,
+        2.6
+       ],
+       "min_adjacent_dE": 2.6,
+       "weakest_vs_map_dE": 48.3,
+       "lightness_L": [
+        46.2,
+        47.2,
+        48.8,
+        51.5
+       ],
+       "lightness_rises": true
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        21.5,
+        36.0,
+        64.1
+       ],
+       "min_adjacent_dE": 21.5,
+       "weakest_vs_map_dE": 51.4,
+       "lightness_L": [
+        34.6,
+        46.9,
+        52.6,
+        83.8
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.4,
+        10.3,
+        48.8
+       ],
+       "min_adjacent_dE": 10.3,
+       "weakest_vs_map_dE": 50.6,
+       "lightness_L": [
+        34.8,
+        46.9,
+        54.6,
+        84.9
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        19.8,
+        16.8,
+        55.0
+       ],
+       "min_adjacent_dE": 16.8,
+       "weakest_vs_map_dE": 50.9,
+       "lightness_L": [
+        34.5,
+        47.1,
+        49.8,
+        82.1
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        21.8,
+        34.7,
+        65.6
+       ],
+       "min_adjacent_dE": 21.8,
+       "weakest_vs_map_dE": 50.5,
+       "lightness_L": [
+        27.1,
+        42.2,
+        50.4,
+        83.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.9,
+        11.3,
+        50.7
+       ],
+       "min_adjacent_dE": 11.3,
+       "weakest_vs_map_dE": 49.8,
+       "lightness_L": [
+        27.1,
+        42.1,
+        52.3,
+        84.2
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        20.4,
+        15.6,
+        56.4
+       ],
+       "min_adjacent_dE": 15.6,
+       "weakest_vs_map_dE": 49.2,
+       "lightness_L": [
+        27.4,
+        42.6,
+        47.9,
+        81.5
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        22.7,
+        38.3,
+        62.3
+       ],
+       "min_adjacent_dE": 22.7,
+       "weakest_vs_map_dE": 55.8,
+       "lightness_L": [
+        40.6,
+        50.7,
+        54.3,
+        84.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        20.2,
+        11.0,
+        46.9
+       ],
+       "min_adjacent_dE": 11.0,
+       "weakest_vs_map_dE": 54.2,
+       "lightness_L": [
+        40.9,
+        50.8,
+        56.3,
+        85.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        20.7,
+        19.1,
+        53.3
+       ],
+       "min_adjacent_dE": 19.1,
+       "weakest_vs_map_dE": 56.6,
+       "lightness_L": [
+        40.2,
+        50.7,
+        51.4,
+        82.7
+       ],
+       "lightness_rises": true
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        25.2,
+        23.6,
+        62.1
+       ],
+       "min_adjacent_dE": 23.6,
+       "weakest_vs_map_dE": 56.3,
+       "lightness_L": [
+        29.1,
+        46.3,
+        57.1,
+        89.0
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        23.9,
+        12.6,
+        49.8
+       ],
+       "min_adjacent_dE": 12.6,
+       "weakest_vs_map_dE": 55.7,
+       "lightness_L": [
+        29.1,
+        46.0,
+        58.4,
+        89.7
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        24.2,
+        9.9,
+        54.1
+       ],
+       "min_adjacent_dE": 9.9,
+       "weakest_vs_map_dE": 55.1,
+       "lightness_L": [
+        29.2,
+        47.1,
+        55.5,
+        87.9
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        25.8,
+        23.7,
+        63.8
+       ],
+       "min_adjacent_dE": 23.7,
+       "weakest_vs_map_dE": 54.1,
+       "lightness_L": [
+        22.3,
+        42.2,
+        55.2,
+        88.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        24.7,
+        15.2,
+        51.8
+       ],
+       "min_adjacent_dE": 15.2,
+       "weakest_vs_map_dE": 53.7,
+       "lightness_L": [
+        22.1,
+        41.7,
+        56.4,
+        89.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        25.1,
+        11.1,
+        55.8
+       ],
+       "min_adjacent_dE": 11.1,
+       "weakest_vs_map_dE": 51.8,
+       "lightness_L": [
+        22.9,
+        43.2,
+        53.6,
+        87.5
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        26.0,
+        24.6,
+        60.0
+       ],
+       "min_adjacent_dE": 24.6,
+       "weakest_vs_map_dE": 61.9,
+       "lightness_L": [
+        34.4,
+        49.6,
+        58.6,
+        89.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        24.4,
+        10.6,
+        47.9
+       ],
+       "min_adjacent_dE": 10.6,
+       "weakest_vs_map_dE": 60.5,
+       "lightness_L": [
+        34.6,
+        49.3,
+        59.9,
+        90.0
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        24.6,
+        9.9,
+        52.3
+       ],
+       "min_adjacent_dE": 9.9,
+       "weakest_vs_map_dE": 62.1,
+       "lightness_L": [
+        34.4,
+        50.2,
+        57.0,
+        88.2
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   }
+  },
+  "Lockdown": {
+   "kills": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        8.6,
+        14.4,
+        49.1
+       ],
+       "min_adjacent_dE": 8.6
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.4,
+        9.4,
+        9.1
+       ],
+       "min_adjacent_dE": 7.4
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.5,
+        7.2,
+        12.3
+       ],
+       "min_adjacent_dE": 6.5
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        8.3,
+        13.2,
+        44.4
+       ],
+       "min_adjacent_dE": 8.3
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.4,
+        9.2,
+        7.8
+       ],
+       "min_adjacent_dE": 7.4
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.6,
+        6.9,
+        10.0
+       ],
+       "min_adjacent_dE": 6.6
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        8.6,
+        14.6,
+        51.0
+       ],
+       "min_adjacent_dE": 8.6
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.4,
+        9.7,
+        11.0
+       ],
+       "min_adjacent_dE": 7.4
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        6.6,
+        7.9,
+        15.2
+       ],
+       "min_adjacent_dE": 6.6
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        21.4,
+        27.4,
+        30.6
+       ],
+       "min_adjacent_dE": 21.4,
+       "weakest_vs_map_dE": 36.2,
+       "lightness_L": [
+        51.4,
+        55.4,
+        56.3,
+        54.7
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        16.2,
+        11.4,
+        5.5
+       ],
+       "min_adjacent_dE": 5.5,
+       "weakest_vs_map_dE": 37.4,
+       "lightness_L": [
+        51.6,
+        56.8,
+        59.3,
+        59.8
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        13.1,
+        5.4,
+        8.2
+       ],
+       "min_adjacent_dE": 5.4,
+       "weakest_vs_map_dE": 35.0,
+       "lightness_L": [
+        50.9,
+        53.2,
+        51.0,
+        45.1
+       ],
+       "lightness_rises": false
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        20.3,
+        24.4,
+        27.5
+       ],
+       "min_adjacent_dE": 20.3,
+       "weakest_vs_map_dE": 39.8,
+       "lightness_L": [
+        42.3,
+        49.7,
+        53.5,
+        54.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        16.1,
+        11.0,
+        4.9
+       ],
+       "min_adjacent_dE": 4.9,
+       "weakest_vs_map_dE": 40.5,
+       "lightness_L": [
+        43.0,
+        51.5,
+        56.8,
+        59.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        13.2,
+        3.9,
+        7.4
+       ],
+       "min_adjacent_dE": 3.9,
+       "weakest_vs_map_dE": 38.9,
+       "lightness_L": [
+        41.0,
+        46.8,
+        47.8,
+        44.3
+       ],
+       "lightness_rises": false
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        21.3,
+        28.3,
+        32.0
+       ],
+       "min_adjacent_dE": 21.3,
+       "weakest_vs_map_dE": 34.2,
+       "lightness_L": [
+        60.4,
+        61.4,
+        59.4,
+        55.5
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        16.3,
+        12.0,
+        6.5
+       ],
+       "min_adjacent_dE": 6.5,
+       "weakest_vs_map_dE": 35.5,
+       "lightness_L": [
+        60.5,
+        62.7,
+        62.3,
+        60.6
+       ],
+       "lightness_rises": false
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        13.5,
+        7.7,
+        9.6
+       ],
+       "min_adjacent_dE": 7.7,
+       "weakest_vs_map_dE": 33.1,
+       "lightness_L": [
+        60.1,
+        59.4,
+        54.3,
+        46.0
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        34.7,
+        34.6,
+        42.2
+       ],
+       "min_adjacent_dE": 34.6,
+       "weakest_vs_map_dE": 32.1,
+       "lightness_L": [
+        36.1,
+        50.7,
+        71.0,
+        92.2
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        33.4,
+        27.3,
+        38.7
+       ],
+       "min_adjacent_dE": 27.3,
+       "weakest_vs_map_dE": 22.1,
+       "lightness_L": [
+        37.3,
+        53.2,
+        72.8,
+        92.8
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        30.2,
+        35.1,
+        42.2
+       ],
+       "min_adjacent_dE": 30.2,
+       "weakest_vs_map_dE": 14.8,
+       "lightness_L": [
+        34.1,
+        46.4,
+        67.9,
+        91.3
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        33.5,
+        35.9,
+        44.2
+       ],
+       "min_adjacent_dE": 33.5,
+       "weakest_vs_map_dE": 33.8,
+       "lightness_L": [
+        28.4,
+        46.4,
+        68.8,
+        91.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        32.4,
+        26.9,
+        40.0
+       ],
+       "min_adjacent_dE": 26.9,
+       "weakest_vs_map_dE": 25.3,
+       "lightness_L": [
+        30.2,
+        49.3,
+        70.8,
+        92.2
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        30.7,
+        35.1,
+        43.7
+       ],
+       "min_adjacent_dE": 30.7,
+       "weakest_vs_map_dE": 16.1,
+       "lightness_L": [
+        25.2,
+        41.3,
+        65.5,
+        90.6
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        34.0,
+        33.8,
+        40.8
+       ],
+       "min_adjacent_dE": 33.8,
+       "weakest_vs_map_dE": 31.8,
+       "lightness_L": [
+        44.4,
+        55.6,
+        73.3,
+        92.9
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        32.8,
+        27.0,
+        37.7
+       ],
+       "min_adjacent_dE": 27.0,
+       "weakest_vs_map_dE": 22.5,
+       "lightness_L": [
+        45.4,
+        58.0,
+        75.0,
+        93.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        29.2,
+        34.7,
+        40.8
+       ],
+       "min_adjacent_dE": 29.2,
+       "weakest_vs_map_dE": 17.6,
+       "lightness_L": [
+        42.8,
+        51.6,
+        70.2,
+        92.0
+       ],
+       "lightness_rises": true
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        34.7,
+        34.6,
+        42.2
+       ],
+       "min_adjacent_dE": 34.6,
+       "weakest_vs_map_dE": 32.1,
+       "lightness_L": [
+        36.1,
+        50.7,
+        71.0,
+        92.2
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        33.4,
+        27.3,
+        38.7
+       ],
+       "min_adjacent_dE": 27.3,
+       "weakest_vs_map_dE": 22.1,
+       "lightness_L": [
+        37.3,
+        53.2,
+        72.8,
+        92.8
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        30.2,
+        35.1,
+        42.2
+       ],
+       "min_adjacent_dE": 30.2,
+       "weakest_vs_map_dE": 14.8,
+       "lightness_L": [
+        34.1,
+        46.4,
+        67.9,
+        91.3
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        33.5,
+        35.9,
+        44.2
+       ],
+       "min_adjacent_dE": 33.5,
+       "weakest_vs_map_dE": 33.8,
+       "lightness_L": [
+        28.4,
+        46.4,
+        68.8,
+        91.6
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        32.4,
+        26.9,
+        40.0
+       ],
+       "min_adjacent_dE": 26.9,
+       "weakest_vs_map_dE": 25.3,
+       "lightness_L": [
+        30.2,
+        49.3,
+        70.8,
+        92.2
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        30.7,
+        35.1,
+        43.7
+       ],
+       "min_adjacent_dE": 30.7,
+       "weakest_vs_map_dE": 16.1,
+       "lightness_L": [
+        25.2,
+        41.3,
+        65.5,
+        90.6
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        34.0,
+        33.8,
+        40.8
+       ],
+       "min_adjacent_dE": 33.8,
+       "weakest_vs_map_dE": 31.8,
+       "lightness_L": [
+        44.4,
+        55.6,
+        73.3,
+        92.9
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        32.8,
+        27.0,
+        37.7
+       ],
+       "min_adjacent_dE": 27.0,
+       "weakest_vs_map_dE": 22.5,
+       "lightness_L": [
+        45.4,
+        58.0,
+        75.0,
+        93.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        29.2,
+        34.7,
+        40.8
+       ],
+       "min_adjacent_dE": 29.2,
+       "weakest_vs_map_dE": 17.6,
+       "lightness_L": [
+        42.8,
+        51.6,
+        70.2,
+        92.0
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   },
+   "deaths": {
+    "current continuous": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        16.0,
+        25.4,
+        17.6
+       ],
+       "min_adjacent_dE": 16.0
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        6.7,
+        16.3,
+        17.0
+       ],
+       "min_adjacent_dE": 6.7
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        9.1,
+        3.0,
+        8.7
+       ],
+       "min_adjacent_dE": 3.0
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        15.3,
+        24.6,
+        17.2
+       ],
+       "min_adjacent_dE": 15.3
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        7.5,
+        17.1,
+        16.7
+       ],
+       "min_adjacent_dE": 7.5
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        9.4,
+        4.9,
+        8.6
+       ],
+       "min_adjacent_dE": 4.9
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        16.3,
+        25.6,
+        17.6
+       ],
+       "min_adjacent_dE": 16.3
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        6.4,
+        15.2,
+        17.0
+       ],
+       "min_adjacent_dE": 6.4
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        9.2,
+        2.3,
+        8.7
+       ],
+       "min_adjacent_dE": 2.3
+      }
+     }
+    },
+    "same palette, cut into bands": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        25.5,
+        21.5,
+        21.6
+       ],
+       "min_adjacent_dE": 21.5,
+       "weakest_vs_map_dE": 39.6,
+       "lightness_L": [
+        42.7,
+        45.4,
+        49.4,
+        56.2
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        13.7,
+        6.0,
+        17.5
+       ],
+       "min_adjacent_dE": 6.0,
+       "weakest_vs_map_dE": 28.5,
+       "lightness_L": [
+        42.0,
+        45.2,
+        50.6,
+        59.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        16.5,
+        9.0,
+        6.0
+       ],
+       "min_adjacent_dE": 6.0,
+       "weakest_vs_map_dE": 30.9,
+       "lightness_L": [
+        44.0,
+        45.9,
+        48.1,
+        51.1
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        24.7,
+        20.5,
+        21.0
+       ],
+       "min_adjacent_dE": 20.5,
+       "weakest_vs_map_dE": 41.5,
+       "lightness_L": [
+        33.9,
+        40.0,
+        46.9,
+        55.4
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        15.3,
+        8.6,
+        17.5
+       ],
+       "min_adjacent_dE": 8.6,
+       "weakest_vs_map_dE": 33.7,
+       "lightness_L": [
+        33.6,
+        40.2,
+        48.3,
+        58.7
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        17.4,
+        10.3,
+        6.8
+       ],
+       "min_adjacent_dE": 6.8,
+       "weakest_vs_map_dE": 35.4,
+       "lightness_L": [
+        34.4,
+        40.0,
+        45.4,
+        50.2
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        25.5,
+        21.9,
+        21.6
+       ],
+       "min_adjacent_dE": 21.6,
+       "weakest_vs_map_dE": 37.2,
+       "lightness_L": [
+        51.3,
+        50.9,
+        52.2,
+        57.0
+       ],
+       "lightness_rises": false
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        13.0,
+        3.7,
+        16.9
+       ],
+       "min_adjacent_dE": 3.7,
+       "weakest_vs_map_dE": 25.6,
+       "lightness_L": [
+        50.5,
+        50.7,
+        53.3,
+        60.2
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        16.1,
+        8.8,
+        5.5
+       ],
+       "min_adjacent_dE": 5.5,
+       "weakest_vs_map_dE": 28.2,
+       "lightness_L": [
+        52.7,
+        51.5,
+        51.0,
+        52.0
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        18.9,
+        36.5,
+        66.6
+       ],
+       "min_adjacent_dE": 18.9,
+       "weakest_vs_map_dE": 43.1,
+       "lightness_L": [
+        37.1,
+        48.4,
+        52.6,
+        83.9
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        15.0,
+        7.2,
+        53.4
+       ],
+       "min_adjacent_dE": 7.2,
+       "weakest_vs_map_dE": 33.2,
+       "lightness_L": [
+        36.1,
+        47.6,
+        54.1,
+        84.9
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        15.7,
+        13.7,
+        57.2
+       ],
+       "min_adjacent_dE": 13.7,
+       "weakest_vs_map_dE": 34.4,
+       "lightness_L": [
+        38.8,
+        49.8,
+        51.0,
+        82.4
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        20.1,
+        35.1,
+        66.8
+       ],
+       "min_adjacent_dE": 20.1,
+       "weakest_vs_map_dE": 44.5,
+       "lightness_L": [
+        29.5,
+        43.6,
+        50.7,
+        83.3
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        17.5,
+        9.7,
+        53.0
+       ],
+       "min_adjacent_dE": 9.7,
+       "weakest_vs_map_dE": 38.2,
+       "lightness_L": [
+        28.8,
+        43.0,
+        52.3,
+        84.3
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        18.1,
+        13.9,
+        57.3
+       ],
+       "min_adjacent_dE": 13.9,
+       "weakest_vs_map_dE": 38.4,
+       "lightness_L": [
+        30.7,
+        44.7,
+        48.8,
+        81.7
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        17.7,
+        37.1,
+        66.2
+       ],
+       "min_adjacent_dE": 17.7,
+       "weakest_vs_map_dE": 41.5,
+       "lightness_L": [
+        44.4,
+        53.1,
+        54.9,
+        84.5
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        13.0,
+        5.2,
+        53.0
+       ],
+       "min_adjacent_dE": 5.2,
+       "weakest_vs_map_dE": 31.3,
+       "lightness_L": [
+        43.4,
+        52.3,
+        56.2,
+        85.5
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        13.8,
+        13.9,
+        56.9
+       ],
+       "min_adjacent_dE": 13.8,
+       "weakest_vs_map_dE": 32.7,
+       "lightness_L": [
+        46.2,
+        54.7,
+        53.1,
+        83.1
+       ],
+       "lightness_rises": false
+      }
+     }
+    },
+    "lightness-ordered, wider for deaths": {
+     "typical": {
+      "normal": {
+       "adjacent_dE": [
+        22.2,
+        23.7,
+        63.8
+       ],
+       "min_adjacent_dE": 22.2,
+       "weakest_vs_map_dE": 47.9,
+       "lightness_L": [
+        31.5,
+        47.7,
+        57.4,
+        89.1
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        19.9,
+        13.0,
+        53.4
+       ],
+       "min_adjacent_dE": 13.0,
+       "weakest_vs_map_dE": 37.0,
+       "lightness_L": [
+        30.4,
+        46.7,
+        58.2,
+        89.7
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        20.5,
+        7.3,
+        56.1
+       ],
+       "min_adjacent_dE": 7.3,
+       "weakest_vs_map_dE": 37.6,
+       "lightness_L": [
+        33.4,
+        49.6,
+        56.4,
+        88.1
+       ],
+       "lightness_rises": true
+      }
+     },
+     "dark_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        23.9,
+        23.6,
+        64.5
+       ],
+       "min_adjacent_dE": 23.6,
+       "weakest_vs_map_dE": 48.1,
+       "lightness_L": [
+        24.5,
+        43.5,
+        55.6,
+        88.7
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        22.4,
+        15.1,
+        53.5
+       ],
+       "min_adjacent_dE": 15.1,
+       "weakest_vs_map_dE": 40.7,
+       "lightness_L": [
+        24.2,
+        42.7,
+        56.5,
+        89.4
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        22.9,
+        9.6,
+        56.6
+       ],
+       "min_adjacent_dE": 9.6,
+       "weakest_vs_map_dE": 40.3,
+       "lightness_L": [
+        26.3,
+        45.1,
+        54.4,
+        87.7
+       ],
+       "lightness_rises": true
+      }
+     },
+     "bright_fifth": {
+      "normal": {
+       "adjacent_dE": [
+        20.7,
+        23.5,
+        63.1
+       ],
+       "min_adjacent_dE": 20.7,
+       "weakest_vs_map_dE": 47.1,
+       "lightness_L": [
+        38.2,
+        51.9,
+        59.3,
+        89.4
+       ],
+       "lightness_rises": true
+      },
+      "deuteranopia": {
+       "adjacent_dE": [
+        17.9,
+        11.1,
+        52.8
+       ],
+       "min_adjacent_dE": 11.1,
+       "weakest_vs_map_dE": 36.1,
+       "lightness_L": [
+        37.1,
+        50.8,
+        60.1,
+        90.1
+       ],
+       "lightness_rises": true
+      },
+      "protanopia": {
+       "adjacent_dE": [
+        18.4,
+        5.2,
+        55.3
+       ],
+       "min_adjacent_dE": 5.2,
+       "weakest_vs_map_dE": 37.2,
+       "lightness_L": [
+        40.1,
+        53.8,
+        58.4,
+        88.5
+       ],
+       "lightness_rises": true
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,1938 @@
+{
+ "thresholds": {
+  "clear_dE": 10,
+  "barely_visible_dE": 5
+ },
+ "band_edges_t": [
+  0.25,
+  0.5,
+  0.75
+ ],
+ "band_alpha": {
+  "traffic": [
+   0.12,
+   0.32,
+   0.6,
+   0.88
+  ],
+  "kills": [
+   0.35,
+   0.55,
+   0.75,
+   0.92
+  ],
+  "deaths": [
+   0.4,
+   0.6,
+   0.78,
+   0.92
+  ]
+ },
+ "maps": {
+  "AmbroseValley": {
+   "typical": {
+    "background_rgb": [
+     51,
+     55,
+     44
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 125.8,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 3.0,
+      "first_intensity_visible_at_dE5": 0.07,
+      "share_of_range_below_dE5_of_map": 0.07
+     },
+     "continuous_all": {
+      "path_length_dE": 130.2,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 10.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       7.6,
+       22.8,
+       42.5,
+       82.6
+      ],
+      "adjacent_dE": [
+       15.5,
+       26.5,
+       59.3
+      ],
+      "min_adjacent_dE": 15.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       6.5,
+       19.2,
+       35.3,
+       82.5
+      ],
+      "adjacent_dE": [
+       13.1,
+       24.6,
+       58.3
+      ],
+      "min_adjacent_dE": 13.1,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       6.3,
+       19.5,
+       38.4,
+       83.8
+      ],
+      "adjacent_dE": [
+       13.6,
+       25.5,
+       55.9
+      ],
+      "min_adjacent_dE": 13.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 119.4,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 2.6,
+      "first_intensity_visible_at_dE5": 0.1,
+      "share_of_range_below_dE5_of_map": 0.1
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 96.1,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 24.2,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 74.9,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 51.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       35.9,
+       52.2,
+       69.6,
+       89.0
+      ],
+      "adjacent_dE": [
+       18.9,
+       23.8,
+       27.4
+      ],
+      "min_adjacent_dE": 18.9,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       36.1,
+       50.3,
+       59.7,
+       63.5
+      ],
+      "adjacent_dE": [
+       14.2,
+       9.5,
+       3.8
+      ],
+      "min_adjacent_dE": 3.8,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       35.2,
+       46.3,
+       48.4,
+       39.7
+      ],
+      "adjacent_dE": [
+       11.2,
+       2.2,
+       8.7
+      ],
+      "min_adjacent_dE": 2.2,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 39.1,
+      "levels_at_dE10": 4,
+      "weakest_vs_map_dE": 24.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 85.0,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 44.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 69.1,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 61.6,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       44.4,
+       70.0,
+       89.3,
+       99.1
+      ],
+      "adjacent_dE": [
+       26.3,
+       21.4,
+       20.7
+      ],
+      "min_adjacent_dE": 20.7,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       37.0,
+       53.9,
+       61.3,
+       56.1
+      ],
+      "adjacent_dE": [
+       16.9,
+       9.0,
+       16.4
+      ],
+      "min_adjacent_dE": 9.0,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       39.4,
+       58.4,
+       69.7,
+       68.0
+      ],
+      "adjacent_dE": [
+       19.1,
+       11.4,
+       6.1
+      ],
+      "min_adjacent_dE": 6.1,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 61.8,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 38.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "dark_fifth": {
+    "background_rgb": [
+     37,
+     43,
+     29
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 128.7,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 3.3,
+      "first_intensity_visible_at_dE5": 0.05,
+      "share_of_range_below_dE5_of_map": 0.05
+     },
+     "continuous_all": {
+      "path_length_dE": 132.3,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 11.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       8.4,
+       24.7,
+       45.5,
+       85.6
+      ],
+      "adjacent_dE": [
+       16.6,
+       27.5,
+       59.6
+      ],
+      "min_adjacent_dE": 16.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       7.3,
+       21.5,
+       39.3,
+       85.7
+      ],
+      "adjacent_dE": [
+       14.6,
+       25.7,
+       58.5
+      ],
+      "min_adjacent_dE": 14.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       7.3,
+       22.0,
+       42.1,
+       86.4
+      ],
+      "adjacent_dE": [
+       15.1,
+       26.6,
+       56.0
+      ],
+      "min_adjacent_dE": 15.1,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 122.7,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 2.9,
+      "first_intensity_visible_at_dE5": 0.07,
+      "share_of_range_below_dE5_of_map": 0.07
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 96.6,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 25.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 74.9,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 52.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       37.0,
+       53.7,
+       71.7,
+       91.3
+      ],
+      "adjacent_dE": [
+       19.3,
+       23.9,
+       27.3
+      ],
+      "min_adjacent_dE": 19.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       37.0,
+       51.5,
+       61.3,
+       65.6
+      ],
+      "adjacent_dE": [
+       14.5,
+       9.9,
+       4.2
+      ],
+      "min_adjacent_dE": 4.2,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       36.0,
+       47.3,
+       49.6,
+       41.4
+      ],
+      "adjacent_dE": [
+       11.2,
+       2.3,
+       8.6
+      ],
+      "min_adjacent_dE": 2.3,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 40.1,
+      "levels_at_dE10": 4,
+      "weakest_vs_map_dE": 25.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 86.1,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 47.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 69.6,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 65.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       46.9,
+       73.1,
+       92.8,
+       103.0
+      ],
+      "adjacent_dE": [
+       26.8,
+       21.8,
+       21.0
+      ],
+      "min_adjacent_dE": 21.0,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       39.4,
+       56.9,
+       65.1,
+       61.2
+      ],
+      "adjacent_dE": [
+       17.5,
+       9.9,
+       16.8
+      ],
+      "min_adjacent_dE": 9.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       42.0,
+       61.6,
+       73.3,
+       72.5
+      ],
+      "adjacent_dE": [
+       19.7,
+       11.9,
+       6.6
+      ],
+      "min_adjacent_dE": 6.6,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 63.3,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 40.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "bright_fifth": {
+    "background_rgb": [
+     119,
+     117,
+     112
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 114.0,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 2.4,
+      "first_intensity_visible_at_dE5": 0.11,
+      "share_of_range_below_dE5_of_map": 0.11
+     },
+     "continuous_all": {
+      "path_length_dE": 121.8,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 8.3,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       6.0,
+       17.8,
+       31.2,
+       69.2
+      ],
+      "adjacent_dE": [
+       12.3,
+       22.0,
+       57.2
+      ],
+      "min_adjacent_dE": 12.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       4.6,
+       11.9,
+       18.2,
+       68.2
+      ],
+      "adjacent_dE": [
+       7.9,
+       19.2,
+       56.4
+      ],
+      "min_adjacent_dE": 7.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       3.5,
+       10.3,
+       22.4,
+       71.3
+      ],
+      "adjacent_dE": [
+       7.6,
+       20.4,
+       54.5
+      ],
+      "min_adjacent_dE": 7.6,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 105.5,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 2.0,
+      "first_intensity_visible_at_dE5": 0.17,
+      "share_of_range_below_dE5_of_map": 0.17
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 94.4,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 20.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 76.1,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 44.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       30.7,
+       45.3,
+       61.8,
+       81.8
+      ],
+      "adjacent_dE": [
+       17.5,
+       23.6,
+       28.4
+      ],
+      "min_adjacent_dE": 17.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       31.2,
+       44.3,
+       52.7,
+       55.5
+      ],
+      "adjacent_dE": [
+       13.3,
+       8.8,
+       4.1
+      ],
+      "min_adjacent_dE": 4.1,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       30.4,
+       41.2,
+       43.7,
+       36.5
+      ],
+      "adjacent_dE": [
+       11.2,
+       5.5,
+       10.7
+      ],
+      "min_adjacent_dE": 5.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 40.6,
+      "levels_at_dE10": 4,
+      "weakest_vs_map_dE": 20.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 82.5,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 37.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 68.0,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 53.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       37.7,
+       62.1,
+       80.9,
+       88.9
+      ],
+      "adjacent_dE": [
+       25.1,
+       20.9,
+       19.6
+      ],
+      "min_adjacent_dE": 19.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       31.3,
+       46.9,
+       52.5,
+       41.2
+      ],
+      "adjacent_dE": [
+       15.6,
+       6.0,
+       14.3
+      ],
+      "min_adjacent_dE": 6.0,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       33.4,
+       51.5,
+       62.0,
+       58.3
+      ],
+      "adjacent_dE": [
+       18.2,
+       10.5,
+       4.0
+      ],
+      "min_adjacent_dE": 4.0,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 57.4,
+      "levels_at_dE10": 5,
+      "weakest_vs_map_dE": 32.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   }
+  },
+  "GrandRift": {
+   "typical": {
+    "background_rgb": [
+     103,
+     69,
+     40
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 126.5,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 4.5,
+      "first_intensity_visible_at_dE5": 0.02,
+      "share_of_range_below_dE5_of_map": 0.02
+     },
+     "continuous_all": {
+      "path_length_dE": 132.5,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 15.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       11.2,
+       30.9,
+       45.1,
+       68.2
+      ],
+      "adjacent_dE": [
+       20.0,
+       23.5,
+       54.9
+      ],
+      "min_adjacent_dE": 20.0,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       8.4,
+       22.2,
+       29.2,
+       64.3
+      ],
+      "adjacent_dE": [
+       14.2,
+       20.1,
+       53.9
+      ],
+      "min_adjacent_dE": 14.2,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       7.4,
+       20.3,
+       32.3,
+       69.4
+      ],
+      "adjacent_dE": [
+       13.5,
+       21.9,
+       52.3
+      ],
+      "min_adjacent_dE": 13.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 114.7,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 3.5,
+      "first_intensity_visible_at_dE5": 0.05,
+      "share_of_range_below_dE5_of_map": 0.05
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 81.8,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 18.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 67.6,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 40.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       27.1,
+       38.1,
+       50.2,
+       66.5
+      ],
+      "adjacent_dE": [
+       14.0,
+       19.6,
+       25.1
+      ],
+      "min_adjacent_dE": 14.0,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       26.8,
+       37.1,
+       43.0,
+       43.7
+      ],
+      "adjacent_dE": [
+       10.4,
+       6.0,
+       0.9
+      ],
+      "min_adjacent_dE": 0.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       28.0,
+       36.1,
+       35.4,
+       24.3
+      ],
+      "adjacent_dE": [
+       8.1,
+       0.9,
+       11.2
+      ],
+      "min_adjacent_dE": 0.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 30.9,
+      "levels_at_dE10": 3,
+      "weakest_vs_map_dE": 18.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 83.3,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 45.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 66.7,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 63.7,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       44.6,
+       69.7,
+       87.9,
+       94.2
+      ],
+      "adjacent_dE": [
+       26.5,
+       21.3,
+       18.8
+      ],
+      "min_adjacent_dE": 18.8,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       42.0,
+       61.7,
+       71.1,
+       64.5
+      ],
+      "adjacent_dE": [
+       19.8,
+       10.1,
+       13.2
+      ],
+      "min_adjacent_dE": 10.1,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       44.6,
+       66.1,
+       79.3,
+       78.4
+      ],
+      "adjacent_dE": [
+       21.6,
+       13.2,
+       4.4
+      ],
+      "min_adjacent_dE": 4.4,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 62.7,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 43.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "dark_fifth": {
+    "background_rgb": [
+     61,
+     33,
+     18
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 136.1,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 4.9,
+      "first_intensity_visible_at_dE5": 0.01,
+      "share_of_range_below_dE5_of_map": 0.01
+     },
+     "continuous_all": {
+      "path_length_dE": 138.2,
+      "levels_at_dE10": 13,
+      "weakest_vs_map_dE": 16.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       12.2,
+       32.9,
+       52.8,
+       84.0
+      ],
+      "adjacent_dE": [
+       21.1,
+       28.6,
+       58.6
+      ],
+      "min_adjacent_dE": 21.1,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       9.1,
+       24.1,
+       38.5,
+       80.4
+      ],
+      "adjacent_dE": [
+       15.7,
+       25.6,
+       57.8
+      ],
+      "min_adjacent_dE": 15.7,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       8.1,
+       23.5,
+       42.8,
+       85.5
+      ],
+      "adjacent_dE": [
+       16.0,
+       27.2,
+       56.0
+      ],
+      "min_adjacent_dE": 16.0,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 124.9,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 3.7,
+      "first_intensity_visible_at_dE5": 0.04,
+      "share_of_range_below_dE5_of_map": 0.04
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 86.6,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 23.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 67.4,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 49.6,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       34.1,
+       47.8,
+       61.0,
+       75.8
+      ],
+      "adjacent_dE": [
+       16.3,
+       20.2,
+       24.6
+      ],
+      "min_adjacent_dE": 16.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       33.8,
+       47.3,
+       56.2,
+       59.3
+      ],
+      "adjacent_dE": [
+       13.5,
+       8.9,
+       3.2
+      ],
+      "min_adjacent_dE": 3.2,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       35.3,
+       46.3,
+       48.5,
+       40.4
+      ],
+      "adjacent_dE": [
+       11.0,
+       2.4,
+       9.1
+      ],
+      "min_adjacent_dE": 2.4,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 36.5,
+      "levels_at_dE10": 4,
+      "weakest_vs_map_dE": 22.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 82.3,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 46.1,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 66.4,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 63.7,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       45.2,
+       69.2,
+       86.7,
+       94.2
+      ],
+      "adjacent_dE": [
+       25.4,
+       20.5,
+       19.7
+      ],
+      "min_adjacent_dE": 19.7,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       42.8,
+       61.5,
+       70.6,
+       66.7
+      ],
+      "adjacent_dE": [
+       18.8,
+       10.6,
+       15.6
+      ],
+      "min_adjacent_dE": 10.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       44.4,
+       64.6,
+       77.1,
+       76.8
+      ],
+      "adjacent_dE": [
+       20.3,
+       12.6,
+       6.5
+      ],
+      "min_adjacent_dE": 6.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 63.8,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 44.6,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "bright_fifth": {
+    "background_rgb": [
+     133,
+     101,
+     48
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 118.4,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 4.4,
+      "first_intensity_visible_at_dE5": 0.02,
+      "share_of_range_below_dE5_of_map": 0.02
+     },
+     "continuous_all": {
+      "path_length_dE": 127.7,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 15.6,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       11.0,
+       30.3,
+       39.9,
+       52.7
+      ],
+      "adjacent_dE": [
+       19.6,
+       18.3,
+       50.9
+      ],
+      "min_adjacent_dE": 18.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       8.5,
+       22.7,
+       25.6,
+       49.9
+      ],
+      "adjacent_dE": [
+       14.5,
+       15.1,
+       49.3
+      ],
+      "min_adjacent_dE": 14.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       7.9,
+       20.8,
+       26.5,
+       53.4
+      ],
+      "adjacent_dE": [
+       13.4,
+       16.7,
+       47.6
+      ],
+      "min_adjacent_dE": 13.4,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 107.2,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 3.5,
+      "first_intensity_visible_at_dE5": 0.05,
+      "share_of_range_below_dE5_of_map": 0.05
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 79.6,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 13.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 70.1,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 30.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       20.3,
+       29.6,
+       43.2,
+       63.5
+      ],
+      "adjacent_dE": [
+       12.8,
+       20.3,
+       26.4
+      ],
+      "min_adjacent_dE": 12.8,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       20.1,
+       27.3,
+       30.3,
+       28.9
+      ],
+      "adjacent_dE": [
+       7.3,
+       3.6,
+       1.9
+      ],
+      "min_adjacent_dE": 1.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       20.7,
+       25.3,
+       21.5,
+       7.8
+      ],
+      "adjacent_dE": [
+       4.8,
+       4.1,
+       13.8
+      ],
+      "min_adjacent_dE": 4.1,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 26.6,
+      "levels_at_dE10": 2,
+      "weakest_vs_map_dE": 13.7,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 87.9,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 48.2,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 69.0,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 68.7,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       47.2,
+       75.1,
+       95.7,
+       102.5
+      ],
+      "adjacent_dE": [
+       29.3,
+       23.6,
+       18.6
+      ],
+      "min_adjacent_dE": 18.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       43.8,
+       65.9,
+       77.0,
+       70.0
+      ],
+      "adjacent_dE": [
+       22.1,
+       11.5,
+       10.9
+      ],
+      "min_adjacent_dE": 10.9,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       48.3,
+       72.7,
+       88.0,
+       88.0
+      ],
+      "adjacent_dE": [
+       24.5,
+       15.4,
+       2.6
+      ],
+      "min_adjacent_dE": 2.6,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 63.8,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 45.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   }
+  },
+  "Lockdown": {
+   "typical": {
+    "background_rgb": [
+     55,
+     91,
+     98
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 117.4,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 1.3,
+      "first_intensity_visible_at_dE5": 0.2,
+      "share_of_range_below_dE5_of_map": 0.2
+     },
+     "continuous_all": {
+      "path_length_dE": 123.1,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 4.7,
+      "first_intensity_visible_at_dE5": 0.02,
+      "share_of_range_below_dE5_of_map": 0.02
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       3.8,
+       14.2,
+       34.7,
+       83.3
+      ],
+      "adjacent_dE": [
+       10.8,
+       25.5,
+       60.9
+      ],
+      "min_adjacent_dE": 10.8,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       3.4,
+       11.9,
+       29.5,
+       84.4
+      ],
+      "adjacent_dE": [
+       8.9,
+       23.8,
+       60.0
+      ],
+      "min_adjacent_dE": 8.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       3.3,
+       12.5,
+       31.7,
+       83.7
+      ],
+      "adjacent_dE": [
+       9.5,
+       24.2,
+       57.4
+      ],
+      "min_adjacent_dE": 9.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 112.4,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 1.3,
+      "first_intensity_visible_at_dE5": 0.23,
+      "share_of_range_below_dE5_of_map": 0.23
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 106.4,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 24.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 82.6,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 53.2,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       36.2,
+       54.2,
+       74.6,
+       97.2
+      ],
+      "adjacent_dE": [
+       21.4,
+       27.4,
+       30.6
+      ],
+      "min_adjacent_dE": 21.4,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       37.4,
+       53.5,
+       64.6,
+       70.0
+      ],
+      "adjacent_dE": [
+       16.2,
+       11.4,
+       5.5
+      ],
+      "min_adjacent_dE": 5.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       35.0,
+       47.9,
+       51.9,
+       45.2
+      ],
+      "adjacent_dE": [
+       13.1,
+       5.4,
+       8.2
+      ],
+      "min_adjacent_dE": 5.4,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 47.0,
+      "levels_at_dE10": 5,
+      "weakest_vs_map_dE": 24.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 85.2,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 39.0,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 70.6,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 54.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       39.6,
+       64.8,
+       84.4,
+       95.3
+      ],
+      "adjacent_dE": [
+       25.5,
+       21.5,
+       21.6
+      ],
+      "min_adjacent_dE": 21.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       28.5,
+       42.2,
+       46.3,
+       37.3
+      ],
+      "adjacent_dE": [
+       13.7,
+       6.0,
+       17.5
+      ],
+      "min_adjacent_dE": 6.0,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       30.9,
+       47.3,
+       56.3,
+       51.9
+      ],
+      "adjacent_dE": [
+       16.5,
+       9.0,
+       6.0
+      ],
+      "min_adjacent_dE": 6.0,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 57.7,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 29.3,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "dark_fifth": {
+    "background_rgb": [
+     41,
+     49,
+     53
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 128.4,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 2.5,
+      "first_intensity_visible_at_dE5": 0.09,
+      "share_of_range_below_dE5_of_map": 0.09
+     },
+     "continuous_all": {
+      "path_length_dE": 132.1,
+      "levels_at_dE10": 12,
+      "weakest_vs_map_dE": 8.6,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       6.7,
+       21.8,
+       45.4,
+       90.2
+      ],
+      "adjacent_dE": [
+       15.3,
+       28.9,
+       61.3
+      ],
+      "min_adjacent_dE": 15.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       5.7,
+       18.1,
+       38.0,
+       90.2
+      ],
+      "adjacent_dE": [
+       12.7,
+       26.6,
+       60.6
+      ],
+      "min_adjacent_dE": 12.7,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       5.7,
+       19.0,
+       41.3,
+       91.3
+      ],
+      "adjacent_dE": [
+       13.5,
+       27.5,
+       58.2
+      ],
+      "min_adjacent_dE": 13.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 122.1,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 2.2,
+      "first_intensity_visible_at_dE5": 0.12,
+      "share_of_range_below_dE5_of_map": 0.12
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 99.8,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 26.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 75.7,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 56.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       39.8,
+       57.2,
+       74.9,
+       93.6
+      ],
+      "adjacent_dE": [
+       20.3,
+       24.4,
+       27.5
+      ],
+      "min_adjacent_dE": 20.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       40.5,
+       56.6,
+       67.5,
+       72.4
+      ],
+      "adjacent_dE": [
+       16.1,
+       11.0,
+       4.9
+      ],
+      "min_adjacent_dE": 4.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       38.9,
+       52.0,
+       55.8,
+       48.3
+      ],
+      "adjacent_dE": [
+       13.2,
+       3.9,
+       7.4
+      ],
+      "min_adjacent_dE": 3.9,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 44.9,
+      "levels_at_dE10": 5,
+      "weakest_vs_map_dE": 27.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 82.9,
+      "levels_at_dE10": 8,
+      "weakest_vs_map_dE": 41.3,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 68.3,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 57.2,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       41.5,
+       65.7,
+       84.3,
+       94.6
+      ],
+      "adjacent_dE": [
+       24.7,
+       20.5,
+       21.0
+      ],
+      "min_adjacent_dE": 20.5,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       33.7,
+       49.0,
+       55.6,
+       51.5
+      ],
+      "adjacent_dE": [
+       15.3,
+       8.6,
+       17.5
+      ],
+      "min_adjacent_dE": 8.6,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       35.4,
+       52.8,
+       62.8,
+       60.9
+      ],
+      "adjacent_dE": [
+       17.4,
+       10.3,
+       6.8
+      ],
+      "min_adjacent_dE": 6.8,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 60.7,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 34.9,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   },
+   "bright_fifth": {
+    "background_rgb": [
+     84,
+     128,
+     140
+    ],
+    "traffic": {
+     "continuous_hotspots": {
+      "path_length_dE": 110.3,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 1.0,
+      "first_intensity_visible_at_dE5": 0.28,
+      "share_of_range_below_dE5_of_map": 0.28
+     },
+     "continuous_all": {
+      "path_length_dE": 117.2,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 3.5,
+      "first_intensity_visible_at_dE5": 0.11,
+      "share_of_range_below_dE5_of_map": 0.11
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       2.5,
+       10.1,
+       28.4,
+       78.5
+      ],
+      "adjacent_dE": [
+       8.1,
+       23.4,
+       60.4
+      ],
+      "min_adjacent_dE": 8.1,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       2.1,
+       7.0,
+       22.5,
+       79.7
+      ],
+      "adjacent_dE": [
+       5.7,
+       21.8,
+       59.6
+      ],
+      "min_adjacent_dE": 5.7,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       1.7,
+       7.2,
+       24.8,
+       79.0
+      ],
+      "adjacent_dE": [
+       6.2,
+       22.0,
+       57.0
+      ],
+      "min_adjacent_dE": 6.2,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 104.8,
+      "levels_at_dE10": 10,
+      "weakest_vs_map_dE": 1.0,
+      "first_intensity_visible_at_dE5": 0.38,
+      "share_of_range_below_dE5_of_map": 0.38
+     }
+    },
+    "kills": {
+     "continuous_hotspots": {
+      "path_length_dE": 108.4,
+      "levels_at_dE10": 11,
+      "weakest_vs_map_dE": 22.5,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 85.3,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 50.8,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       34.2,
+       52.1,
+       73.3,
+       97.6
+      ],
+      "adjacent_dE": [
+       21.3,
+       28.3,
+       32.0
+      ],
+      "min_adjacent_dE": 21.3,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       35.5,
+       51.7,
+       63.3,
+       69.2
+      ],
+      "adjacent_dE": [
+       16.3,
+       12.0,
+       6.5
+      ],
+      "min_adjacent_dE": 6.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       33.1,
+       46.3,
+       51.6,
+       47.2
+      ],
+      "adjacent_dE": [
+       13.5,
+       7.7,
+       9.6
+      ],
+      "min_adjacent_dE": 7.7,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 49.8,
+      "levels_at_dE10": 5,
+      "weakest_vs_map_dE": 23.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    },
+    "deaths": {
+     "continuous_hotspots": {
+      "path_length_dE": 85.6,
+      "levels_at_dE10": 9,
+      "weakest_vs_map_dE": 36.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "continuous_all": {
+      "path_length_dE": 71.3,
+      "levels_at_dE10": 7,
+      "weakest_vs_map_dE": 51.4,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     },
+     "banded": {
+      "bands_vs_map_dE": [
+       37.2,
+       62.4,
+       82.5,
+       93.4
+      ],
+      "adjacent_dE": [
+       25.5,
+       21.9,
+       21.6
+      ],
+      "min_adjacent_dE": 21.6,
+      "bands_at_least_dE10_apart": true
+     },
+     "banded_deuteranopia": {
+      "bands_vs_map_dE": [
+       25.6,
+       38.5,
+       41.3,
+       27.8
+      ],
+      "adjacent_dE": [
+       13.0,
+       3.7,
+       16.9
+      ],
+      "min_adjacent_dE": 3.7,
+      "bands_at_least_dE10_apart": false
+     },
+     "banded_protanopia": {
+      "bands_vs_map_dE": [
+       28.2,
+       44.3,
+       53.0,
+       47.7
+      ],
+      "adjacent_dE": [
+       16.1,
+       8.8,
+       5.5
+      ],
+      "min_adjacent_dE": 5.5,
+      "bands_at_least_dE10_apart": false
+     },
+     "continuous_hotspots_deuteranopia": {
+      "path_length_dE": 55.7,
+      "levels_at_dE10": 6,
+      "weakest_vs_map_dE": 26.2,
+      "first_intensity_visible_at_dE5": 0.0,
+      "share_of_range_below_dE5_of_map": 0.0
+     }
+    }
+   }
+  }
+ }
+}
