@@ -33,7 +33,7 @@ describe('traffic colour', () => {
       const [r, g] = trafficColor(k / 20)
       expect(g).toBeGreaterThanOrEqual(r - 25) // never red or magenta
     }
-    expect(trafficGradient()).toBe('linear-gradient(to right, #1a7fa3 0%, #38d3e0 50%, #ffe953 85%, #fff6a8 100%)')
+    expect(trafficGradient()).toBe('linear-gradient(to right, #1a7fa3 0%, #38d3e0 50%, #ffe953 85%, #fffce6 100%)')
   })
 
   it('position is log1p over the fixed domain: 0 → nothing, max → 1, low values lifted above linear', () => {
@@ -88,7 +88,7 @@ describe('traffic visibility policy (Focused view, S 2026-10-23)', () => {
       expect(alphaOf(v)).toBeGreaterThanOrEqual(last)
       last = alphaOf(v)
     }
-    expect(alphaOf(MAX)).toBeCloseTo(0.95, 9)
+    expect(alphaOf(MAX)).toBeCloseTo(1, 9)
     expect(alphaOf(MAX)).toBeGreaterThan(alphaOf(120) * 4) // the strongest cell against a typical visible one
   })
 

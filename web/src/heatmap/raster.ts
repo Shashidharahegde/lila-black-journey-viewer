@@ -3,8 +3,9 @@
 // The 64 × 64 cells stay the numbers. This only paints them: each non-zero cell becomes a soft bump
 // centred on the cell, with a bounded falloff. A bump's peak opacity and colour come from the cell's own
 // value, so an isolated cell shows exactly its own intensity at its centre and nothing is added up
-// across neighbours (no invented peaks); where bumps overlap the stronger one wins the opacity and the
-// colours blend. Nothing here reads or changes the raw values, and hover reads the cells, not these pixels.
+// across neighbours (no invented peaks); where bumps overlap the stronger one wins the opacity, and the
+// colours blend weighted by the square of each bump, so a strong cell keeps its own bright colour instead
+// of being averaged towards its dimmer neighbours (S, 2026-10-23: hotspots stand out more). Nothing here reads or changes the raw values, and hover reads the cells, not these pixels.
 //
 // The picture covers the whole minimap, row 0 = north, so it is placed with the minimap's own bounds and
 // follows each map's aspect ratio (GrandRift's is not square) without any extra maths.
@@ -77,10 +78,11 @@ export function renderRaster(
         const bump = peak * ((g0 - edge) / (1 - edge))
         const k = y * size + x
         if (bump > alpha[k]) alpha[k] = bump
-        weight[k] += bump
-        red[k] += bump * r
-        green[k] += bump * g
-        blue[k] += bump * b
+        const w = bump * bump
+        weight[k] += w
+        red[k] += w * r
+        green[k] += w * g
+        blue[k] += w * b
       }
     }
   }

@@ -18,6 +18,8 @@ export interface Evidence {
   low: boolean
   /** Kill/Killed pairs on this map and date (EC-12): the Killed counts as a death, the Kill is left out of kills. Not used for traffic */
   pairs: number
+  /** deaths only: storm deaths among `total` (from the index's human-file counts); 0 for the other layers */
+  stormDeaths: number
 }
 
 /** Matches contributing to a layer, from the index (its per-match counts equal the heatmap totals). */
@@ -30,17 +32,17 @@ function contributingMatches(index: Index, map: string, date: string | null, lay
   return n
 }
 
-function pairCount(index: Index, map: string, date: string | null): number {
+function countSum(index: Index, map: string, date: string | null, key: 'kill_killed_pair' | 'storm_death'): number {
   return index.matches
     .filter((m) => m.map === map && (date === null || m.date === date))
-    .reduce((sum, m) => sum + m.counts.kill_killed_pair, 0)
+    .reduce((sum, m) => sum + m.counts[key], 0)
 }
 
 export function heatmapEvidence(index: Index, file: HeatmapFile, layer: HeatmapLayerKey, date: string | null): Evidence {
   const key = date ?? 'all'
   const sample = file.samples[key]
   if (!sample) {
-    return { kind: 'no-data', total: 0, humanJourneys: 0, matchesWithHumans: 0, contributing: 0, low: false, pairs: 0 }
+    return { kind: 'no-data', total: 0, humanJourneys: 0, matchesWithHumans: 0, contributing: 0, low: false, pairs: 0, stormDeaths: 0 }
   }
   const contributing = layer === 'traffic' ? sample.matches : contributingMatches(index, file.map, date, layer)
   const empty = (file.layers[layer][key] ?? []).length === 0
@@ -51,19 +53,50 @@ export function heatmapEvidence(index: Index, file: HeatmapFile, layer: HeatmapL
     matchesWithHumans: sample.matches,
     contributing,
     low: !empty && contributing < LOW_EVIDENCE_MATCHES,
-    pairs: layer === 'traffic' ? 0 : pairCount(index, file.map, date),
+    pairs: layer === 'traffic' ? 0 : countSum(index, file.map, date, 'kill_killed_pair'),
+    stormDeaths: layer === 'deaths' ? countSum(index, file.map, date, 'storm_death') : 0,
   }
 }
 
-/** "315 deaths in 314 matches", "About 26 min of estimated player time". */
-export function layerEvidenceText(layer: HeatmapLayerKey, e: Evidence): string {
-  if (layer === 'traffic') return `About ${formatPlayerTime(e.total)} of estimated player time`
-  return `${plural(e.total, layer === 'kills' ? 'kill' : 'death')} in ${plural(e.contributing, 'match', 'matches')}`
+export interface SummaryFigure {
+  value: string
+  label: string
 }
 
-/** "554 human journeys in 553 matches". */
-export function journeysText(e: Evidence): string {
-  return `${plural(e.humanJourneys, 'human journey')} in ${plural(e.matchesWithHumans, 'match', 'matches')}`
+export interface LayerSummary {
+  /** the layer's total, with what it counts */
+  lead: SummaryFigure
+  /** at most three figures that put the total in context; every ratio says its denominator in its label */
+  figures: SummaryFigure[]
+}
+
+const oneDecimal = (n: number) => (Math.round(n * 10) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 })
+const percent = (part: number, whole: number) => (whole > 0 ? `${Math.round((part / whole) * 100)}%` : '–')
+
+/**
+ * The summary card of the Heatmaps panel: the total and what it means per match or per journey. Only ratios of the figures above
+ * (all from the heatmap file and the index); nothing new is counted. Matches = matches on this map and date with a human journey.
+ */
+export function layerSummary(layer: HeatmapLayerKey, e: Evidence): LayerSummary {
+  const matches = e.matchesWithHumans
+  if (layer === 'traffic') {
+    return {
+      lead: { value: formatPlayerTime(e.total), label: 'estimated time humans spent on the map' },
+      figures: [
+        { value: e.humanJourneys > 0 ? formatPlayerTime(e.total / e.humanJourneys) : '–', label: 'per human journey' },
+        { value: e.humanJourneys.toLocaleString('en-US'), label: 'human journeys' },
+        { value: matches.toLocaleString('en-US'), label: 'matches' },
+      ],
+    }
+  }
+  const noun = layer === 'kills' ? 'kill' : 'death'
+  const figures: SummaryFigure[] = [
+    { value: matches > 0 ? oneDecimal(e.total / matches) : '–', label: `${noun}s per match` },
+    { value: percent(e.contributing, matches), label: `of matches had a ${noun}` },
+  ]
+  if (layer === 'deaths') figures.push({ value: `${e.stormDeaths.toLocaleString('en-US')}`, label: `storm deaths (${percent(e.stormDeaths, e.total)})` })
+  else figures.push({ value: matches.toLocaleString('en-US'), label: 'matches' })
+  return { lead: { value: e.total.toLocaleString('en-US'), label: layer === 'kills' ? 'kills by human players' : 'human deaths' }, figures }
 }
 
 export function lowEvidenceText(layer: HeatmapLayerKey, e: Evidence): string {
@@ -98,5 +131,3 @@ export function pairNote(layer: HeatmapLayerKey, pairs: number): string | null {
     ? `Includes ${events} from Kill/Killed pairs (the Killed half; cause unknown).`
     : `Leaves out ${events} from Kill/Killed pairs (the Kill half; cause unknown).`
 }
-
-export const COVERAGE_NOTE = 'Telemetry covers recorded players only; most matches have one recorded human.'

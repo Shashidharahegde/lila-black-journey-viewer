@@ -11,9 +11,10 @@ export default function TabBar() {
   const setTab = useStore((s) => s.setTab)
   return (
     <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="shrink-0 border-b bg-card px-4">
+      {/* Heatmaps first: it is the tab Explore opens on */}
       <TabsList aria-label="Workspace">
-        <TabsTrigger value="journeys">Journeys &amp; Playback</TabsTrigger>
         <TabsTrigger value="heatmaps">Heatmaps</TabsTrigger>
+        <TabsTrigger value="journeys">Journeys &amp; Playback</TabsTrigger>
       </TabsList>
     </Tabs>
   )

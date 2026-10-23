@@ -12,22 +12,17 @@ import type { HeatmapFile, Index, ZoneRecord, ZonesFile } from '../data/types'
 import { imageBounds, spaceHeight } from '../map/space'
 import { cellRect } from './grid'
 import {
-  DEFAULT_SHOWN,
-  NO_CONSISTENT_TEXT,
-  failedChecks,
   footprintPolygon,
   insideOutline,
   layerOf,
-  regionWorldUnits,
-  visibleConsistent,
-  zoneOutline,
+  passingZones,
+  shareOf,
   sharePercent,
-  summarizeZones,
-  zoneDetails,
   zoneFootprint,
   zoneKey,
   zoneLayer,
-  zoneRowText,
+  zoneMetric,
+  zoneOutline,
   zoneSupportText,
   zoneValueText,
 } from './zones'
@@ -37,6 +32,17 @@ const files = { AmbroseValley: AmbroseValleyZones, GrandRift: GrandRiftZones, Lo
 const heat = { AmbroseValley: AmbroseValleyHeat, GrandRift: GrandRiftHeat, Lockdown: LockdownHeat } as unknown as Record<string, HeatmapFile>
 const MAPS = Object.keys(files)
 const LAYERS = ['kills', 'deaths', 'traffic'] as const
+
+/** The published checks a region failed (empty when it passes them all); a test-side reading of the rules, not used by the interface. */
+function failedChecks(z: ZoneRecord, rules: ZonesFile['rules']): string[] {
+  const failed: string[] = []
+  if (z.stability < rules.min_stability) failed.push('stability')
+  if (z.matches < rules.min_matches) failed.push('matches')
+  if (z.players < rules.min_players) failed.push('players')
+  if (z.largest_match_share > rules.max_one_match_share) failed.push('one match')
+  if (z.survived_shifts < rules.required_shifts) failed.push('shifted grids')
+  return failed
+}
 
 describe('the generated region files', () => {
   it.each(MAPS)('%s: the same selections as the heatmap, and layer totals equal the heatmap totals', (id) => {
@@ -58,6 +64,8 @@ describe('the generated region files', () => {
         expect(result.consistent).toBe(result.zones.filter((z) => z.tier === 'consistent').length)
         expect(result.candidates).toBe(result.zones.length)
         expect(result.zones.reduce((sum, z) => sum + z.share, 0)).toBeLessThanOrEqual(1.0001)
+        // observed candidates fail at least one check, so leaving them out is never arbitrary
+        for (const z of result.zones.filter((r) => r.tier === 'observed')) expect(failedChecks(z, rules).length).toBeGreaterThan(0)
         for (const z of result.zones.filter((r) => r.tier === 'consistent')) {
           expect(failedChecks(z, rules)).toEqual([])
           expect(z.matches).toBeLessThanOrEqual(selection.matches)
@@ -96,34 +104,18 @@ describe('the generated region files', () => {
 })
 
 describe('which regions are shown', () => {
-  it('shows at most three consistent regions at first, strongest first, and says how many more there are', () => {
+  it('hotspots are the consistent regions only, strongest first; the observed candidates are not shown', () => {
     const layer = zoneLayer(AmbroseValleyZones as unknown as ZonesFile, null, 'kills')!
-    const summary = summarizeZones(layer)
-    expect(DEFAULT_SHOWN).toBe(3)
-    expect(summary.consistent.length).toBe(layer.consistent)
-    expect(summary.shown).toHaveLength(3)
-    expect(summary.hidden).toBe(layer.consistent - 3)
-    expect(summary.shown.map((z) => z.value)).toEqual([...summary.shown.map((z) => z.value)].sort((a, b) => b - a))
-    expect(summarizeZones(layer, Infinity).hidden).toBe(0)
+    const hotspots = passingZones(layer)
+    expect(hotspots).toHaveLength(layer.consistent)
+    expect(hotspots.every((z) => z.tier === 'consistent')).toBe(true)
+    expect(hotspots.map((z) => z.value)).toEqual([...hotspots.map((z) => z.value)].sort((a, b) => b - a))
   })
 
-  it('fewer consistent regions than the limit shows just those; the observed ones keep their measurements', () => {
-    const layer = zoneLayer(AmbroseValleyZones as unknown as ZonesFile, null, 'deaths')!
-    const summary = summarizeZones(layer)
-    expect(summary.consistent.length).toBe(layer.consistent)
-    expect(summary.shown).toHaveLength(Math.min(3, layer.consistent))
-    expect(summary.observed.length + summary.consistent.length).toBe(layer.candidates)
-    expect(summary.observed.every((z) => z.value > 0 && z.matches >= 1)).toBe(true)
-  })
-
-  it('does not force three: some layers have none', () => {
+  it('does not force any: some layers have none', () => {
     for (const [id, layerName] of [['GrandRift', 'deaths'], ['GrandRift', 'kills'], ['Lockdown', 'kills']] as const) {
-      const layer = zoneLayer(files[id], null, layerName)!
-      expect(summarizeZones(layer).consistent).toHaveLength(0)
-      expect(summarizeZones(layer).shown).toHaveLength(0)
-      expect(summarizeZones(layer).observed.length).toBeGreaterThan(0)
+      expect(passingZones(zoneLayer(files[id], null, layerName)!)).toHaveLength(0)
     }
-    expect(NO_CONSISTENT_TEXT).toBe('No consistent concentration detected in this selection.')
   })
 
   it('a date with no human journeys has no region data; a date with one match cannot have a consistent region', () => {
@@ -208,15 +200,18 @@ describe('how a region is described', () => {
   const sample = (over: Partial<ZoneRecord> = {}): ZoneRecord => ({
     i: 1, j: 1, value: 139, share: 0.084, matches: 57, players: 44, largest_match_share: 0.15, stability: 1, survived_shifts: 3, tier: 'consistent', ...over,
   })
-  const rules = AmbroseValleyZones.rules
 
   it('says what was recorded with the layer\'s own unit', () => {
     expect(zoneValueText('kills', 139)).toBe('139 kills')
     expect(zoneValueText('kills', 1)).toBe('1 kill')
     expect(zoneValueText('deaths', 25)).toBe('25 deaths')
     expect(zoneValueText('traffic', 2460)).toBe('41 min of estimated player time')
-    expect(zoneRowText('kills', sample())).toBe('139 kills · 8% of the layer')
     expect(zoneSupportText(sample())).toBe('57 matches · 44 players')
+    expect(zoneMetric('kills', 139)).toEqual({ value: '139', unit: 'kills' })
+    expect(zoneMetric('deaths', 1)).toEqual({ value: '1', unit: 'death' })
+    expect(zoneMetric('traffic', 136 * 60)).toEqual({ value: '136 min', unit: 'player time' })
+    expect(shareOf('kills')).toBe('of all kills')
+    expect(shareOf('traffic')).toBe('of all player time')
     expect(zoneSupportText(sample({ matches: 1, players: 1 }))).toBe('1 match · 1 player')
   })
 
@@ -225,41 +220,8 @@ describe('how a region is described', () => {
     expect(sharePercent(0.084)).toBe('8%')
   })
 
-  it('a consistent region lists no failed check; an observed one names each check it failed', () => {
-    expect(failedChecks(sample(), rules)).toEqual([])
-    const failed = failedChecks(sample({ stability: 0.7, matches: 4, players: 2, largest_match_share: 0.74, survived_shifts: 1, tier: 'observed' }), rules)
-    expect(failed).toHaveLength(5)
-    expect(failed.join(' ')).toMatch(/70%/)
-    expect(failed.join(' ')).toMatch(/4 matches/)
-    expect(failed.join(' ')).toMatch(/2 players/)
-    expect(failed.join(' ')).toMatch(/74% from one match/)
-    expect(failed.join(' ')).toMatch(/1 of 3/)
-  })
-
-  it('every observed region in the files fails at least one check (so the label is never arbitrary)', () => {
-    for (const id of MAPS) {
-      for (const selection of Object.values(files[id].selections)) {
-        for (const layer of LAYERS) {
-          for (const z of selection.layers[layer].zones.filter((r) => r.tier === 'observed')) {
-            expect(failedChecks(z, files[id].rules).length).toBeGreaterThan(0)
-          }
-        }
-      }
-    }
-  })
-
-  it('details give value, share, matches, players, and each layer\'s own extras, kept apart from event contribution', () => {
-    const kills = zoneDetails('kills', sample(), rules).map((r) => r.label)
-    expect(kills).toEqual(['Kills recorded', 'Share of the layer', 'Matches', 'Recorded players', 'Largest single match', 'Repeated when matches are resampled', 'Holds on shifted grids'])
-    const traffic = zoneDetails('traffic', sample({ value: 2460, journeys: 31 }), rules)
-    expect(traffic.find((r) => r.label === 'Journeys through it')?.value).toBe('31')
-    expect(traffic[0].label).toBe('Estimated player time')
-    const deaths = zoneDetails('deaths', sample({ storm_deaths: 3 }), rules)
-    expect(deaths.find((r) => r.label === 'of which storm deaths')?.value).toBe('3')
-    expect(zoneDetails('deaths', sample({ storm_deaths: 0 }), rules).some((r) => r.label === 'of which storm deaths')).toBe(false)
-  })
-
   it('a layer helper reads one layer out of a selection', () => {
+
     expect(layerOf(AmbroseValleyZones.selections.all as never, 'kills')).toBe(AmbroseValleyZones.selections.all.layers.kills)
   })
 })
@@ -278,29 +240,10 @@ describe('hotspot outlines (circles around the validated regions)', () => {
     expect(insideOutline([o.cx + o.radius * 1.01, o.cy], o)).toBe(false)
   })
 
-  it('the outlined regions are the consistent ones only: up to three at first, all of them once expanded, none when none qualifies', () => {
-    const av = files.AmbroseValley.selections.all.layers.traffic
-    expect(av.consistent).toBeGreaterThan(DEFAULT_SHOWN)
-    expect(visibleConsistent(av, false)).toHaveLength(DEFAULT_SHOWN)
-    expect(visibleConsistent(av, true)).toHaveLength(av.consistent)
-    for (const z of visibleConsistent(av, true)) expect(z.tier).toBe('consistent')
-    expect(visibleConsistent(av, false).map(zoneKey)).toEqual(visibleConsistent(av, true).slice(0, DEFAULT_SHOWN).map(zoneKey))
-    for (const id of ['GrandRift', 'Lockdown']) {
-      const none = files[id].selections.all.layers.kills
-      expect(none.consistent).toBe(0)
-      expect(visibleConsistent(none, true)).toEqual([])
-    }
-  })
-
   it('numbers follow the strongest-first order of the panel', () => {
     for (const layer of LAYERS) {
-      const shown = visibleConsistent(files.AmbroseValley.selections.all.layers[layer], true)
+      const shown = passingZones(files.AmbroseValley.selections.all.layers[layer])
       for (let k = 1; k < shown.length; k++) expect(shown[k].value).toBeLessThanOrEqual(shown[k - 1].value)
     }
-  })
-
-  it('the size note is the minimap scale over the regions per side', () => {
-    expect(regionWorldUnits(900, 16)).toBe(56) // rounded
-    for (const id of MAPS) expect(regionWorldUnits(index.maps[id].scale, files[id].zones_per_side)).toBeGreaterThan(0)
   })
 })

@@ -5,7 +5,7 @@ import GrandRift from '../../public/data/heatmaps/GrandRift.json'
 import Lockdown from '../../public/data/heatmaps/Lockdown.json'
 import indexJson from '../../public/data/index.json'
 import type { HeatmapFile, HeatmapLayerKey, Index, MatchFile } from '../data/types'
-import { LOW_EVIDENCE_MATCHES, emptyText, heatmapEvidence, journeysText, layerEvidenceText, lowEvidenceText, pairNote, partialText } from './evidence'
+import { LOW_EVIDENCE_MATCHES, emptyText, heatmapEvidence, layerSummary, lowEvidenceText, pairNote, partialText } from './evidence'
 
 const index = indexJson as Index
 const files = { AmbroseValley, GrandRift, Lockdown } as unknown as Record<string, HeatmapFile>
@@ -15,18 +15,42 @@ const matches: MatchFile[] = readdirSync('public/data/matches').map(
   (f) => JSON.parse(readFileSync(`public/data/matches/${f}`, 'utf-8')) as MatchFile,
 )
 
+describe('summary card', () => {
+  it('AmbroseValley, all dates: totals and ratios of the same figures, each with its denominator in the label', () => {
+    const deaths = layerSummary('deaths', evidence('AmbroseValley', 'deaths', null))
+    expect(deaths.lead).toEqual({ value: '315', label: 'human deaths' })
+    expect(deaths.figures.slice(0, 2)).toEqual([
+      { value: '0.6', label: 'deaths per match' }, // 315 / 553
+      { value: '57%', label: 'of matches had a death' }, // 314 / 553
+    ])
+    const traffic = layerSummary('traffic', evidence('AmbroseValley', 'traffic', null))
+    expect(traffic.figures.map((f) => f.label)).toEqual(['per human journey', 'human journeys', 'matches'])
+    expect(traffic.figures.slice(1).map((f) => f.value)).toEqual(['554', '553'])
+  })
+
+  it('storm deaths from the index agree with the region file, and never exceed the deaths', () => {
+    for (const map of Object.keys(files)) {
+      const zones = JSON.parse(readFileSync(`public/data/zones/${map}.json`, 'utf-8')) as { selections: Record<string, { layers: { deaths: { storm_deaths?: number } } }> }
+      for (const key of Object.keys(files[map].samples)) {
+        const e = evidence(map, 'deaths', key === 'all' ? null : key)
+        expect(e.stormDeaths).toBeLessThanOrEqual(e.total)
+        const fromZones = zones.selections[key]?.layers.deaths.storm_deaths
+        if (fromZones !== undefined) expect(e.stormDeaths).toBe(fromZones)
+      }
+    }
+  })
+})
+
 describe('evidence lines', () => {
   it('AmbroseValley deaths, all dates: the counts and the words, from the real files', () => {
     const e = evidence('AmbroseValley', 'deaths', null)
     expect(e).toMatchObject({ kind: 'ok', total: 315, humanJourneys: 554, matchesWithHumans: 553, contributing: 314, low: false })
-    expect(layerEvidenceText('deaths', e)).toBe('315 deaths in 314 matches')
-    expect(journeysText(e)).toBe('554 human journeys in 553 matches')
   })
 
   it('traffic says "about" and counts the matches with a human journey', () => {
     const e = evidence('GrandRift', 'traffic', '2026-02-13')
     expect(e.contributing).toBe(5)
-    expect(layerEvidenceText('traffic', e)).toBe('About 26 min of estimated player time')
+    expect(layerSummary('traffic', e).lead.value).toBe('26 min')
   })
 
   it.each(['kills', 'deaths'] as const)('%s: contributing matches equal the matches that have such an event in the match files', (layer) => {

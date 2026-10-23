@@ -28,23 +28,5 @@ export const LAYER_LABEL: Record<HeatmapLayerKey, string> = {
   deaths: 'Deaths',
 }
 
-/** What a layer shows, in the words of spec 06. */
-export const LAYER_NOTE: Record<HeatmapLayerKey, string> = {
-  traffic: 'Estimated observed player time',
-  kills: 'Where humans stood when they killed',
-  deaths: 'Where humans died, storm included',
-}
-
 export const MODE_LABEL: Record<HeatmapMode, string> = { focused: 'Focused', all: 'All activity' }
 
-export const MODE_NOTE: Record<HeatmapMode, string> = {
-  focused: 'Focused hides cells under 30 s of estimated player time, shows 30 to 60 s as a barely visible trace, and lets stronger cells rise steeply. No number is removed: every cell is still in the hover.',
-  all: 'All activity shows every observed cell at a clearly visible strength, stronger where there is more.',
-}
-
-export const dateText = (date: string | null) => date ?? 'all dates'
-
-/** The scope line: what the heatmap is built from. It never says "match" as if one match were selected. */
-export function scopeLine(map: string, date: string | null): string {
-  return `All human journeys · ${map} · ${dateText(date)}`
-}

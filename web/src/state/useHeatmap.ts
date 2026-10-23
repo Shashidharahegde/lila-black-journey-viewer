@@ -41,7 +41,7 @@ const loadedZones = new Map<string, ZonesFile>()
 
 /**
  * Loads the selected map's region statistics (the interpretation layer) with the heatmap. If they fail to load the
- * heatmap itself still works; the concentrations list just says they are unavailable.
+ * heatmap itself still works; the region list just says they are unavailable.
  */
 export function useZonesFile(): void {
   const map = useStore((s) => s.selection?.map ?? null)

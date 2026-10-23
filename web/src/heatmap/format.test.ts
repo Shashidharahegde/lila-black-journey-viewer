@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cellValueText, formatPlayerTime, plural, scopeLine } from './format'
+import { cellValueText, formatPlayerTime, plural } from './format'
 
 describe('formatPlayerTime', () => {
   it('says "under 1 s" below a second, seconds below a minute and minutes after', () => {
@@ -30,10 +30,5 @@ describe('plural and cell values', () => {
   it('says traffic is an estimate', () => {
     expect(cellValueText('traffic', 2460)).toBe('41 min of estimated player time')
     expect(cellValueText('traffic', 0.1)).toBe('under 1 s of estimated player time')
-  })
-
-  it('the scope line says which journeys and dates, and never implies a match', () => {
-    expect(scopeLine('AmbroseValley', null)).toBe('All human journeys · AmbroseValley · all dates')
-    expect(scopeLine('GrandRift', '2026-02-13')).toBe('All human journeys · GrandRift · 2026-02-13')
   })
 })

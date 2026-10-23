@@ -38,12 +38,13 @@ export function trafficPosition(value: number, max: number): number | null {
   return Math.min(1, Math.max(0, Math.log1p(value) / Math.log1p(max)))
 }
 
+// teal → cyan → yellow → near-white: the top 15 % of the scale runs to a near-white yellow, so the busiest cells read brightest
 const TRAFFIC_PALETTE = [
   [0, '#1a7fa3'],
   [0.5, '#38d3e0'],
   [0.85, '#ffe953'],
-  [1, '#fff6a8'],
-] as const // teal → cyan → yellow
+  [1, '#fffce6'],
+] as const
 
 const TRAFFIC_STOPS = TRAFFIC_PALETTE.map(([at, hex]) => ({ at, rgb: hexToRgb(hex) }))
 
@@ -77,7 +78,7 @@ export const TRAFFIC_FOCUS = {
   hideBelow: 30,
   faintBelow: 60,
   faint: { from: 0.03, to: 0.06 },
-  strong: { floor: 0.1, top: 0.95, power: 1.5 },
+  strong: { floor: 0.1, top: 1, power: 1.5 },
 }
 
 /** Position of a value above the strong threshold, 0–1, on a log scale up to the map's maximum (1 when the maximum is no larger than the threshold). */
@@ -97,7 +98,7 @@ export function trafficFocusedStyle(value: number, max: number): { color: Rgb; a
 }
 
 /** All activity: every observed cell, log1p intensity over the scale maximum, opacity rising from a faint floor. */
-export const TRAFFIC_ALL = { floor: 0.18, top: 0.85 }
+export const TRAFFIC_ALL = { floor: 0.18, top: 0.95 }
 
 export function trafficAllAlpha(t: number): number {
   const x = Math.min(1, Math.max(0, t))
@@ -130,13 +131,13 @@ const style = (rows: readonly (readonly [string, number])[]) => rows.map(([hex, 
 /**
  * Class styles, weakest to strongest: colour and peak opacity. Lightness rises with the count (kills: dark red, orange, amber, pale
  * yellow; deaths: deep indigo, periwinkle, orchid, pale pink), and so does opacity. A single event is faint (opacity 0.26 for kills,
- * 0.30 for deaths) and ten or more are near-opaque (0.98), so weak and strong observations are far apart. Measured over the three
+ * 0.30 for deaths) and ten or more are opaque (4–9 at 0.88 for kills, 0.90 for deaths; S, 2026-10-23: hotspots brighter), so weak and strong observations are far apart. Measured over the three
  * minimaps' own colours the neighbouring classes stay at least 16.4 dE apart for kills and 10.1 dE for deaths even under deuteranopia
  * and protanopia (docs/evidence/spatial_analysis/count_bands.json).
  */
 export const COUNT_STYLE: Record<CountLayer, { color: Rgb; alpha: number }[]> = {
-  kills: style([['#c2361b', 0.26], ['#ff6a1a', 0.52], ['#ffb52e', 0.8], ['#fff1b8', 0.98]]),
-  deaths: style([['#4a3fd0', 0.3], ['#7a74ff', 0.56], ['#d86cff', 0.84], ['#ffe4f8', 0.98]]),
+  kills: style([['#c2361b', 0.26], ['#ff6a1a', 0.52], ['#ffb52e', 0.88], ['#fff1b8', 1]]),
+  deaths: style([['#4a3fd0', 0.3], ['#7a74ff', 0.56], ['#d86cff', 0.9], ['#ffe4f8', 1]]),
 }
 
 /** CSS colour of a class's legend swatch: its colour at its own opacity. */
