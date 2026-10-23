@@ -1,0 +1,316 @@
+{
+  "actors": {
+    "raw_files_read": 1242,
+    "raw_rows_read": 89016,
+    "ownership": {
+      "files_with_more_than_one_user_id": 0,
+      "files_whose_user_id_differs_from_file_name": 0,
+      "files_with_more_than_one_match_id": 0,
+      "files_whose_match_id_differs_from_file_name": 0,
+      "files_with_more_than_one_map": 0
+    },
+    "files_with_both_position_and_botposition": 0,
+    "event_profile": {
+      "uuid": {
+        "files": 781,
+        "events": {
+          "Position": {
+            "files_with": 781,
+            "rows": 50648
+          },
+          "Loot": {
+            "files_with": 724,
+            "rows": 12751
+          },
+          "BotKill": {
+            "files_with": 581,
+            "rows": 2227
+          },
+          "BotKilled": {
+            "files_with": 400,
+            "rows": 402
+          },
+          "Kill": {
+            "files_with": 3,
+            "rows": 3
+          },
+          "Killed": {
+            "files_with": 3,
+            "rows": 3
+          },
+          "KilledByStorm": {
+            "files_with": 39,
+            "rows": 39
+          }
+        }
+      },
+      "numeric_with_botposition": {
+        "files": 444,
+        "events": {
+          "BotPosition": {
+            "files_with": 444,
+            "rows": 21712
+          },
+          "BotKill": {
+            "files_with": 126,
+            "rows": 170
+          },
+          "BotKilled": {
+            "files_with": 296,
+            "rows": 296
+          }
+        }
+      },
+      "numeric_without_botposition": {
+        "files": 17,
+        "events": {
+          "Position": {
+            "files_with": 17,
+            "rows": 636
+          },
+          "Loot": {
+            "files_with": 14,
+            "rows": 115
+          },
+          "BotKill": {
+            "files_with": 5,
+            "rows": 13
+          },
+          "BotKilled": {
+            "files_with": 1,
+            "rows": 1
+          }
+        }
+      }
+    },
+    "bot_speed_cap_units_per_s": 5.001,
+    "behaviour": {
+      "uuid": {
+        "journeys": 781,
+        "journeys_faster_than_bot_cap": 728,
+        "journeys_with_a_death": 442,
+        "median_duration_s": 367.0,
+        "journeys_starting_at_match_start": 781
+      },
+      "numeric_with_botposition": {
+        "journeys": 444,
+        "journeys_faster_than_bot_cap": 0,
+        "journeys_with_a_death": 296,
+        "median_duration_s": 220.5,
+        "journeys_starting_at_match_start": 28
+      },
+      "numeric_without_botposition": {
+        "journeys": 17,
+        "journeys_faster_than_bot_cap": 12,
+        "journeys_with_a_death": 1,
+        "median_duration_s": 161.0,
+        "journeys_starting_at_match_start": 17
+      }
+    },
+    "match_shapes": [
+      {
+        "uuid_journeys": 0,
+        "unknown_journeys": 1,
+        "has_bots": true,
+        "matches": 16
+      },
+      {
+        "uuid_journeys": 1,
+        "unknown_journeys": 0,
+        "has_bots": false,
+        "matches": 743
+      },
+      {
+        "uuid_journeys": 1,
+        "unknown_journeys": 0,
+        "has_bots": true,
+        "matches": 35
+      },
+      {
+        "uuid_journeys": 1,
+        "unknown_journeys": 1,
+        "has_bots": true,
+        "matches": 1
+      },
+      {
+        "uuid_journeys": 2,
+        "unknown_journeys": 0,
+        "has_bots": false,
+        "matches": 1
+      }
+    ],
+    "bot_start_delay_after_first_non_bot_s": {
+      "uuid_led": {
+        "0": 15,
+        "5": 283
+      },
+      "unknown_led": {
+        "0": 13,
+        "5": 133
+      }
+    },
+    "unknown": {
+      "files": 17,
+      "journeys": 17,
+      "actors": 3,
+      "matches": 17,
+      "actors_detail": {
+        "A": {
+          "unknown_journeys": 14,
+          "bot_journeys_elsewhere": 3,
+          "bot_journeys_elsewhere_share_a_match_with_a_uuid_human": 3,
+          "maps": [
+            "AmbroseValley"
+          ],
+          "id_inside_bot_id_range": true
+        },
+        "B": {
+          "unknown_journeys": 2,
+          "bot_journeys_elsewhere": 0,
+          "bot_journeys_elsewhere_share_a_match_with_a_uuid_human": 0,
+          "maps": [
+            "GrandRift"
+          ],
+          "id_inside_bot_id_range": false
+        },
+        "C": {
+          "unknown_journeys": 1,
+          "bot_journeys_elsewhere": 0,
+          "bot_journeys_elsewhere_share_a_match_with_a_uuid_human": 0,
+          "maps": [
+            "Lockdown"
+          ],
+          "id_inside_bot_id_range": true
+        }
+      }
+    },
+    "pipeline_journeys_by_kind": {
+      "bot": 444,
+      "human": 781,
+      "unknown": 17
+    }
+  },
+  "kill_killed_pairs": {
+    "raw_kill_rows": 3,
+    "raw_killed_rows": 3,
+    "files_with_kill_or_killed": 3,
+    "kill_rows_without_same_second_killed": 0,
+    "pipeline_rows_flagged_kill_killed_pair": 6,
+    "pipeline_self_kill_rows": 0,
+    "base_rate_human_botkill_rows": 2227,
+    "base_rate_human_botkilled_seconds": 400,
+    "base_rate_botkilled_seconds_with_same_second_botkill": 2,
+    "matches_with_one_recorded_file": 743,
+    "matches": 796
+  },
+  "heatmap_impact": {
+    "AmbroseValley": {
+      "human_journeys": 554,
+      "unknown_journeys": 14,
+      "layers": {
+        "kills": {
+          "total_with_unknown": 1669.0,
+          "total_published": 1656.0,
+          "share_from_unknown_pct": 0.78,
+          "cells_changed": 12,
+          "cells_lit_only_by_unknown": 2,
+          "cells_lit_published": 460,
+          "top10_cells_shared": 10,
+          "pearson_r": 0.9994
+        },
+        "deaths": {
+          "total_with_unknown": 316.0,
+          "total_published": 315.0,
+          "share_from_unknown_pct": 0.32,
+          "cells_changed": 1,
+          "cells_lit_only_by_unknown": 0,
+          "cells_lit_published": 208,
+          "top10_cells_shared": 10,
+          "pearson_r": 0.9993
+        },
+        "traffic": {
+          "total_with_unknown": 212082.0,
+          "total_published": 208625.0,
+          "share_from_unknown_pct": 1.63,
+          "cells_changed": 489,
+          "cells_lit_only_by_unknown": 2,
+          "cells_lit_published": 1620,
+          "top10_cells_shared": 10,
+          "pearson_r": 0.9998
+        }
+      }
+    },
+    "GrandRift": {
+      "human_journeys": 57,
+      "unknown_journeys": 2,
+      "layers": {
+        "kills": {
+          "total_with_unknown": 179.0,
+          "total_published": 179.0,
+          "share_from_unknown_pct": 0.0,
+          "cells_changed": 0,
+          "cells_lit_only_by_unknown": 0,
+          "cells_lit_published": 107,
+          "top10_cells_shared": 10,
+          "pearson_r": 1.0
+        },
+        "deaths": {
+          "total_with_unknown": 30.0,
+          "total_published": 30.0,
+          "share_from_unknown_pct": 0.0,
+          "cells_changed": 0,
+          "cells_lit_only_by_unknown": 0,
+          "cells_lit_published": 28,
+          "top10_cells_shared": 10,
+          "pearson_r": 1.0
+        },
+        "traffic": {
+          "total_with_unknown": 21844.0,
+          "total_published": 21708.0,
+          "share_from_unknown_pct": 0.62,
+          "cells_changed": 45,
+          "cells_lit_only_by_unknown": 3,
+          "cells_lit_published": 1259,
+          "top10_cells_shared": 10,
+          "pearson_r": 0.9997
+        }
+      }
+    },
+    "Lockdown": {
+      "human_journeys": 170,
+      "unknown_journeys": 1,
+      "layers": {
+        "kills": {
+          "total_with_unknown": 388.0,
+          "total_published": 388.0,
+          "share_from_unknown_pct": 0.0,
+          "cells_changed": 0,
+          "cells_lit_only_by_unknown": 0,
+          "cells_lit_published": 214,
+          "top10_cells_shared": 10,
+          "pearson_r": 1.0
+        },
+        "deaths": {
+          "total_with_unknown": 97.0,
+          "total_published": 97.0,
+          "share_from_unknown_pct": 0.0,
+          "cells_changed": 0,
+          "cells_lit_only_by_unknown": 0,
+          "cells_lit_published": 77,
+          "top10_cells_shared": 10,
+          "pearson_r": 1.0
+        },
+        "traffic": {
+          "total_with_unknown": 67305.0,
+          "total_published": 67144.0,
+          "share_from_unknown_pct": 0.24,
+          "cells_changed": 36,
+          "cells_lit_only_by_unknown": 1,
+          "cells_lit_published": 1103,
+          "top10_cells_shared": 10,
+          "pearson_r": 0.9999
+        }
+      }
+    }
+  }
+}

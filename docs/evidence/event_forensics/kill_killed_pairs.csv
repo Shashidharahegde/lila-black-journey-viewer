@@ -1,0 +1,7 @@
+case_id,map,file_group,event_in_pair,raw_event,rows_apart_from_partner,t_match_s,same_second_as_partner,same_xyz_as_partner,rows_after_in_file,seconds_to_journey_end,other_recorded_files_in_match,pipeline_type,pipeline_kill_killed_pair,counted_in_kill_totals,counted_in_death_totals
+P1,GrandRift,uuid,1,Kill,1,431,True,True,2,1,0,kill,True,False,False
+P1,GrandRift,uuid,2,Killed,1,431,True,True,1,1,0,death,True,False,True
+P2,AmbroseValley,uuid,1,Kill,1,546,True,True,2,2,0,kill,True,False,False
+P2,AmbroseValley,uuid,2,Killed,1,546,True,True,1,2,0,death,True,False,True
+P3,AmbroseValley,uuid,1,Kill,1,639,True,True,1,0,0,kill,True,False,False
+P3,AmbroseValley,uuid,2,Killed,1,639,True,True,0,0,0,death,True,False,True
