@@ -47,6 +47,7 @@ SEED = 7
 
 HUMAN = (255, 214, 10)
 BOT = (80, 200, 255)
+UNKNOWN = (255, 255, 255)  # EC-09: numeric ID, player-client events
 
 # Runs the real space.ts: JSON in on stdin, JSON out. `cursor` mode starts from a deck.gl drawing-space
 # coordinate (what the hover handler receives); `uv` mode starts from the exported u, v.
@@ -288,7 +289,7 @@ def draw_map(map_id: str, info: dict, points: pd.DataFrame) -> dict:
     width, height = canvas.size
     dots = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     dots_draw = ImageDraw.Draw(dots)
-    for kind, colour, alpha in (("bot", BOT, 70), ("human", HUMAN, 190)):
+    for kind, colour, alpha in (("bot", BOT, 70), ("unknown", UNKNOWN, 190), ("human", HUMAN, 190)):
         part = points[points["kind"] == kind]
         px, py = uv_to_pixel(part["u"], part["v"], width, height)
         for x, y in zip(px, py):
@@ -329,10 +330,13 @@ def draw_map(map_id: str, info: dict, points: pd.DataFrame) -> dict:
     draw.text((38, height - 46), f"human positions ({int((points['kind'] == 'human').sum())})", font=small, fill=(255, 255, 255))
     draw.ellipse((420, height - 40, 436, height - 24), fill=BOT)
     draw.text((444, height - 46), f"bot positions ({int((points['kind'] == 'bot').sum())})", font=small, fill=(255, 255, 255))
-    draw.text((820, height - 46), "red crosses = cursor probes; grid = world coordinates", font=small, fill=(255, 255, 255))
+    draw.ellipse((800, height - 40, 816, height - 24), fill=UNKNOWN)
+    draw.text((824, height - 46), f"unknown ({int((points['kind'] == 'unknown').sum())})", font=small, fill=(255, 255, 255))
+    draw.text((1080, height - 46), "red crosses = cursor probes; grid = world coordinates", font=small, fill=(255, 255, 255))
     name = f"reverse_{map_id.lower()}_overlay.png"
     canvas.convert("RGB").save(OUT_DIR / name, optimize=True)
-    return {"overlay": name, "human_points": int((points["kind"] == "human").sum()), "bot_points": int((points["kind"] == "bot").sum())}
+    counts = {f"{kind}_points": int((points["kind"] == kind).sum()) for kind in ("human", "unknown", "bot")}
+    return {"overlay": name, **counts}
 
 
 def draw_controls(map_id: str, info: dict, points: pd.DataFrame) -> None:
