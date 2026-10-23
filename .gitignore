@@ -1,7 +1,21 @@
-data/raw/player_data
+# LILA's raw production data never enters git
+data/raw/
+*.zip
+
+# Documentation, evidence and tests are tracked. Evidence must be sanitised first: counts and hashed or case IDs only,
+# never a real player ID. `make check-ids` (tools/check_ids.py) scans for them.
+observations.md
 .env*
 node_modules/
+dist/
 .venv/
 __pycache__/
+.pytest_cache/
 .DS_Store
-COMMIT_CONVENTION.md
+*.log
+*.tmp
+scratch/
+
+# interrupted pipeline builds (web/public/data/matches is rebuilt via these)
+web/public/data/matches.staging/
+web/public/data/matches.old/
