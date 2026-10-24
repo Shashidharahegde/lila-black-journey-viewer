@@ -1,0 +1,478 @@
+{
+ "rows_final": 88653,
+ "files": 1242,
+ "doubled_files": 3,
+ "kinds": {
+  "human": 781,
+  "bot": 444,
+  "unknown": 17
+ },
+ "index_matches": [
+  796,
+  796
+ ],
+ "index_diff_count": 0,
+ "index_field_diffs": [],
+ "dates_index": {
+  "2026-02-09": 1,
+  "2026-02-10": 287,
+  "2026-02-11": 197,
+  "2026-02-12": 162,
+  "2026-02-13": 112,
+  "2026-02-14": 37
+ },
+ "match_file_diff_count": 0,
+ "match_file_diffs": [],
+ "max_u_rounding_err": 4.999999999999449e-05,
+ "heatmaps": {
+  "AmbroseValley|kills|all": {
+   "mine_total": 1656.0,
+   "pub_total": 1656,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 460,
+   "cells_pub": 460
+  },
+  "AmbroseValley|deaths|all": {
+   "mine_total": 315.0,
+   "pub_total": 315,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 208,
+   "cells_pub": 208
+  },
+  "AmbroseValley|traffic|all": {
+   "mine_total": 208625.0,
+   "pub_total": 208625.0,
+   "max_cell_abs_diff": 0.205,
+   "cells_mine": 1619,
+   "cells_pub": 1619
+  },
+  "AmbroseValley|kills|2026-02-09": {
+   "mine_total": 5.0,
+   "pub_total": 5,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 4,
+   "cells_pub": 4
+  },
+  "AmbroseValley|deaths|2026-02-09": {
+   "mine_total": 0.0,
+   "pub_total": 0,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 0,
+   "cells_pub": 0
+  },
+  "AmbroseValley|traffic|2026-02-09": {
+   "mine_total": 744.0,
+   "pub_total": 744.0,
+   "max_cell_abs_diff": 0.053,
+   "cells_mine": 124,
+   "cells_pub": 124
+  },
+  "AmbroseValley|kills|2026-02-10": {
+   "mine_total": 677.0,
+   "pub_total": 677,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 288,
+   "cells_pub": 288
+  },
+  "AmbroseValley|deaths|2026-02-10": {
+   "mine_total": 105.0,
+   "pub_total": 105,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 91,
+   "cells_pub": 91
+  },
+  "AmbroseValley|traffic|2026-02-10": {
+   "mine_total": 78617.0,
+   "pub_total": 78617.0,
+   "max_cell_abs_diff": 0.13,
+   "cells_mine": 1524,
+   "cells_pub": 1524
+  },
+  "AmbroseValley|kills|2026-02-11": {
+   "mine_total": 403.0,
+   "pub_total": 403,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 207,
+   "cells_pub": 207
+  },
+  "AmbroseValley|deaths|2026-02-11": {
+   "mine_total": 75.0,
+   "pub_total": 75,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 68,
+   "cells_pub": 68
+  },
+  "AmbroseValley|traffic|2026-02-11": {
+   "mine_total": 49186.0,
+   "pub_total": 49186.0,
+   "max_cell_abs_diff": 0.115,
+   "cells_mine": 1439,
+   "cells_pub": 1439
+  },
+  "AmbroseValley|kills|2026-02-12": {
+   "mine_total": 267.0,
+   "pub_total": 267,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 168,
+   "cells_pub": 168
+  },
+  "AmbroseValley|deaths|2026-02-12": {
+   "mine_total": 79.0,
+   "pub_total": 79,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 72,
+   "cells_pub": 72
+  },
+  "AmbroseValley|traffic|2026-02-12": {
+   "mine_total": 42173.0,
+   "pub_total": 42173.0,
+   "max_cell_abs_diff": 0.188,
+   "cells_mine": 1348,
+   "cells_pub": 1348
+  },
+  "AmbroseValley|kills|2026-02-13": {
+   "mine_total": 220.0,
+   "pub_total": 220,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 139,
+   "cells_pub": 139
+  },
+  "AmbroseValley|deaths|2026-02-13": {
+   "mine_total": 44.0,
+   "pub_total": 44,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 38,
+   "cells_pub": 38
+  },
+  "AmbroseValley|traffic|2026-02-13": {
+   "mine_total": 28865.0,
+   "pub_total": 28865.0,
+   "max_cell_abs_diff": 0.115,
+   "cells_mine": 1270,
+   "cells_pub": 1270
+  },
+  "AmbroseValley|kills|2026-02-14": {
+   "mine_total": 84.0,
+   "pub_total": 84,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 58,
+   "cells_pub": 58
+  },
+  "AmbroseValley|deaths|2026-02-14": {
+   "mine_total": 12.0,
+   "pub_total": 12,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 12,
+   "cells_pub": 12
+  },
+  "AmbroseValley|traffic|2026-02-14": {
+   "mine_total": 9040.0,
+   "pub_total": 9040.0,
+   "max_cell_abs_diff": 0.078,
+   "cells_mine": 793,
+   "cells_pub": 793
+  },
+  "GrandRift|kills|all": {
+   "mine_total": 179.0,
+   "pub_total": 179,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 107,
+   "cells_pub": 107
+  },
+  "GrandRift|deaths|all": {
+   "mine_total": 30.0,
+   "pub_total": 30,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 28,
+   "cells_pub": 28
+  },
+  "GrandRift|traffic|all": {
+   "mine_total": 21708.0,
+   "pub_total": 21708.0,
+   "max_cell_abs_diff": 0.1,
+   "cells_mine": 1257,
+   "cells_pub": 1258
+  },
+  "GrandRift|kills|2026-02-10": {
+   "mine_total": 67.0,
+   "pub_total": 67,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 46,
+   "cells_pub": 46
+  },
+  "GrandRift|deaths|2026-02-10": {
+   "mine_total": 13.0,
+   "pub_total": 13,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 13,
+   "cells_pub": 13
+  },
+  "GrandRift|traffic|2026-02-10": {
+   "mine_total": 8880.0,
+   "pub_total": 8880.0,
+   "max_cell_abs_diff": 0.088,
+   "cells_mine": 1020,
+   "cells_pub": 1020
+  },
+  "GrandRift|kills|2026-02-11": {
+   "mine_total": 75.0,
+   "pub_total": 75,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 54,
+   "cells_pub": 54
+  },
+  "GrandRift|deaths|2026-02-11": {
+   "mine_total": 5.0,
+   "pub_total": 5,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 5,
+   "cells_pub": 5
+  },
+  "GrandRift|traffic|2026-02-11": {
+   "mine_total": 6155.0,
+   "pub_total": 6155.0,
+   "max_cell_abs_diff": 0.067,
+   "cells_mine": 875,
+   "cells_pub": 875
+  },
+  "GrandRift|kills|2026-02-12": {
+   "mine_total": 20.0,
+   "pub_total": 20,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 15,
+   "cells_pub": 15
+  },
+  "GrandRift|deaths|2026-02-12": {
+   "mine_total": 4.0,
+   "pub_total": 4,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 4,
+   "cells_pub": 4
+  },
+  "GrandRift|traffic|2026-02-12": {
+   "mine_total": 3597.0,
+   "pub_total": 3597.0,
+   "max_cell_abs_diff": 0.075,
+   "cells_mine": 670,
+   "cells_pub": 672
+  },
+  "GrandRift|kills|2026-02-13": {
+   "mine_total": 7.0,
+   "pub_total": 7,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 6,
+   "cells_pub": 6
+  },
+  "GrandRift|deaths|2026-02-13": {
+   "mine_total": 4.0,
+   "pub_total": 4,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 4,
+   "cells_pub": 4
+  },
+  "GrandRift|traffic|2026-02-13": {
+   "mine_total": 1543.0,
+   "pub_total": 1543.0,
+   "max_cell_abs_diff": 0.087,
+   "cells_mine": 292,
+   "cells_pub": 293
+  },
+  "GrandRift|kills|2026-02-14": {
+   "mine_total": 10.0,
+   "pub_total": 10,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 8,
+   "cells_pub": 8
+  },
+  "GrandRift|deaths|2026-02-14": {
+   "mine_total": 4.0,
+   "pub_total": 4,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 4,
+   "cells_pub": 4
+  },
+  "GrandRift|traffic|2026-02-14": {
+   "mine_total": 1533.0,
+   "pub_total": 1533.0,
+   "max_cell_abs_diff": 0.075,
+   "cells_mine": 342,
+   "cells_pub": 344
+  },
+  "Lockdown|kills|all": {
+   "mine_total": 388.0,
+   "pub_total": 388,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 214,
+   "cells_pub": 214
+  },
+  "Lockdown|deaths|all": {
+   "mine_total": 97.0,
+   "pub_total": 97,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 77,
+   "cells_pub": 77
+  },
+  "Lockdown|traffic|all": {
+   "mine_total": 67144.0,
+   "pub_total": 67144.0,
+   "max_cell_abs_diff": 0.16,
+   "cells_mine": 1099,
+   "cells_pub": 1100
+  },
+  "Lockdown|kills|2026-02-10": {
+   "mine_total": 193.0,
+   "pub_total": 193,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 123,
+   "cells_pub": 123
+  },
+  "Lockdown|deaths|2026-02-10": {
+   "mine_total": 37.0,
+   "pub_total": 37,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 33,
+   "cells_pub": 33
+  },
+  "Lockdown|traffic|2026-02-10": {
+   "mine_total": 27642.0,
+   "pub_total": 27642.0,
+   "max_cell_abs_diff": 0.095,
+   "cells_mine": 935,
+   "cells_pub": 936
+  },
+  "Lockdown|kills|2026-02-11": {
+   "mine_total": 132.0,
+   "pub_total": 132,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 88,
+   "cells_pub": 88
+  },
+  "Lockdown|deaths|2026-02-11": {
+   "mine_total": 20.0,
+   "pub_total": 20,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 20,
+   "cells_pub": 20
+  },
+  "Lockdown|traffic|2026-02-11": {
+   "mine_total": 20745.0,
+   "pub_total": 20745.0,
+   "max_cell_abs_diff": 0.1,
+   "cells_mine": 898,
+   "cells_pub": 898
+  },
+  "Lockdown|kills|2026-02-12": {
+   "mine_total": 34.0,
+   "pub_total": 34,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 31,
+   "cells_pub": 31
+  },
+  "Lockdown|deaths|2026-02-12": {
+   "mine_total": 15.0,
+   "pub_total": 15,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 15,
+   "cells_pub": 15
+  },
+  "Lockdown|traffic|2026-02-12": {
+   "mine_total": 8475.0,
+   "pub_total": 8475.0,
+   "max_cell_abs_diff": 0.077,
+   "cells_mine": 654,
+   "cells_pub": 655
+  },
+  "Lockdown|kills|2026-02-13": {
+   "mine_total": 20.0,
+   "pub_total": 20,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 19,
+   "cells_pub": 19
+  },
+  "Lockdown|deaths|2026-02-13": {
+   "mine_total": 22.0,
+   "pub_total": 22,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 19,
+   "cells_pub": 19
+  },
+  "Lockdown|traffic|2026-02-13": {
+   "mine_total": 8317.0,
+   "pub_total": 8317.0,
+   "max_cell_abs_diff": 0.087,
+   "cells_mine": 580,
+   "cells_pub": 580
+  },
+  "Lockdown|kills|2026-02-14": {
+   "mine_total": 9.0,
+   "pub_total": 9,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 9,
+   "cells_pub": 9
+  },
+  "Lockdown|deaths|2026-02-14": {
+   "mine_total": 3.0,
+   "pub_total": 3,
+   "max_cell_abs_diff": 0.0,
+   "cells_mine": 3,
+   "cells_pub": 3
+  },
+  "Lockdown|traffic|2026-02-14": {
+   "mine_total": 1965.0,
+   "pub_total": 1965.0,
+   "max_cell_abs_diff": 0.075,
+   "cells_mine": 183,
+   "cells_pub": 183
+  }
+ },
+ "stats_cmp": {
+  "all": "all equal",
+  "all_values": {
+   "human_journeys": 781,
+   "human_players": 245,
+   "kills": 2223,
+   "loot": 12714,
+   "deaths": 442,
+   "kill_rate": 2.85,
+   "loot_rate": 16.28,
+   "storm_rate": 4.99,
+   "span_median": 367.0
+  },
+  "AmbroseValley": "all equal",
+  "AmbroseValley_values": {
+   "human_journeys": 554,
+   "human_players": 217,
+   "kills": 1656,
+   "loot": 9791,
+   "deaths": 315,
+   "kill_rate": 2.99,
+   "loot_rate": 17.67,
+   "storm_rate": 3.07,
+   "span_median": 354.5
+  },
+  "GrandRift": "all equal",
+  "GrandRift_values": {
+   "human_journeys": 57,
+   "human_players": 29,
+   "kills": 179,
+   "loot": 876,
+   "deaths": 30,
+   "kill_rate": 3.14,
+   "loot_rate": 15.37,
+   "storm_rate": 8.77,
+   "span_median": 403.0
+  },
+  "Lockdown": "all equal",
+  "Lockdown_values": {
+   "human_journeys": 170,
+   "human_players": 79,
+   "kills": 388,
+   "loot": 2047,
+   "deaths": 97,
+   "kill_rate": 2.28,
+   "loot_rate": 12.04,
+   "storm_rate": 10.0,
+   "span_median": 427.0
+  }
+ }
+}

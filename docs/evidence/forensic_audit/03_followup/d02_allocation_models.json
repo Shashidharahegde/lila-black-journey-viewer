@@ -1,0 +1,439 @@
+{
+ "per_map_all_dates": {
+  "AmbroseValley": {
+   "total_s": {
+    "D5_30": 208625.0,
+    "D5_inf": 218075.0,
+    "DWELL_A": 218075.0,
+    "SPLIT": 218075.0,
+    "DWELL_B": 218075.0,
+    "POINT": 176525.0
+   },
+   "vs_D5_30": {
+    "D5_inf": {
+     "spearman": 0.9958,
+     "top10_kept": 10
+    },
+    "DWELL_A": {
+     "spearman": 0.9918,
+     "top10_kept": 9
+    },
+    "SPLIT": {
+     "spearman": 0.9941,
+     "top10_kept": 10
+    },
+    "DWELL_B": {
+     "spearman": 0.9904,
+     "top10_kept": 9
+    },
+    "POINT": {
+     "spearman": 0.9766,
+     "top10_kept": 9
+    }
+   },
+   "cells_ge_60s_where_plausible_models_differ_by_over_1.5x": "37 of 816",
+   "consistent_regions": {
+    "D5_30": 7,
+    "D5_inf": 6,
+    "DWELL_A": 6,
+    "SPLIT": 6,
+    "DWELL_B": 6,
+    "POINT": 8
+   },
+   "published_regions_still_consistent": {
+    "D5_30": "7 of 7",
+    "D5_inf": "6 of 7",
+    "DWELL_A": "6 of 7",
+    "SPLIT": "6 of 7",
+    "DWELL_B": "6 of 7",
+    "POINT": "7 of 7"
+   },
+   "new_regions_vs_published": {
+    "POINT": [
+     [
+      3,
+      2
+     ]
+    ]
+   },
+   "published_regions_value_range_s_over_plausible_models": {
+    "(8, 3)": [
+     8180.0,
+     8463.0
+    ],
+    "(8, 7)": [
+     7600.0,
+     8338.0
+    ],
+    "(6, 3)": [
+     7558.0,
+     7745.0
+    ],
+    "(4, 7)": [
+     6506.0,
+     6591.0
+    ],
+    "(9, 7)": [
+     6434.0,
+     6681.0
+    ],
+    "(6, 8)": [
+     5475.0,
+     5591.0
+    ],
+    "(5, 2)": [
+     5252.0,
+     5566.0
+    ]
+   },
+   "kendall_tau_of_published_region_order_vs_D5_30": {
+    "D5_inf": 0.905,
+    "DWELL_A": 0.905,
+    "SPLIT": 0.905,
+    "DWELL_B": 0.81,
+    "POINT": 0.905
+   },
+   "strongest_region": {
+    "D5_30": "(8, 3)",
+    "D5_inf": "(8, 3)",
+    "DWELL_A": "(8, 3)",
+    "SPLIT": "(8, 3)",
+    "DWELL_B": "(8, 3)",
+    "POINT": "(8, 3)"
+   }
+  },
+  "GrandRift": {
+   "total_s": {
+    "D5_30": 21708.0,
+    "D5_inf": 22644.0,
+    "DWELL_A": 22644.0,
+    "SPLIT": 22644.0,
+    "DWELL_B": 22644.0,
+    "POINT": 18505.0
+   },
+   "vs_D5_30": {
+    "D5_inf": {
+     "spearman": 0.9935,
+     "top10_kept": 9
+    },
+    "DWELL_A": {
+     "spearman": 0.983,
+     "top10_kept": 7
+    },
+    "SPLIT": {
+     "spearman": 0.9847,
+     "top10_kept": 8
+    },
+    "DWELL_B": {
+     "spearman": 0.9769,
+     "top10_kept": 8
+    },
+    "POINT": {
+     "spearman": 0.8519,
+     "top10_kept": 9
+    }
+   },
+   "cells_ge_60s_where_plausible_models_differ_by_over_1.5x": "11 of 86",
+   "consistent_regions": {
+    "D5_30": 3,
+    "D5_inf": 3,
+    "DWELL_A": 3,
+    "SPLIT": 2,
+    "DWELL_B": 2,
+    "POINT": 2
+   },
+   "published_regions_still_consistent": {
+    "D5_30": "3 of 3",
+    "D5_inf": "2 of 3",
+    "DWELL_A": "3 of 3",
+    "SPLIT": "2 of 3",
+    "DWELL_B": "2 of 3",
+    "POINT": "1 of 3"
+   },
+   "new_regions_vs_published": {
+    "D5_inf": [
+     [
+      7,
+      8
+     ]
+    ],
+    "POINT": [
+     [
+      7,
+      7
+     ]
+    ]
+   },
+   "published_regions_value_range_s_over_plausible_models": {
+    "(7, 6)": [
+     1391.0,
+     1461.0
+    ],
+    "(5, 8)": [
+     656.0,
+     711.0
+    ],
+    "(12, 6)": [
+     621.0,
+     720.0
+    ]
+   },
+   "kendall_tau_of_published_region_order_vs_D5_30": {
+    "D5_inf": 0.333,
+    "DWELL_A": 1.0,
+    "SPLIT": 0.333,
+    "DWELL_B": 0.333,
+    "POINT": 1.0
+   },
+   "strongest_region": {
+    "D5_30": "(7, 6)",
+    "D5_inf": "(7, 6)",
+    "DWELL_A": "(7, 6)",
+    "SPLIT": "(7, 6)",
+    "DWELL_B": "(7, 6)",
+    "POINT": "(7, 6)"
+   }
+  },
+  "Lockdown": {
+   "total_s": {
+    "D5_30": 67144.0,
+    "D5_inf": 69849.0,
+    "DWELL_A": 69849.0,
+    "SPLIT": 69849.0,
+    "DWELL_B": 69849.0,
+    "POINT": 56610.0
+   },
+   "vs_D5_30": {
+    "D5_inf": {
+     "spearman": 0.9964,
+     "top10_kept": 10
+    },
+    "DWELL_A": {
+     "spearman": 0.9916,
+     "top10_kept": 10
+    },
+    "SPLIT": {
+     "spearman": 0.9949,
+     "top10_kept": 10
+    },
+    "DWELL_B": {
+     "spearman": 0.9902,
+     "top10_kept": 9
+    },
+    "POINT": {
+     "spearman": 0.9644,
+     "top10_kept": 9
+    }
+   },
+   "cells_ge_60s_where_plausible_models_differ_by_over_1.5x": "16 of 343",
+   "consistent_regions": {
+    "D5_30": 1,
+    "D5_inf": 2,
+    "DWELL_A": 2,
+    "SPLIT": 2,
+    "DWELL_B": 2,
+    "POINT": 2
+   },
+   "published_regions_still_consistent": {
+    "D5_30": "1 of 1",
+    "D5_inf": "1 of 1",
+    "DWELL_A": "1 of 1",
+    "SPLIT": "1 of 1",
+    "DWELL_B": "1 of 1",
+    "POINT": "1 of 1"
+   },
+   "new_regions_vs_published": {
+    "D5_inf": [
+     [
+      3,
+      6
+     ]
+    ],
+    "DWELL_A": [
+     [
+      3,
+      6
+     ]
+    ],
+    "SPLIT": [
+     [
+      3,
+      6
+     ]
+    ],
+    "DWELL_B": [
+     [
+      3,
+      6
+     ]
+    ],
+    "POINT": [
+     [
+      9,
+      7
+     ]
+    ]
+   },
+   "published_regions_value_range_s_over_plausible_models": {
+    "(8, 11)": [
+     3124.0,
+     3358.0
+    ]
+   },
+   "kendall_tau_of_published_region_order_vs_D5_30": {
+    "D5_inf": null,
+    "DWELL_A": null,
+    "SPLIT": null,
+    "DWELL_B": null,
+    "POINT": null
+   },
+   "strongest_region": {
+    "D5_30": "(8, 11)",
+    "D5_inf": "(8, 11)",
+    "DWELL_A": "(8, 11)",
+    "SPLIT": "(8, 11)",
+    "DWELL_B": "(8, 11)",
+    "POINT": "(8, 11)"
+   }
+  }
+ },
+ "selections": {
+  "AmbroseValley|all": {
+   "D5_30": 7,
+   "DWELL_A": 6,
+   "SPLIT": 6,
+   "D5_inf": 6,
+   "same_set_all_models": false
+  },
+  "AmbroseValley|2026-02-09": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  },
+  "AmbroseValley|2026-02-10": {
+   "D5_30": 6,
+   "DWELL_A": 5,
+   "SPLIT": 5,
+   "D5_inf": 5,
+   "same_set_all_models": false
+  },
+  "AmbroseValley|2026-02-11": {
+   "D5_30": 2,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": true
+  },
+  "AmbroseValley|2026-02-12": {
+   "D5_30": 7,
+   "DWELL_A": 6,
+   "SPLIT": 6,
+   "D5_inf": 6,
+   "same_set_all_models": false
+  },
+  "AmbroseValley|2026-02-13": {
+   "D5_30": 3,
+   "DWELL_A": 3,
+   "SPLIT": 3,
+   "D5_inf": 3,
+   "same_set_all_models": true
+  },
+  "AmbroseValley|2026-02-14": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  },
+  "GrandRift|all": {
+   "D5_30": 3,
+   "DWELL_A": 3,
+   "SPLIT": 2,
+   "D5_inf": 3,
+   "same_set_all_models": false
+  },
+  "GrandRift|2026-02-10": {
+   "D5_30": 1,
+   "DWELL_A": 1,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": false
+  },
+  "GrandRift|2026-02-11": {
+   "D5_30": 2,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": true
+  },
+  "GrandRift|2026-02-12": {
+   "D5_30": 2,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": true
+  },
+  "GrandRift|2026-02-13": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  },
+  "GrandRift|2026-02-14": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  },
+  "Lockdown|all": {
+   "D5_30": 1,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": false
+  },
+  "Lockdown|2026-02-10": {
+   "D5_30": 2,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 2,
+   "same_set_all_models": true
+  },
+  "Lockdown|2026-02-11": {
+   "D5_30": 2,
+   "DWELL_A": 2,
+   "SPLIT": 2,
+   "D5_inf": 3,
+   "same_set_all_models": false
+  },
+  "Lockdown|2026-02-12": {
+   "D5_30": 1,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": false
+  },
+  "Lockdown|2026-02-13": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  },
+  "Lockdown|2026-02-14": {
+   "D5_30": 0,
+   "DWELL_A": 0,
+   "SPLIT": 0,
+   "D5_inf": 0,
+   "same_set_all_models": true
+  }
+ },
+ "selections_summary": {
+  "selections": 19,
+  "same_consistent_set_under_all_4_models": 11
+ }
+}

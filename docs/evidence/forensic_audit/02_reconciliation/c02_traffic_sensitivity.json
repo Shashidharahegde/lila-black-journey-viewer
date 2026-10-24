@@ -1,0 +1,170 @@
+{
+ "AmbroseValley": {
+  "total_s": {
+   "D5": 208625.0,
+   "D5_60": 215099.0,
+   "D5_inf": 218075.0,
+   "DWELL": 218075.0
+  },
+  "D5_60": {
+   "spearman_vs_D5": 0.9985,
+   "top10_overlap": 10,
+   "top50_overlap": 47,
+   "max_cell_ratio": 2.82,
+   "cells_gt_2x": 2
+  },
+  "D5_inf": {
+   "spearman_vs_D5": 0.9958,
+   "top10_overlap": 10,
+   "top50_overlap": 47,
+   "max_cell_ratio": 12.41,
+   "cells_gt_2x": 5
+  },
+  "DWELL": {
+   "spearman_vs_D5": 0.9918,
+   "top10_overlap": 9,
+   "top50_overlap": 46,
+   "max_cell_ratio": 7.18,
+   "cells_gt_2x": 17
+  },
+  "consistent_regions": {
+   "D5": 7,
+   "DWELL": 6,
+   "D5_inf": 6
+  },
+  "consistent_only_in_D5": [
+   [
+    6,
+    3
+   ]
+  ],
+  "consistent_only_in_DWELL": [],
+  "consistent_regions_D5": [
+   [
+    4,
+    7
+   ],
+   [
+    5,
+    2
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    6,
+    8
+   ],
+   [
+    8,
+    3
+   ],
+   [
+    8,
+    7
+   ],
+   [
+    9,
+    7
+   ]
+  ]
+ },
+ "GrandRift": {
+  "total_s": {
+   "D5": 21708.0,
+   "D5_60": 22383.0,
+   "D5_inf": 22644.0,
+   "DWELL": 22644.0
+  },
+  "D5_60": {
+   "spearman_vs_D5": 0.995,
+   "top10_overlap": 10,
+   "top50_overlap": 47,
+   "max_cell_ratio": 14.29,
+   "cells_gt_2x": 1
+  },
+  "D5_inf": {
+   "spearman_vs_D5": 0.9935,
+   "top10_overlap": 9,
+   "top50_overlap": 45,
+   "max_cell_ratio": 14.29,
+   "cells_gt_2x": 5
+  },
+  "DWELL": {
+   "spearman_vs_D5": 0.983,
+   "top10_overlap": 7,
+   "top50_overlap": 39,
+   "max_cell_ratio": 11.7,
+   "cells_gt_2x": 9
+  },
+  "consistent_regions": {
+   "D5": 3,
+   "DWELL": 3,
+   "D5_inf": 3
+  },
+  "consistent_only_in_D5": [],
+  "consistent_only_in_DWELL": [],
+  "consistent_regions_D5": [
+   [
+    5,
+    8
+   ],
+   [
+    7,
+    6
+   ],
+   [
+    12,
+    6
+   ]
+  ]
+ },
+ "Lockdown": {
+  "total_s": {
+   "D5": 67144.0,
+   "D5_60": 68861.0,
+   "D5_inf": 69849.0,
+   "DWELL": 69849.0
+  },
+  "D5_60": {
+   "spearman_vs_D5": 0.9965,
+   "top10_overlap": 10,
+   "top50_overlap": 47,
+   "max_cell_ratio": 22.01,
+   "cells_gt_2x": 1
+  },
+  "D5_inf": {
+   "spearman_vs_D5": 0.9964,
+   "top10_overlap": 10,
+   "top50_overlap": 47,
+   "max_cell_ratio": 22.01,
+   "cells_gt_2x": 1
+  },
+  "DWELL": {
+   "spearman_vs_D5": 0.9916,
+   "top10_overlap": 10,
+   "top50_overlap": 45,
+   "max_cell_ratio": 16.1,
+   "cells_gt_2x": 2
+  },
+  "consistent_regions": {
+   "D5": 1,
+   "DWELL": 2,
+   "D5_inf": 2
+  },
+  "consistent_only_in_D5": [],
+  "consistent_only_in_DWELL": [
+   [
+    3,
+    6
+   ]
+  ],
+  "consistent_regions_D5": [
+   [
+    8,
+    11
+   ]
+  ]
+ }
+}

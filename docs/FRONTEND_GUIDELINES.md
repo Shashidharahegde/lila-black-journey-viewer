@@ -20,7 +20,7 @@ S's 20 principles, turned into rules we can check. AI principles (12–14) apply
 |---|---|---|
 | 1 | Decision-first | Every view has a title that says what it shows ("Deaths · AmbroseValley · all dates"). No decorative charts. |
 | 2 | Data accuracy, spatial integrity | Nothing is converted in the browser except the hover readout (`space.ts`). Image, paths, markers, heatmap cells and playback all use the one drawing space. No smoothing, blur or curve-fitting. |
-| 3 | Overview first | The app opens on the Heatmaps tab: the aggregate over all matches. Journeys & Playback is the other tab; a match opens there on demand. |
+| 3 | Overview first | The app opens on the all-maps Overview (`/stats`). Heatmaps (`/heatmaps`) is the aggregate over all matches; Journeys (`/journeys`) holds matches, paths and playback, and a match opens there on demand. The three are the primary nav (P22). |
 | 4 | Progressive disclosure | Defaults show the essentials; data notes, raw event labels and IDs live in tooltips and an "About this data" panel. |
 | 5 | Consistent encodings | Gameplay colours, shapes and labels are defined once (§4) and used by the map, legend, tooltips and timeline ticks. |
 | 6 | Context over isolated data | Every marker tooltip says who, what, when (mm:ss) and what the position means. Every heatmap shows its sample size. |
@@ -42,7 +42,9 @@ Dark by default with a light toggle (P12). The minimaps are dark (mean luminance
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ LILA BLACK Journeys   [AmbroseValley|GrandRift|Lockdown]  Date ▾   ⧉ Copy link│  top bar 56 px
+│ LILA BLACK          [Overview]  Heatmaps  Journeys                    ⧉   ⚙  │  row 1: primary nav 56 px
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Map [All maps|AmbroseValley|GrandRift|Lockdown]  [All dates ▾]               │  row 2: filters 48 px
 ├───────────────────────┬──────────────────────────────────────────────────────┤
 │ SIDE PANEL 320 px     │ MAP STAGE                               [+][−][Fit]  │
 │                       │                                                      │
@@ -62,8 +64,9 @@ Dark by default with a light toggle (P12). The minimaps are dark (mean luminance
 └───────────────────────┴──────────────────────────────────────────────────────┘
 ```
 
-- **Top bar:** title, map as a 3-option segmented control (always visible, one click), date dropdown, copy-link button.
-- **Side panel:** content depends on whether a match is selected. Overview: heatmap controls, then the match list. Match: a "← Overview" link, the match card (players, duration, counts), then the legend with the layer toggles (P13).
+- **Two rows, on every page (P22):** row 1 is the primary nav: brand, Overview · Heatmaps · Journeys in the centre (the active one filled in brand blue), and the secondary actions on the right: Copy link (Heatmaps and Journeys only) and one settings menu (theme, keyboard shortcuts, the page's About panel, GitHub). Row 2 holds the filters: the map as a segmented control, the same on every page ("All maps" first on the Overview only; it slides out on Heatmaps and Journeys and back in on the Overview), then the date dropdown. The map and date carry across all three pages. AI Chat is hidden for now; `/chat` still works but nothing links to it.
+- *(The diagram's side panel predates the Heatmaps/Journeys split; each page now has its own panel, see spec 06 Stage 6d.)*
+- **Side panel:** content depends on whether a match is selected. Overview: heatmap controls, then the match list. Match: a "← Overview" link, the match card (players, duration, counts), then the legend with the layer toggles (P13). The match card keeps recorded bot journeys apart from bot combat. "Recorded bot journeys" is the number of bot files, which is often 0. "Bot kills" and "Deaths by bots" count `BotKill` and `BotKilled` in human files; they show "–" until the match file loads. When a match has bot combat but no recorded bot journey, a one-line note in secondary text says: "Bot activity detected, but no bot movement data is available for playback." "Other kills" and "Other deaths" appear only if a counted kill or death isn't bot combat. None does in this data.
 - **Map stage:** zoom buttons and "Fit" top right; world x/z readout bottom left in Geist Mono; bottom right, the statistics of the clicked route (how it ended, kills, deaths, loot, time recorded, distance), kept until Esc, its close button or a click on empty map; a one-line hint when nothing is selected.
 - **Timeline dock:** only when a match is selected (spec 05).
 - **Default view:** with no match selected, the overview shows the traffic heatmap for the selected map and date. Until feature 6 exists, the overview shows the bare map, with no space reserved for heatmap controls (no placeholders, CLAUDE.md rule 3).
@@ -146,6 +149,7 @@ Interface components come from shadcn/ui (Decisions table). They are copied into
 | Date | `Select` |
 | Buttons (fit, copy link, play) | `Button` |
 | Layer toggles in the legend | `Checkbox` |
+| "With bots" match filter | `Toggle` |
 | Timeline, heatmap opacity | `Slider` (the timeline's event ticks are our own overlay on top) |
 | Match card, legend, panels | `Card` |
 | "Partial", "small sample", "numeric ID" | `Badge` |
@@ -154,7 +158,8 @@ Interface components come from shadcn/ui (Decisions table). They are copied into
 | Side panel below 1024 px | `Sheet` |
 | Loading | `Skeleton` |
 | Hover help on controls | `Tooltip` |
-| Journeys & Playback / Heatmaps tabs; statistics page sections | `Tabs` |
+| Statistics page sections | `Tabs` |
+| Settings menu (theme, shortcuts, GitHub); About button | `DropdownMenu` (added with P22) |
 | Statistics charts (histograms, bars) | `Chart` (`ChartContainer`, `ChartTooltip`, `ChartLegend` on Recharts) |
 
 Rules:
@@ -173,7 +178,8 @@ Rules:
 - **Hover:** highlights the hovered actor everywhere and dims the others to 30 %. **Click** on a path or marker selects that actor (kept until Esc or a click on empty map).
 - **Keyboard:** all controls reachable with Tab, visible focus ring (`brand`, 2 px). Space play/pause, ← / → ±5 s, F fit map, Esc clear selection. Shortcuts are listed in a "?" popover.
 - **URL:** every visible state that matters is in the URL (`map, date, match, hide`, later `t`, `layer`). User actions push history; corrections replace (Decisions table).
-- **Motion:** only for meaning (playback, hover highlight). Transitions ≤ 150 ms. Respect `prefers-reduced-motion` (no smooth zoom animation, instant highlights).
+- **Motion:** only for meaning (playback, hover highlight, the camera bringing a picked match or hotspot into view). Transitions ≤ 150 ms, except camera moves: eased in and out over 700 ms (`map/zoom.ts`), stopped by any user input. Respect `prefers-reduced-motion` (camera moves are instant, instant highlights). One exception: the statistics count-up (`ui/CountUp.tsx`) runs under reduced motion too, because only digits change in place and nothing moves (S, 2026-10-24).
+- **Loading on the map:** `LoadingIndicator` (`components/loading-indicator.tsx`): a pill centred in the map frame, shown only when loading lasts over 200 ms and then for at least 400 ms, so fast loads don't flicker.
 - **Copy:** plain English, no jargon ("time spent", not "dwell"). Humans and bots are always counted separately, never as "players". Numbers in UI text come from the data files, never typed in.
 
 ## 7. Uncertainty and data quality in the UI
@@ -189,9 +195,9 @@ Show each limit where it affects a reading:
 | Partial dates (EC-24) | "Partial" label in the date list; reason in a tooltip |
 | Small samples (EC-26) | Sample-size line on every heatmap; a "Few matches" badge when a layer has fewer than 10 contributing matches (§11 P7) |
 | No extraction event (EC-13) | Any extraction view is labelled "inferred" |
-| Event counts have three scopes (M4): match card = events in human files (paired `Kill` counted as a pair, late events included); legend = markers on the map, bot events included; journey card = one journey (paired `Kill` and events after death left out) | Labelled heading on each; legend kill row names its pair markers; `SCOPE` in `journeys.ts` |
+| Event counts have three scopes (M4): match card = events in human files (bot kills and deaths by bots from raw labels; paired `Kill` and `Killed` counted as a pair; late events included); legend = markers on the map, bot events included; journey card = one journey (paired `Kill` and events after death left out) | Labelled heading on each; legend kill row names its pair markers; `SCOPE` in `journeys.ts` |
 
-An "About this data" popover in the top bar collects these in one place and links to `EDGE_CASES.md`.
+An "About this data" panel, opened from the About button in the top nav on every page, collects these in one place and links to `EDGE_CASES.md`.
 
 ## 8. Code conventions
 - **Styling:** Tailwind v4 utilities with the `@theme` tokens above, combined with `cn()` (`src/lib/utils.ts`, from shadcn). No raw hex in components; no inline styles except values computed from data.
@@ -267,3 +273,5 @@ Run at the end of each feature, timed, with the answer checked against the data:
 | P18 | `t=` in the URL | Written with a replace after the time has settled, never while playing; opening a link starts paused at that time |
 | P19 | Vendored `slider.tsx` | Edited to accept `thumbProps`, so the timeline thumb gets an accessible name and value text |
 | P20 | Statistics charts (spec 10) | shadcn `Chart` on Recharts 3.8.0 (the version shadcn CLI 4.22.1 installs for React 19); `--chart-1…5` mapped to the brand and gameplay tokens; `chart.tsx` unedited (S, 2026-10-22) |
+| P22 | Navigation (S, 2026-10-24) | At most two persistent rows. Row 1: brand · Overview, Heatmaps, Journeys · Copy link (map pages) and a settings menu. Row 2: the map toggle and date filter, shared and carried across the three pages; "All maps" exists only on the Overview, and a map picked on any page opens that map's report there. Heatmaps and Journeys have their own paths (`/heatmaps`, `/journeys`); old `/explore?tab=` links are forwarded. The theme toggle, About and shortcuts moved into the settings menu; the date filter left the side panels. AI Chat is hidden from the nav (the `/chat` page still works). Replaces the Overview · Explore · AI Chat bar, the map row and the Heatmaps / Journeys & Playback tabs |
+| P21 | Finding bot matches | A "With bots" `Toggle` beside the match list title narrows the list to matches with a bot journey (52 of 796), combined with the search and kept in the store for the session, not the URL. Each such row carries an amber chip with the bot avatar, "14 bots", after the sort chip; bots are no longer repeated in the row's grey details line (S, 2026-10-23) |

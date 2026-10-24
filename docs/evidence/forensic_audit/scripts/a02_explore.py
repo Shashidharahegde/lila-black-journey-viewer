@@ -1,0 +1,38 @@
+"""A02: first-pass structure of the raw table: identifiers, file naming, events, timestamps, coordinates."""
+import sys, re, numpy as np, pandas as pd
+df = pd.read_parquet(sys.argv[1])
+UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+print("== per-file constancy")
+g = df.groupby(["folder","fname"])
+for c in ["user_id","match_id","map_id"]:
+    print(c, "files with >1 distinct value:", (g[c].nunique()>1).sum())
+f = g.agg(user=("user_id","first"), match=("match_id","first"), map=("map_id","first"), sha=("file_sha","first"), n=("x","size")).reset_index()
+stem = f.fname.str.replace(".nakama-0","",regex=False)
+f["fa"] = stem.str.split("_").str[0]; f["fb"] = stem.str.split("_",n=1).str[1]
+print("fname part A == user_id:", (f.fa==f.user).mean(), " part B == match_id:", (f.fb==f.match).mean())
+print("example match_id shapes:", f.match.str.replace(r"[0-9a-f]", "h", regex=True).value_counts().head(5).to_dict())
+print("user id shapes:", f.user.str.replace(r"[0-9a-f]", "h", regex=True).str.replace(r"\d","d",regex=True).value_counts().head(8).to_dict())
+f["uuid_user"] = f.user.str.match(UUID.pattern)
+f["numeric_user"] = f.user.str.fullmatch(r"\d+")
+print("uuid users files:", f.uuid_user.sum(), " numeric users files:", f.numeric_user.sum(), " other:", (~f.uuid_user & ~f.numeric_user).sum())
+print("map ids:", df.map_id.value_counts().to_dict())
+print("== duplicates")
+print("distinct sha:", f.sha.nunique(), "of", len(f))
+d = f[f.duplicated("sha", keep=False)].sort_values("sha"); print("files sharing a sha:", len(d), d[["folder","n","uuid_user"]].to_string())
+k = f.groupby(["user","match"]).size(); print("(user,match) keys:", len(k), " with >1 file:", (k>1).sum())
+k2 = f.drop_duplicates("sha").groupby(["user","match"]).size(); print("after sha dedupe, (user,match) with >1 file:", (k2>1).sum())
+print("== events")
+print(df.event.value_counts().to_string())
+print("non-ascii event bytes:", df.event_raw.apply(lambda b: any(c>127 for c in b)).sum())
+print("== timestamps")
+ts = df.ts.astype("int64")  # ms since epoch as stored
+print("raw int64 range:", ts.min(), ts.max(), " as datetime:", df.ts.min(), df.ts.max())
+print("== coordinates")
+for m, s in df.groupby("map_id"):
+    print(m, s[["x","y","z"]].describe().loc[["min","max","mean"]].round(1).to_dict())
+print("non-finite:", (~np.isfinite(df[["x","y","z"]])).sum().to_dict())
+print("exact zeros xyz:", ((df.x==0)&(df.y==0)&(df.z==0)).sum())
+print("files per folder:", f.folder.value_counts().to_dict())
+print("matches:", df.match_id.nunique(), " users:", df.user_id.nunique(), " uuid users:", f[f.uuid_user].user.nunique(), " numeric users:", f[f.numeric_user].user.nunique())
+mm = df.groupby("match_id").map_id.nunique(); print("matches with >1 map:", (mm>1).sum())
+mf = f.groupby("match").folder.nunique(); print("matches spanning >1 folder:", (mf>1).sum())

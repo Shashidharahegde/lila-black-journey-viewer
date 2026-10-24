@@ -1,0 +1,38 @@
+{
+ "matches": 796,
+ "with_recorded_bot_files": 52,
+ "with_human_bot_combat_labels": 722,
+ "with_a_human_killed_by_a_bot_label": 399,
+ "with_combat_but_no_bot_file": 690,
+ "with_neither": 54,
+ "with_bot_files_but_no_human_combat": 20,
+ "label_validation_in_matches_with_bot_files": {
+  "BotKill": {
+   "human_events": 104,
+   "paired_with_counterpart_event": 26,
+   "paired_share": 0.25,
+   "null_paired_share_mean_p95": [
+    0.032,
+    0.067
+   ],
+   "counterpart_kinds": {
+    "bot": 26
+   },
+   "counterpart_distance_median": 12.8
+  },
+  "BotKilled": {
+   "human_events": 20,
+   "paired_with_counterpart_event": 5,
+   "paired_share": 0.25,
+   "null_paired_share_mean_p95": [
+    0.016,
+    0.05
+   ],
+   "counterpart_kinds": {
+    "bot": 5
+   },
+   "counterpart_distance_median": 11.8
+  }
+ },
+ "human_Bot_events_paired_with_another_human_file": 0
+}

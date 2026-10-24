@@ -1,0 +1,197 @@
+{
+ "variants": {
+  "published": {
+   "scores": {
+    "AmbroseValley": 0.76,
+    "GrandRift": 0.49,
+    "Lockdown": 0.25
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.822,
+   "bootstrap_share_AmbroseValley_first": 0.973
+  },
+  "without_human_journeys": {
+   "scores": {
+    "AmbroseValley": 0.71,
+    "GrandRift": 0.61,
+    "Lockdown": 0.25
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.565,
+   "bootstrap_share_AmbroseValley_first": 0.664
+  },
+  "without_median_span_s": {
+   "scores": {
+    "AmbroseValley": 0.96,
+    "GrandRift": 0.44,
+    "Lockdown": 0.06
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.971,
+   "bootstrap_share_AmbroseValley_first": 0.999
+  },
+  "without_kills_per_journey": {
+   "scores": {
+    "AmbroseValley": 0.75,
+    "GrandRift": 0.36,
+    "Lockdown": 0.31
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.577,
+   "bootstrap_share_AmbroseValley_first": 0.995
+  },
+  "without_loot_per_journey": {
+   "scores": {
+    "AmbroseValley": 0.71,
+    "GrandRift": 0.46,
+    "Lockdown": 0.31
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.671,
+   "bootstrap_share_AmbroseValley_first": 0.952
+  },
+  "without_storm_deaths_per_100": {
+   "scores": {
+    "AmbroseValley": 0.71,
+    "GrandRift": 0.56,
+    "Lockdown": 0.31
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.572,
+   "bootstrap_share_AmbroseValley_first": 0.772
+  },
+  "rank_based": {
+   "scores": {
+    "AmbroseValley": 1.4,
+    "GrandRift": 1.0,
+    "Lockdown": 0.6
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.827,
+   "bootstrap_share_AmbroseValley_first": 0.977
+  },
+  "z_score": {
+   "scores": {
+    "AmbroseValley": 0.62,
+    "GrandRift": -0.03,
+    "Lockdown": -0.59
+   },
+   "order": "AmbroseValley > GrandRift > Lockdown",
+   "bootstrap_share_of_this_order": 0.818,
+   "bootstrap_share_AmbroseValley_first": 0.972
+  }
+ },
+ "parts_with_95ci": {
+  "AmbroseValley": {
+   "human_journeys": [
+    554,
+    [
+     554.0,
+     554.0
+    ]
+   ],
+   "median_span_s": [
+    354.5,
+    [
+     332.98,
+     382.0
+    ]
+   ],
+   "kills_per_journey": [
+    2.99,
+    [
+     2.7,
+     3.32
+    ]
+   ],
+   "loot_per_journey": [
+    17.67,
+    [
+     16.58,
+     18.82
+    ]
+   ],
+   "storm_deaths_per_100": [
+    3.07,
+    [
+     1.81,
+     4.51
+    ]
+   ]
+  },
+  "GrandRift": {
+   "human_journeys": [
+    57,
+    [
+     57.0,
+     57.0
+    ]
+   ],
+   "median_span_s": [
+    403.0,
+    [
+     302.0,
+     467.0
+    ]
+   ],
+   "kills_per_journey": [
+    3.14,
+    [
+     2.26,
+     4.12
+    ]
+   ],
+   "loot_per_journey": [
+    15.37,
+    [
+     12.54,
+     18.47
+    ]
+   ],
+   "storm_deaths_per_100": [
+    8.77,
+    [
+     1.75,
+     17.54
+    ]
+   ]
+  },
+  "Lockdown": {
+   "human_journeys": [
+    170,
+    [
+     170.0,
+     170.0
+    ]
+   ],
+   "median_span_s": [
+    427.0,
+    [
+     352.95,
+     469.61
+    ]
+   ],
+   "kills_per_journey": [
+    2.28,
+    [
+     1.91,
+     2.74
+    ]
+   ],
+   "loot_per_journey": [
+    12.04,
+    [
+     10.73,
+     13.48
+    ]
+   ],
+   "storm_deaths_per_100": [
+    10.0,
+    [
+     5.29,
+     14.71
+    ]
+   ]
+  }
+ }
+}

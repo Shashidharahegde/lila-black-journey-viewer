@@ -1,0 +1,91 @@
+{
+ "rows": 88826,
+ "files": 1242,
+ "files_by_kind": {
+  "U+P": 781,
+  "N+BP": 444,
+  "N+P": 17
+ },
+ "events_by_kind": {
+  "N+BP": {
+   "BotPosition": 21712,
+   "BotKilled": 296,
+   "BotKill": 170
+  },
+  "N+P": {
+   "Position": 636,
+   "Loot": 115,
+   "BotKill": 13,
+   "BotKilled": 1
+  },
+  "U+P": {
+   "Position": 50501,
+   "Loot": 12714,
+   "BotKill": 2223,
+   "BotKilled": 400,
+   "KilledByStorm": 39,
+   "Kill": 3,
+   "Killed": 3
+  }
+ },
+ "matches": 796,
+ "matches_by_map": {
+  "AmbroseValley": 566,
+  "GrandRift": 59,
+  "Lockdown": 171
+ },
+ "files_by_map_kind": {
+  "AmbroseValley|N+BP": 268,
+  "AmbroseValley|N+P": 14,
+  "AmbroseValley|U+P": 554,
+  "GrandRift|N+BP": 52,
+  "GrandRift|N+P": 2,
+  "GrandRift|U+P": 57,
+  "Lockdown|N+BP": 124,
+  "Lockdown|N+P": 1,
+  "Lockdown|U+P": 170
+ },
+ "matches_by_utc_start_date": {
+  "2026-02-09": 1,
+  "2026-02-10": 287,
+  "2026-02-11": 197,
+  "2026-02-12": 162,
+  "2026-02-13": 112,
+  "2026-02-14": 37
+ },
+ "matches_by_min_folder": {
+  "February_10": 285,
+  "February_11": 200,
+  "February_12": 162,
+  "February_13": 112,
+  "February_14": 37
+ },
+ "uuid_users": 245,
+ "human_events_by_map": {
+  "AmbroseValley": {
+   "Position": 35429,
+   "Loot": 9791,
+   "BotKill": 1656,
+   "BotKilled": 296,
+   "KilledByStorm": 17,
+   "Kill": 2,
+   "Killed": 2
+  },
+  "GrandRift": {
+   "Position": 3717,
+   "Loot": 876,
+   "BotKill": 179,
+   "BotKilled": 24,
+   "KilledByStorm": 5,
+   "Kill": 1,
+   "Killed": 1
+  },
+  "Lockdown": {
+   "Position": 11355,
+   "Loot": 2047,
+   "BotKill": 388,
+   "BotKilled": 80,
+   "KilledByStorm": 17
+  }
+ }
+}
