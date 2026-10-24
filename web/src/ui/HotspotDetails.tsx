@@ -7,6 +7,9 @@ import { currentZones, useStore } from '@/state/store'
 
 export const PICK_HOTSPOT_TEXT = 'Click on the specific hotspot to get more information.'
 
+/** The card's content eases in when a hotspot is picked or cleared (a new key remounts it); instant under reduced motion. */
+const REVEAL = 'animate-in fade-in slide-in-from-bottom-1 fill-mode-both duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none'
+
 function Figure({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col-reverse gap-0.5">
@@ -44,14 +47,16 @@ export default function HotspotDetails({ layer, date }: { layer: HeatmapLayerKey
       aria-label="Hotspot details"
       aria-live="polite"
       className={cn(
-        'flex min-h-36 flex-col rounded-xl p-3 transition-colors',
+        'flex min-h-36 flex-col rounded-xl p-3 transition-[background-color,border-color,box-shadow] duration-300 ease-out',
         zone ? 'bg-brand/8 ring-1 ring-brand/50' : 'items-center justify-center border border-dashed text-center',
       )}
     >
       {!zone ? (
-        <p className="max-w-56 text-sm text-muted-foreground">{prompt}</p>
+        <p key="prompt" className={cn('max-w-56 text-sm text-muted-foreground', REVEAL)}>
+          {prompt}
+        </p>
       ) : (
-        <>
+        <div key={key} className={REVEAL}>
           <div className="flex items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <span aria-hidden className="flex size-5 items-center justify-center rounded-full bg-brand text-[11px] text-white tabular-nums">
@@ -81,7 +86,7 @@ export default function HotspotDetails({ layer, date }: { layer: HeatmapLayerKey
             {zone.journeys !== undefined && <Figure label="journeys" value={zone.journeys} />}
             {zone.storm_deaths !== undefined && zone.storm_deaths > 0 && <Figure label="storm deaths" value={zone.storm_deaths} />}
           </dl>
-        </>
+        </div>
       )}
     </section>
   )

@@ -2,10 +2,11 @@ import { ArrowRightIcon, MapPinnedIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ALL, exploreLinkFor } from '@/state/statsUrl'
+import { ALL } from '@/state/statsUrl'
+import { mapPageHref } from '@/state/useUrlSync'
 
 /** Replaces a "top POIs" list: the data has no named locations, so this points to the heatmaps and hotspot regions in
- * Explore instead of inventing place names. */
+ * Heatmaps page instead of inventing place names. */
 export default function ExploreHeatmapsCard({ map, date }: { map: string; date: string }) {
   return (
     <Card size="sm" className="flex-row flex-wrap items-center justify-between gap-3 px-4">
@@ -19,7 +20,7 @@ export default function ExploreHeatmapsCard({ map, date }: { map: string; date: 
         </div>
       </div>
       <Button asChild>
-        <Link to={exploreLinkFor(map, date === ALL ? null : date)}>
+        <Link to={mapPageHref('heatmaps', { map, date: date === ALL ? null : date })}>
           Open heatmaps
           <ArrowRightIcon data-icon="inline-end" />
         </Link>

@@ -20,7 +20,7 @@ A heatmap is **one precomputed aggregate per map, per layer, per date key** (`al
 
 - It uses **all recorded human journeys** on that map and date. It does **not** use the selected match, the match list, or the playback time. None of them change it.
 - The heatmap is the map-and-date aggregate, and it lives only in the Heatmaps tab (see "Stage 6c" at the end; it was briefly drawn under an open match, which Stage 6c replaced). The control that does change it is the date dropdown, and the scope line always says so.
-- The scope line is always visible with the heatmap, in plain words, e.g. `All human journeys · AmbroseValley · all dates`. It never says "match" in a way that suggests a single match.
+- ~~The scope line is always visible with the heatmap~~ (removed in Stage 6d: the map picker, the date filter and the Heatmaps tab already say what is shown, and the summary card counts human journeys). Nothing on the tab says "match" in a way that suggests a single match.
 - The match list below the heatmap controls is for browsing. Hovering or selecting a row doesn't change the heatmap.
 - **The match list stays usable.** The heatmap controls are compact (layer, scope, evidence, legend, opacity; the longer notes sit under "About this heatmap"), and the list keeps at least 20 rem of height; on a short window the whole overview panel scrolls. Checked at 1440×700 and 1280×620.
 - No time-filtered mode in this feature. Aggregates can't change with playback time because a match isn't selected while a heatmap is shown.
@@ -87,7 +87,7 @@ Example scope and evidence lines (all values come from the files at runtime):
 
 **Low-evidence flag** (below 10 contributing matches, D3): a "Few matches" badge, with a tooltip saying what it rests on, when the layer's contributing matches are below the threshold. Raw counts stay visible next to it. The flag says "read with care", never "wrong".
 
-**Coverage note** (one line, also in About this data): "Telemetry covers recorded players only; most matches have one recorded human."
+**Coverage note** (in About this data; no longer repeated in the Heatmaps panel since Stage 6d): "Telemetry covers recorded players only; most matches have one recorded human."
 
 ## Empty states
 - **No data for the date** (the date key is missing, e.g. GrandRift on 2026-02-09, or a map with no human journeys): no cells, no legend, text "No human journeys recorded on GrandRift on 2026-02-09." and "Choose another date or All dates."
@@ -190,8 +190,8 @@ separate). The interpretation layer sits beside the heatmap; it does not replace
 
 Of the candidates that passed stability and support, the shifted grids removed 0 of 5 (AmbroseValley kills), 3 of 4 (deaths), 5 of 12 (traffic), 1 of 1 (GrandRift kills), 5 of 8 (GrandRift traffic), 1 of 1 (Lockdown kills), 1 of 2 (Lockdown deaths) and 7 of 8 (Lockdown traffic). Moving the match, player and one-match thresholds changes no count; the top-decile share and the shift check move them most. A candidate that failed is reported as observed; the which-survives table is section 8.2 of the report.
 
-### Behaviour (built)
-For the selected map, date and layer, under the heatmap controls:
+### Behaviour (built; the panel part is superseded by Stage 6d)
+Stage 6d replaced the list, the tiers' wording and the details below with a hotspot area in the panel; the analysis, thresholds and data are unchanged. As first built, for the selected map, date and layer, under the heatmap controls:
 - **A compact summary of the strongest consistent regions, at most three at first** ("Show N more" for the rest), each with the layer's value in its own unit, its share of the layer, and the matches and recorded players behind it.
 - **Click a region** to open its details (value, share, matches, players, journeys through it for traffic, storm deaths among a death region's value, largest single match, resample stability, shifted-grid result) and to outline its footprint on the map. Clicking it again clears it. The outline is a line, never a fill over the heatmap.
 - **No consistent region:** "No consistent concentration detected in this selection." followed by the highest observed regions (up to three), marked as not consistent, each with its measurements and, when opened, the checks it failed.
@@ -200,7 +200,7 @@ For the selected map, date and layer, under the heatmap controls:
 - Wording: "recorded", "observed", "concentration"; never "dangerous", "deadliest" or a bare "hotspot".
 
 ### Count classes for kills and deaths (decision 5; code `heatmap/scale.ts`, evidence `count_bands.*`)
-Kills and deaths are coloured on the 64 × 64 cells by absolute count: **1 / 2–3 / 4–9 / 10 or more**, identical on every date and map, and never applied to the 16 × 16 regions. The classes step in lightness and opacity as well as hue (neighbouring classes >= 18.9 dE apart for kills and >= 7.0 dE for deaths under deuteranopia and protanopia, where the previous continuous ramp was 0.7–8 dE for kills and 0 dE for GrandRift deaths). Hotspots and All activity differ for traffic only.
+Kills and deaths are coloured on the 64 × 64 cells by absolute count: **1 / 2–3 / 4–9 / 10 or more**, identical on every date and map, and never applied to the 16 × 16 regions. The classes step in lightness and opacity as well as hue (neighbouring classes >= 18.9 dE apart for kills and >= 7.0 dE for deaths under deuteranopia and protanopia, where the previous continuous ramp was 0.7–8 dE for kills and 0 dE for GrandRift deaths). Stage 6d raised the opacity of the 4–9 and 10+ classes; the colours are unchanged, but these dE figures were measured with the earlier opacities and have not been re-run. Hotspots and All activity differ for traffic only.
 
 ### Data (pipeline, approved)
 `web/public/data/zones/<map>.json`: per selection (all and each date) and layer: total, occupied regions, candidates, consistent count, and the candidate regions with `i`, `j`, `value`, `share`, `matches`, `players`, `largest_match_share`, `stability`, `survived_shifts`, `tier`, plus `journeys` (traffic) and `storm_deaths` (deaths; the layer also carries the selection's storm-death total). The qualification rules used are written into the file. Counts only: no player or match IDs. Built by `make data`, deterministic (seeded), tested in `pipeline/tests/test_zones.py` and `web/src/heatmap/zones.test.ts`.
@@ -213,23 +213,59 @@ Kill/death balance maps, danger scores, deaths-per-visit, inferred extraction, a
 
 ## Stage 6c — Tabs, independent switches, outlines, Focused traffic (S, 2026-10-23)
 
-**Two tabs on one map.** *Journeys & Playback* is the match list, paths, markers and timeline; it has no heatmap and no outlines. *Heatmaps* is the aggregate over the selected map and date (All dates included) as one metric at a time (Traffic, Kills or Deaths); it has no match, path, marker or playback, and says so: "Aggregated recorded human telemetry … Not filtered by the selected match or the playback time". The same `MapView` stays mounted, so the minimap is not reloaded and the camera stays where the user left it.
+> **Navigation pass (S, 2026-10-24):** the two tabs below are now primary nav pages with their own paths, `/heatmaps` and `/journeys` ("Journeys & Playback" is called "Journeys"), and `?tab=` is no longer written; old `tab=` links are forwarded. Each page still writes only its own parameters and keeps the other page's state, as described here. See FRONTEND_GUIDELINES P22.
+
+**Two tabs on one map.** *Journeys & Playback* is the match list, paths, markers and timeline; it has no heatmap and no outlines. *Heatmaps* is the aggregate over the selected map and date (All dates included) as one metric at a time (Traffic, Kills or Deaths); it has no match, path, marker or playback (the sentence that said so, "Aggregated recorded human telemetry … Not filtered by the selected match or the playback time", was removed in Stage 6d). The same `MapView` stays mounted, so the minimap is not reloaded and the camera stays where the user left it.
 
 **State rules.**
 - Map and date are shared. The match, its hidden layers and the playback time are kept while the other tab is open. **Leaving Journeys pauses playback** (also a scrub in progress); coming back shows the same moment, paused.
-- The heatmap metric, both switches, the Focused / All activity view and the opacity are kept across metric, map, date and tab changes. A selected region and an expanded list are cleared by a new metric, date or map, not by a tab switch.
+- The heatmap metric, both switches, the Focused / All activity view and the opacity are kept across metric, map, date and tab changes. A selected hotspot is cleared by a new metric, date or map, not by a tab switch (the expanded list went with the list in Stage 6d).
 - URL: `?map=&date=&tab=journeys|heatmaps`, then only that tab's own parameters. Journeys: `match`, `hide`, `t`. Heatmaps: `layer` (not traffic), `density=off`, `outlines=off`, `intensity=all`. So the two sets never conflict. Links without `tab` still work: a `match` means Journeys, anything else Heatmaps; the old `heatmap=off` reads as `density=off`; the earlier `intensity=hotspots` reads as the default. Back and Forward step between tabs and selections (a `t=` update uses a replace).
 
-**Two independent switches** (replacing the master On/Off): *Show density overlay* and *Show hotspot outlines*; all four combinations work, including both off (the bare minimap). Outlines are read from the 16×16 zone analysis only; the density picture is the 64×64 grid. Neither is derived from the other, and nothing is ranked from smoothed pixels.
+**Two independent switches** (replacing the master On/Off): *Density overlay* and *Hotspot outlines* (labelled "Show …" until Stage 6d); all four combinations work, including both off (the bare minimap). Outlines are read from the 16×16 zone analysis only; the density picture is the 64×64 grid. Neither is derived from the other, and nothing is ranked from smoothed pixels.
 
-**Outlines.** A double stroke (dark casing, white line) so it reads on every minimap, drawn in map coordinates so it follows zoom and pan. The shape is a circle through the corners of the region's 4×4-cell footprint, wide enough to contain it: an approximate mark, not a boundary (the panel says so and gives the size: "about 56 world units across" for the 16×16 regions on AmbroseValley). Only regions that passed every check are outlined, numbered 1–3 first (more on request); the number is the same as in the list. Clicking an outline or a list row selects it: the map **zooms in** until the region fills about a third of the view's shorter side (never zooms out; instant, no animation) and a **details card** opens in the map's bottom-right corner (value, share of the layer, matches, recorded players, journeys through it, storm deaths, largest single match, resample stability, shifted-grid result, and the plain statement that the repeat tests use the recorded matches only). Esc, the close button or a click on empty map clears it. When no region qualifies the panel says "No consistent concentration detected in this selection." and the map draws no outline (the highest observed regions are listed, marked not consistent).
+**Outlines** (as built in 6c; Stage 6d changed which are drawn and where the details go). A double stroke (dark casing, white line) so it reads on every minimap, drawn in map coordinates so it follows zoom and pan. The shape is a circle through the corners of the region's 4×4-cell footprint, wide enough to contain it: an approximate mark, not a boundary (the panel says so and gives the size: "about 56 world units across" for the 16×16 regions on AmbroseValley). Only regions that passed every check are outlined, numbered 1–3 first (more on request); the number is the same as in the list. Clicking an outline or a list row selects it: the map **zooms in** until the region fills about a third of the view's shorter side (never zooms out; eased over 700 ms since 2026-10-24, `map/zoom.ts`) and a **details card** opens in the map's bottom-right corner (value, share of the layer, matches, recorded players, journeys through it, storm deaths, largest single match, resample stability, shifted-grid result, and the plain statement that the repeat tests use the recorded matches only). Esc, the close button or a click on empty map clears it. When no region qualifies the panel says "No consistent concentration detected in this selection." and the map draws no outline (the highest observed regions are listed, marked not consistent).
 
 **Regions that pass the shifted-grid check (all dates):** AmbroseValley kills 5, deaths 1, traffic 7; GrandRift 0, 0, 3; Lockdown 0, 1, 1.
 
 **Traffic contrast (Focused view, per 64×64 cell, in estimated player-seconds; thresholds are absolute, so a value looks the same on every date of a map).**
-- Under 30 s: not drawn. 30 s to under 60 s: a faint trace (opacity 0.03 to 0.06). 60 s and over: opacity = 0.10 + 0.85·x^1.5 with x = ln(v/60) / ln(max/60), where `max` is the map's largest cell over all dates; colour follows x on the traffic palette.
+- Under 30 s: not drawn. 30 s to under 60 s: a faint trace (opacity 0.03 to 0.06). 60 s and over: opacity = 0.10 + 0.90·x^1.5 (0.85 until Stage 6d) with x = ln(v/60) / ln(max/60), where `max` is the map's largest cell over all dates; colour follows x on the traffic palette.
 - Why this curve: on AmbroseValley 31 % of cells are under 30 s and 49 % are at 60 s or more, so the 1.5 power keeps the typical visible cell low and makes the few strongest cells far brighter (tests require the top to be over 4× a typical 2-minute cell, and 2–15 % of AmbroseValley's cells to be bright). Recorded values are untouched: hover and the tooltip still read the raw grid, hidden cells included.
 - **Decision for S:** the thresholds are absolute, as asked, and that hides most of GrandRift's traffic: 84 % of its cells are under 30 s and only 5 % reach 60 s (Lockdown: 30 % reach 60 s). A single day of GrandRift is almost empty in this view. "All activity" shows everything; a per-map threshold would be a different rule.
 - Kills and Deaths keep the count classes (1 / 2–3 / 4–9 / 10+), with slightly stronger opacity steps, and no time threshold.
 
-Code: `heatmap/scale.ts` (`trafficFocusedStyle`, `TRAFFIC_FOCUS`), `heatmap/zones.ts` (`zoneOutline`, `visibleConsistent`), `heatmap/layers.ts` (`outlineLayers`), `ui/RegionCard.tsx`, `map/space.ts` (`focusZoom`), `state/url.ts`, `state/useUrlSync.ts`. Evidence: `docs/evidence/tabs_and_outlines/`.
+Code: `heatmap/scale.ts` (`trafficFocusedStyle`, `TRAFFIC_FOCUS`), `heatmap/zones.ts` (`zoneOutline`), `heatmap/layers.ts` (`outlineLayers`), `map/space.ts` (`focusZoom`), `state/url.ts`, `state/useUrlSync.ts` (`visibleConsistent` and `ui/RegionCard.tsx` were removed in Stage 6d). Evidence: `docs/evidence/tabs_and_outlines/`.
+
+## Stage 6d — Sidebar redesign and refinement (S, 2026-10-23)
+
+**Why.** S's review: the panel repeated the map and date, explained methods nobody needed to act on, scattered its numbers, and the map jumped when the tab or the panel changed. This stage changes presentation only: the 64 × 64 grids, the 16 × 16 region analysis, its thresholds and every recorded value are unchanged. Decisions are the rows "Heatmaps sidebar (redesign + refinement)", "Fixed map frame" and "Full paths default and heatmap intensity" in the CLAUDE.md table.
+
+**Panel, top to bottom.**
+1. Traffic / Kills / Deaths.
+2. The date filter and the theme toggle (moved from the primary nav, which now holds Copy link, GitHub, About this data and Keyboard shortcuts).
+3. **One summary card** (`ui/HeatmapSummary.tsx`, figures from `layerSummary` in `heatmap/evidence.ts`): the layer total with what it counts, then three figures that give it meaning. They are ratios of numbers already in the files; nothing new is counted, and each label names its denominator. "Matches" are matches on this map and date with a human journey.
+   - Traffic: estimated time humans spent on the map; per human journey; human journeys; matches.
+   - Kills: kills by human players; kills per match; share of matches with a kill; matches.
+   - Deaths: human deaths; deaths per match; share of matches with a death; storm deaths with their share of deaths (from `index.json`; equal to the zones file's storm count for every map and date, tested).
+   - Below the figures, only when they apply: a partial day, the Kill/Killed pair note, and the "Few matches" badge (D3 unchanged).
+4. The two switches, *Density overlay* and *Hotspot outlines*.
+5. **The hotspot area** (`ui/HotspotDetails.tsx`). By default: "Click on the specific hotspot to get more information." When no region passes the checks: "No hotspots stand out for this map and date." With outlines off: "Turn on hotspot outlines to pick a hotspot." After a click on an outline: the hotspot's number, its value in the layer's unit, its share of the layer's total with a bar, and its matches and players, plus journeys (traffic) or storm deaths (deaths). Esc, the close button or a click on empty map bring the prompt back. The map's selected outline and the panel always show the same hotspot.
+
+**What was removed.** The intro sentence, the scope line, "About this heatmap" (layer and mode notes, the coverage note), the ranked region list with "Show N more", the floating details card, and all method text (resampling, shifted grids, world units, the outline note). Methods live in this spec and `docs/evidence/` only. No "Consistent"/"Observed" wording anywhere in the interface.
+
+**Hotspots.** Every region that passes all 6b checks is outlined and numbered strongest first (Traffic leads with estimated player time, the ranking metric); there is no list to expand, so no top-3 limit (AmbroseValley all dates: 7 traffic, 5 kills, 1 death). Candidates that failed a check are never drawn or listed; the region file keeps them (tested: each fails at least one check). Clicking an outline still zooms as in 6c. The map's hover card reads "Hotspot N · value" and "share of all kills · matches · players".
+
+**Map display card** (`ui/HeatmapMapControls.tsx`): Focused / All activity (traffic only), the legend and opacity, in a small see-through card (blurred dark glass) in the map's bottom-right corner, shown while the density overlay is on and the layer has data. No captions: the selected metric names the unit; the full legend wording is kept for screen readers.
+
+**Brighter hotspots** (display only, `heatmap/scale.ts`, `heatmap/raster.ts`):
+- Focused traffic tops out at full opacity (0.10 + 0.90·x^1.5) and the palette's top runs to near-white (`#fffce6`); All activity tops at 0.95 (was 0.85).
+- Kills and deaths: 4–9 at 0.88 / 0.90 and 10+ at 1.0 (were 0.80 / 0.84 / 0.98). The 1 and 2–3 classes and the 30 s / 60 s traffic thresholds are unchanged.
+- Where soft edges overlap, colours blend weighted by the square of each bump, so a strong cell keeps its own colour instead of being averaged towards its dimmer neighbours. Opacity is still the stronger bump, never a sum.
+
+**Map frame and switching** (`map/MapView.tsx`, `App.tsx`): the side panel and the playback dock are drawn over the map, and the camera fits, zooms and clamps inside a frame that always reserves the panel's width (320 px, desktop) and one dock row (56 px). Switching tabs, opening a match or hiding the panel therefore never moves or rescales the map (headless check: 0.00 % of map pixels change). On a map switch the previous map stays, dimmed and without overlays, with a "Loading <map>…" label, until the next minimap has loaded; then the next fades in.
+
+**How to verify (this stage).**
+1. `/explore?map=AmbroseValley&tab=heatmaps`: the summary card reads 3,477 min, 554 human journeys, 553 matches; the hotspot area shows the default prompt.
+2. Click outline 1: the map zooms to it and the panel shows Hotspot 1 (136 min, 4 % of all player time, 78 matches, 53 players, 79 journeys). Esc brings the prompt back.
+3. GrandRift kills: "No hotspots stand out for this map and date." and no outline.
+4. Switch tabs, toggle the panel and change maps: the map doesn't move; a map change dims, then fades in.

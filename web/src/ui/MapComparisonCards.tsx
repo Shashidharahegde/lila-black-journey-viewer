@@ -8,6 +8,7 @@ import { ALL, statsLinkFor } from '@/state/statsUrl'
 import { COMPARISON_KPIS, KPIS, STANDING, bestAndWorst, kpiByMap, kpiContext, kpiText, secondaryKpis, type KpiId } from '@/stats/comparison'
 import { MAP_CARD_IMAGE } from '@/stats/images'
 import { sliceBadges, sliceFor } from '@/stats/slices'
+import CountUp from './CountUp'
 import ReasonBadge from './ReasonBadge'
 
 interface Props {
@@ -91,7 +92,8 @@ export default function MapComparisonCards({ stats, date, selected, onSelect }: 
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl leading-tight font-semibold text-brand tabular-nums">{kpiText(slice, kpiId)}</span>
+                    {/* keyed by card, not metric: switching "Compare on" shows the new value directly */}
+                    <CountUp id={`cards:${map}`} value={kpiText(slice, kpiId)} className="text-3xl leading-tight font-semibold text-brand tabular-nums" />
                     {rank && (
                       <Badge variant={rank === STANDING.best ? 'default' : 'outline'} className={rank === STANDING.best ? 'bg-brand-strong' : ''}>
                         {rank}
@@ -104,9 +106,9 @@ export default function MapComparisonCards({ stats, date, selected, onSelect }: 
                   </div>
                 </div>
                 <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
-                  {secondaryKpis(kpiId).map((id) => (
+                  {secondaryKpis(kpiId).map((id, i) => (
                     <p key={id} className="flex flex-col">
-                      <span className="text-sm font-semibold tabular-nums">{kpiText(slice, id)}</span>
+                      <CountUp id={`cards:${map}:${i}`} value={kpiText(slice, id)} className="text-sm font-semibold tabular-nums" />
                       <span className="text-xs text-muted-foreground">{KPIS[id].short}</span>
                     </p>
                   ))}

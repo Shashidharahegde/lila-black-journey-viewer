@@ -1,9 +1,10 @@
-import { CompassIcon, LayoutDashboardIcon, PackageIcon, SwordsIcon, type LucideIcon } from 'lucide-react'
+import { FlameIcon, LayoutDashboardIcon, PackageIcon, SwordsIcon, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { StatsFile, StatsSlice } from '@/data/types'
-import { ALL, SECTIONS, SECTION_LABEL, exploreLinkFor, type Section, type StatsScope } from '@/state/statsUrl'
+import { ALL, SECTIONS, SECTION_LABEL, type Section, type StatsScope } from '@/state/statsUrl'
+import { mapPageHref } from '@/state/useUrlSync'
 import { headlineFigures } from '@/stats/figures'
 import { MAP_HERO_IMAGE } from '@/stats/images'
 import CombatSection from './CombatSection'
@@ -55,9 +56,9 @@ export default function MapReport({ stats, scope, slice, update }: Props) {
         actions={
           <>
             <Button asChild>
-              <Link to={exploreLinkFor(scope.map, scope.date === ALL ? null : scope.date)}>
-                <CompassIcon data-icon="inline-start" />
-                Explore this map
+              <Link to={mapPageHref('heatmaps', { map: scope.map, date: scope.date === ALL ? null : scope.date })}>
+                <FlameIcon data-icon="inline-start" />
+                Open heatmaps
               </Link>
             </Button>
           </>

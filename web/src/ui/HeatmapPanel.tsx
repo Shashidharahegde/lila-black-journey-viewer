@@ -12,7 +12,6 @@ import { currentHeatmap, useStore } from '@/state/store'
 import { HEATMAP_LAYERS, type Selection } from '@/state/url'
 import HeatmapSummary from './HeatmapSummary'
 import HotspotDetails from './HotspotDetails'
-import { ContextRow } from './TopBar'
 
 interface Props {
   index: Index
@@ -65,7 +64,7 @@ function Summary({ index, selection, layer }: Props & { layer: HeatmapLayerKey }
 }
 
 /**
- * The Heatmaps workspace's side panel: the metric, the date and theme, one summary card, the two display switches, and the clicked
+ * The Heatmaps page's side panel: the metric, one summary card, the two display switches, and the clicked
  * hotspot's details. It never shows a match, a path or a marker (spec 06).
  */
 export default function HeatmapPanel({ index, selection }: Props) {
@@ -96,7 +95,6 @@ export default function HeatmapPanel({ index, selection }: Props) {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <ContextRow index={index} selection={selection} />
         <Summary index={index} selection={selection} layer={layer} />
         <div className="flex flex-col gap-2 px-1">
           <SwitchRow label="Density overlay" checked={densityOn} onChange={setDensityOn} />

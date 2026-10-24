@@ -34,7 +34,7 @@ export default function OverviewAllMaps({ stats, date }: { stats: StatsFile; dat
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-8 lg:px-6">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {headlineFigures(slice).map((figure) => (
-            <FigureCard key={figure.id} stats={stats} figure={figure} />
+            <FigureCard key={figure.id} stats={stats} figure={figure} place="overview" />
           ))}
         </div>
 

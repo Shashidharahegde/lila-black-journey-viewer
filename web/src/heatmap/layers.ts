@@ -93,6 +93,9 @@ const BRAND: [number, number, number, number] = [37, 137, 245, 255]
  * that matches the ranking list. The selected region gets a thicker brand-coloured line. Nothing here is filled, so the density
  * overlay underneath stays visible.
  */
+/** Selecting an outline eases its width and colour instead of snapping. */
+const SELECT_EASE = { getLineWidth: 250, getLineColor: 250, getFillColor: 250 }
+
 export function outlineLayers(regions: OutlinedRegion[], selectedKey: string | null): Layer[] {
   if (regions.length === 0) return []
   const selected = (r: OutlinedRegion) => r.key === selectedKey
@@ -111,6 +114,7 @@ export function outlineLayers(regions: OutlinedRegion[], selectedKey: string | n
       getLineColor: DARK,
       pickable: false,
       updateTriggers: { getLineWidth: selectedKey },
+      transitions: SELECT_EASE,
     }),
     new ScatterplotLayer<OutlinedRegion>({
       id: 'hotspot-outline-line',
@@ -125,6 +129,7 @@ export function outlineLayers(regions: OutlinedRegion[], selectedKey: string | n
       getLineColor: (r) => (selected(r) ? BRAND : LIGHT),
       pickable: false,
       updateTriggers: { getLineWidth: selectedKey, getLineColor: selectedKey },
+      transitions: SELECT_EASE,
     }),
     new ScatterplotLayer<OutlinedRegion>({
       id: 'hotspot-outline-badge',
@@ -140,6 +145,7 @@ export function outlineLayers(regions: OutlinedRegion[], selectedKey: string | n
       getLineColor: DARK,
       pickable: false,
       updateTriggers: { getFillColor: selectedKey },
+      transitions: SELECT_EASE,
     }),
     new TextLayer<OutlinedRegion>({
       id: 'hotspot-outline-number',
