@@ -33,4 +33,4 @@ After S deploys: production URL at the top of the README.
 4. Total first-load size is reasonable (aim: under ~5 MB including one minimap).
 
 ## Out of scope
-Any serverless functions (only for the optional chatbot).
+No serverless functions (the chatbot was dropped).

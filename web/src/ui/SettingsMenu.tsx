@@ -1,5 +1,5 @@
-import { InfoIcon, KeyboardIcon, MoonIcon, Settings2Icon, SunIcon } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { KeyboardIcon, MoonIcon, Settings2Icon, SunIcon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,11 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ShortcutsContent } from './HelpPopovers'
+import { REPO_URL, ShortcutsContent } from './HelpPopovers'
 import { isTypingTarget } from './shortcuts'
 import { setTheme, useTheme, type Theme } from './theme'
-
-const REPO_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer'
 
 // lucide-react dropped its brand icons, so the GitHub mark is inline (24×24, currentColor)
 function GithubMark() {
@@ -30,21 +28,17 @@ function GithubMark() {
 }
 
 interface Props {
-  /** the page's own "About" panel: the data notes on the map pages, the statistics notes on the Overview */
-  about?: { label: string; content: ReactNode }
   /** the map pages' keyboard shortcuts, also opened with "?" */
   shortcuts?: boolean
 }
 
-type Panel = 'about' | 'shortcuts'
-
 /**
- * The secondary actions behind one button in the primary nav (S, 2026-10-24): theme, keyboard shortcuts, the page's About
- * panel and GitHub. An About or Shortcuts choice opens its panel under the same button once the menu has closed.
+ * The secondary actions behind one button in the primary nav (S, 2026-10-24): theme, keyboard shortcuts and GitHub. The page's
+ * About panel has its own button (`AboutButton`). A Shortcuts choice opens its panel under the same button once the menu has closed.
  */
-export default function SettingsMenu({ about, shortcuts = false }: Props) {
+export default function SettingsMenu({ shortcuts = false }: Props) {
   const theme = useTheme()
-  const [panel, setPanel] = useState<Panel | null>(null)
+  const [panel, setPanel] = useState<'shortcuts' | null>(null)
   const button = useRef<HTMLButtonElement>(null)
   // set when a menu item opens a panel, so the closing menu doesn't take focus back to the button (that would close the panel)
   const opening = useRef(false)
@@ -60,9 +54,9 @@ export default function SettingsMenu({ about, shortcuts = false }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [shortcuts])
 
-  const open = (next: Panel) => () => {
+  const openShortcuts = () => {
     opening.current = true
-    setPanel(next)
+    setPanel('shortcuts')
   }
 
   return (
@@ -102,16 +96,10 @@ export default function SettingsMenu({ about, shortcuts = false }: Props) {
           </DropdownMenuRadioGroup>
           <DropdownMenuSeparator />
           {shortcuts && (
-            <DropdownMenuItem onSelect={open('shortcuts')}>
+            <DropdownMenuItem onSelect={openShortcuts}>
               <KeyboardIcon />
               Keyboard shortcuts
               <DropdownMenuShortcut>?</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          )}
-          {about && (
-            <DropdownMenuItem onSelect={open('about')}>
-              <InfoIcon />
-              {about.label}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem asChild>
@@ -125,14 +113,14 @@ export default function SettingsMenu({ about, shortcuts = false }: Props) {
       </DropdownMenu>
       <PopoverContent
         align="end"
-        className={panel === 'about' ? 'w-96' : 'w-72'}
+        className="w-72"
         // back to the button, which opened the panel through the menu
         onCloseAutoFocus={(event) => {
           event.preventDefault()
           button.current?.focus()
         }}
       >
-        {panel === 'shortcuts' ? <ShortcutsContent /> : about?.content}
+        <ShortcutsContent />
       </PopoverContent>
     </Popover>
   )

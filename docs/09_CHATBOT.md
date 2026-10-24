@@ -1,4 +1,5 @@
 # 09 — Chatbot (optional — only after feature 8 is submitted-ready)
+> **Dropped 2026-10-24.** Chat is out of scope and its code was removed. This spec is kept as history only.
 
 ## Goal
 Let a designer ask questions in plain language ("How many deaths on Lockdown?") and get a short answer backed by the data, with the map, date and sample size.

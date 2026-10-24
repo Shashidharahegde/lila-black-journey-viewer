@@ -11,7 +11,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import './index.css'
 import App from './App.tsx'
 import { parseTab } from './state/url'
-import ChatPage from './ui/ChatPage'
+import AboutPage from './ui/AboutPage'
 import StatsPage from './ui/StatsPage'
 
 /** `/` and unknown paths open the all-maps Overview. An old Explore link (`/explore?tab=…`) or a link to the old map root
@@ -25,16 +25,15 @@ function RedirectToLanding() {
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <TooltipProvider>
-        {/* the three destinations: Overview (/stats, the landing page), Heatmaps and Journeys. The two map pages share one
-            App, so switching between them keeps the map, its camera and the loaded files. AI Chat is hidden from the nav for now
-            (S, 2026-10-24) but still answers at /chat. */}
+        {/* the three destinations: Overview (/stats, where `/` lands), Heatmaps and Journeys. The two map pages share one
+            App, so switching between them keeps the map, its camera and the loaded files. /about is opened from the nav's info button. */}
         <Routes>
           <Route path="/stats" element={<StatsPage />} />
           <Route element={<App />}>
             <Route path="/heatmaps" />
             <Route path="/journeys" />
           </Route>
-          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<RedirectToLanding />} />
         </Routes>
       </TooltipProvider>

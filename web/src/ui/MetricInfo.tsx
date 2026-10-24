@@ -16,7 +16,7 @@ export default function MetricInfo({ metric, label = metric.label, className = '
         </button>
       </TooltipTrigger>
       <TooltipContent className="flex max-w-[280px] flex-col gap-1 text-left">
-        {/* the page's label first; the stored metric name is kept when it differs, so the chat's wording can be matched */}
+        {/* the page's label first */}
         <p className="font-medium">{label}</p>
         {label !== metric.label && <p className="opacity-80">Stored as “{metric.label}”.</p>}
         <p>{metric.definition}</p>

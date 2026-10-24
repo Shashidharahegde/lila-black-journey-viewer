@@ -4,15 +4,17 @@ import { Link, useNavigate } from 'react-router'
 import { overviewLinkFor } from '@/state/statsUrl'
 import { useStore } from '@/state/store'
 import { mapPageHref } from '@/state/useUrlSync'
+import AboutButton from './AboutButton'
+import SettingsMenu from './SettingsMenu'
 
 export type Destination = 'overview' | 'heatmaps' | 'journeys'
 
 interface Props {
-  /** the page shown; null on a page outside the three destinations (the hidden AI Chat page) */
+  /** the page shown; null on a page outside the three destinations (the About page) */
   current: Destination | null
   /** the Overview's map ('all' or a map) and date, when the Overview is the page shown; the map pages read theirs from the store */
   overview?: { map: string; date: string }
-  /** the secondary actions on the right: Copy link on the map pages, then the settings menu */
+  /** page-specific actions on the right, before the About button and the settings menu every page has (Copy link on the map pages) */
   actions?: ReactNode
 }
 
@@ -63,7 +65,7 @@ export default function PrimaryNav({ current, overview, actions }: Props) {
         onClick={go('overview')}
         className="hidden justify-self-start rounded-md text-sm font-bold tracking-wide whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-ring md:block"
       >
-        LILA BLACK
+        LILA BLACK VISUALIZER
       </Link>
       <div className="flex items-center gap-1">
         {ITEMS.map(({ id, label, icon: Icon }) => (
@@ -79,9 +81,13 @@ export default function PrimaryNav({ current, overview, actions }: Props) {
             <Icon className="size-4 sm:hidden" aria-hidden="true" />
             <span className="hidden sm:inline">{label}</span>
           </Link>
-        ))}
+        ))} 
       </div>
-      <div className="flex min-w-0 items-center justify-self-end gap-1">{actions}</div>
+      <div className="flex min-w-0 items-center justify-self-end gap-1">
+        {actions}
+        <AboutButton />
+        <SettingsMenu shortcuts={current === 'heatmaps' || current === 'journeys'} />
+      </div>
     </nav>
   )
 }

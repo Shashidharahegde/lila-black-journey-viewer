@@ -14,7 +14,7 @@ export function statsProblem(file: Pick<StatsFile, 'metrics_version'>): string |
   return file.metrics_version === SUPPORTED_METRICS_VERSION ? null : OUT_OF_DATE
 }
 
-/** The first 8 characters of the data fingerprint, as the About popover and the chat show it. */
+/** The first 8 characters of the data fingerprint, as the About popover shows it. */
 export function shortFingerprint(file: Pick<StatsFile, 'source'>): string {
   return file.source.fingerprint.replace(/^sha256:/, '').slice(0, 8)
 }

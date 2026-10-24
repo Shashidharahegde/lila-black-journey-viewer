@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PopoverDescription, PopoverHeader, PopoverTitle } from '@/components/ui/popover'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { loadStats } from '@/data/load'
@@ -12,13 +11,12 @@ import type { StatsFile } from '@/data/types'
 import { ALL, parseStatsScope, serializeStatsScope, type StatsScope } from '@/state/statsUrl'
 import { useStore } from '@/state/store'
 import { plural } from '@/stats/format'
-import { shortFingerprint, sliceFor, statsProblem } from '@/stats/slices'
+import { sliceFor, statsProblem } from '@/stats/slices'
 import { Fade } from '@/components/fade'
 import MapReport from './MapReport'
 import OverviewAllMaps from './OverviewAllMaps'
 import { ContextBar, FILTER_TRIGGER, MapToggle } from './ContextBar'
 import PrimaryNav from './PrimaryNav'
-import SettingsMenu from './SettingsMenu'
 
 type Loaded = { status: 'loading' } | { status: 'ready'; data: StatsFile } | { status: 'error'; message: string; retry: boolean }
 
@@ -97,32 +95,6 @@ function WithCode({ text }: { text: string }) {
   return text.split('`').map((part, i) => (i % 2 ? <code key={i} className="font-mono text-foreground">{part}</code> : part))
 }
 
-/** The statistics notes, opened from the settings menu. */
-function AboutStatsContent({ stats }: { stats: StatsFile | null }) {
-  return (
-    <>
-      <PopoverHeader>
-        <PopoverTitle>About these statistics</PopoverTitle>
-        <PopoverDescription>
-          Computed once by the data pipeline (<code className="font-mono">make data</code>); this page only formats them.
-        </PopoverDescription>
-      </PopoverHeader>
-      <ul className="flex list-disc flex-col gap-2 pl-4">
-        <li>Human journeys only. Bot and unknown journeys count only towards recorded matches.</li>
-        <li>Every map and date combination is computed from its own journeys. Player counts and medians are never added or averaged across maps or dates.</li>
-        <li>Players are pseudonyms. Observed in multiple matches means observed repeat activity in this sample, not retention.</li>
-        <li>There is no extraction event: a journey without a death has no death recorded.</li>
-      </ul>
-      {stats && (
-        <p className="text-xs text-muted-foreground">
-          Statistics version <span className="font-mono">{stats.metrics_version}</span> · data{' '}
-          <span className="font-mono">{shortFingerprint(stats)}</span> ({plural(stats.source.files, 'file')})
-        </p>
-      )}
-    </>
-  )
-}
-
 /** /stats: the all-maps Overview (the landing page) and, with `?map=`, a single map's report. Independent of the map pages:
  * a broken stats file never affects the map. */
 export default function StatsPage() {
@@ -158,7 +130,6 @@ export default function StatsPage() {
       <PrimaryNav
         current="overview"
         overview={scope ? { map: scope.map, date: scope.date } : undefined}
-        actions={<SettingsMenu about={{ label: 'About these statistics', content: <AboutStatsContent stats={stats} /> }} />}
       />
       <ContextBar label="Map and date">
         {ready ? (

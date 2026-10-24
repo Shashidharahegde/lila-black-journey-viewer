@@ -21,8 +21,6 @@ import PrimaryNav from './ui/PrimaryNav'
 import SidePanel from './ui/SidePanel'
 import HeatmapMapControls from './ui/HeatmapMapControls'
 import TopBar, { CopyLinkButton } from './ui/TopBar'
-import SettingsMenu from './ui/SettingsMenu'
-import { AboutDataContent } from './ui/HelpPopovers'
 import { isTypingTarget } from './ui/shortcuts'
 
 /** Side panel width on desktop (w-80). */
@@ -155,12 +153,7 @@ export default function App() {
     <div className="flex h-full flex-col">
       <PrimaryNav
         current={page}
-        actions={
-          <>
-            <CopyLinkButton ready={Boolean(index && selection)} />
-            <SettingsMenu shortcuts about={{ label: 'About this data', content: <AboutDataContent /> }} />
-          </>
-        }
+        actions={<CopyLinkButton ready={Boolean(index && selection)} />}
       />
       <h1 className="sr-only">LILA BLACK Journeys · {TAB_TITLE[page]}</h1>
       <TopBar index={index} selection={selection} onOpenPanel={() => setPanelOpen(true)} />
