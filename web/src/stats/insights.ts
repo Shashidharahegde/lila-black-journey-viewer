@@ -63,7 +63,7 @@ export function stormInsight(stats: StatsFile, date: string): Insight | null {
   }
 }
 
-/** The map where players pick up the fewest items per match. */
+/** The map where players pick up the fewest items per human journey. */
 export function lootInsight(stats: StatsFile, date: string): Insight | null {
   const rows = [...rateRows(stats, date, 'loot_rate')].sort((a, b) => a.value - b.value)
   if (rows.length < 2 || rows[0].value === rows.at(-1)!.value) return null
@@ -73,7 +73,7 @@ export function lootInsight(stats: StatsFile, date: string): Insight | null {
     id: 'loot_rate',
     map: low.map,
     headline: `${low.map} players find the least loot`,
-    detail: `About ${fewer}% fewer items per match than on ${top.map}. Loot density or placement there may be worth reviewing.`,
+    detail: `About ${fewer}% fewer items per human journey than on ${top.map}. Loot density or placement there may be worth reviewing.`,
   }
 }
 

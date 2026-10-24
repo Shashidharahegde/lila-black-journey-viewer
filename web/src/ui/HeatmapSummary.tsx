@@ -49,7 +49,8 @@ export default function HeatmapSummary({ layer, evidence, map, date, dateInfo }:
       </div>
       <dl className="grid grid-cols-3 gap-2 border-t pt-3">
         {figures.map((figure) => (
-          <div key={figure.label} className="flex min-w-0 flex-col-reverse gap-0.5">
+          // justify-end packs a reversed column at the top, so the three numbers line up however long their labels wrap
+          <div key={figure.label} className="flex min-w-0 flex-col-reverse justify-end gap-0.5">
             <dt className="text-[11px] leading-tight text-muted-foreground">{figure.label}</dt>
             <dd className="text-sm font-semibold tabular-nums">{figure.value}</dd>
           </div>

@@ -10,9 +10,9 @@ describe('assessments, all dates (from the stored map_score)', () => {
   it('ranks the maps by score and names their standing', () => {
     const ranked = assessments(stats, ALL)
     expect(ranked.map((a) => [a.map, a.score.value, rankText(a), STANDING_LABEL[a.standing]])).toEqual([
-      ['AmbroseValley', 0.77, '1st of 3', 'Leading'],
-      ['GrandRift', 0.49, '2nd of 3', 'In between'],
-      ['Lockdown', 0.25, '3rd of 3', 'Needs improvement'],
+      ['AmbroseValley', 0.78, '1st of 3', 'Leading'],
+      ['GrandRift', 0.44, '2nd of 3', 'In between'],
+      ['Lockdown', 0.24, '3rd of 3', 'Needs improvement'],
     ])
   })
 

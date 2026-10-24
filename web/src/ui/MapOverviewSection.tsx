@@ -8,7 +8,7 @@ import HistogramChart from './HistogramChart'
 import MapStanding, { SCORE_SCALE } from './MapStanding'
 import MetricInfo from './MetricInfo'
 
-const MATCHES = [{ key: 'value', label: 'Matches played', color: 'var(--chart-1)' }]
+const JOURNEYS = [{ key: 'value', label: 'Human journeys', color: 'var(--chart-1)' }]
 
 interface Props {
   stats: StatsFile
@@ -42,15 +42,15 @@ export default function MapOverviewSection({ stats, map, date, slice }: Props) {
       {span && (
         <HistogramChart
           compact
-          title="Time in match"
+          title="Recorded span"
           metric={stats.metrics.journey_span_s}
-          description="How long players stay, first to last record."
+          description="Time from a journey’s first to its last record."
           rows={histogramRows(span, 'minutes', false)}
-          series={MATCHES}
-          unit="matches played"
-          xLabel="time in match"
-          xTitle="Time in match (minutes)"
-          yTitle="Matches played"
+          series={JOURNEYS}
+          unit="human journeys"
+          xLabel="recorded span"
+          xTitle="Recorded span (minutes)"
+          yTitle="Human journeys"
         />
       )}
       <div className="lg:col-span-2">

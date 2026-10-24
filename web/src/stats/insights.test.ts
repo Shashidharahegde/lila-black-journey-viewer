@@ -13,12 +13,12 @@ describe('overviewInsights, all maps and all dates', () => {
     expect(insight.headline).toBe('AmbroseValley leads overall; Lockdown has the most room to improve')
     // Lockdown's parts: kills, loot and storm at 0; AmbroseValley's: activity, loot and storm at 1 (stats.json map_score)
     expect(insight.detail).toBe(
-      'Lockdown ranks lowest on kills, loot found and storm survival: the first areas to review. AmbroseValley ranks top on player activity, loot found and storm survival.',
+      'Lockdown ranks lowest on kills, loot found and storm survival: the first areas to review. AmbroseValley ranks top on human journeys, loot found and storm survival.',
     )
     expect(insight.map).toBe('Lockdown')
   })
 
-  it('storm: a comparison, not the card values (10.00 ÷ 3.07 = 3.3)', () => {
+  it('storm: a comparison, not the card values (9.94 ÷ 2.99 = 3.3)', () => {
     const insight = stormInsight(stats, ALL)!
     expect(insight.headline).toBe('Lockdown players are caught by the storm most often')
     expect(insight.detail).toBe(
@@ -26,10 +26,10 @@ describe('overviewInsights, all maps and all dates', () => {
     )
   })
 
-  it('loot: the share fewer items than the top map (1 − 12.04 ÷ 17.67 = 32%)', () => {
+  it('loot: the share fewer items than the top map (1 − 11.97 ÷ 17.43 = 31%)', () => {
     const insight = lootInsight(stats, ALL)!
     expect(insight.headline).toBe('Lockdown players find the least loot')
-    expect(insight.detail).toBe('About 32% fewer items per match than on AmbroseValley. Loot density or placement there may be worth reviewing.')
+    expect(insight.detail).toBe('About 31% fewer items per human journey than on AmbroseValley. Loot density or placement there may be worth reviewing.')
   })
 
   it('exactly three curated insights, never every available statistic', () => {

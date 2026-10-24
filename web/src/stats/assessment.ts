@@ -6,8 +6,8 @@ import { scoreOf, sliceFor } from './slices'
 
 /** stats.py SCORE_PARTS, in its order, as a level designer reads them */
 export const MEASURES: Record<string, { label: string; word: string }> = {
-  human_journeys: { label: 'Player activity', word: 'player activity' },
-  journey_span_s: { label: 'Time in match', word: 'time in match' },
+  human_journeys: { label: 'Human journeys', word: 'human journeys' },
+  journey_span_s: { label: 'Recorded span', word: 'recorded span' },
   kill_rate: { label: 'Kills', word: 'kills' },
   loot_rate: { label: 'Loot found', word: 'loot found' },
   storm_death_rate: { label: 'Storm survival', word: 'storm survival' },

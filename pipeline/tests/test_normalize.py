@@ -13,7 +13,7 @@ from lila_pipeline.normalize import SOURCE_COLUMNS, add_match_clock, classify_ac
 DOUBLED = {("13a425dd", "d3a3297e"): 147, ("da9a800a", "fc797a67"): 39, ("51b60c09", "0954f788"): 4}
 # A legitimate same-second double Loot inside each of the two larger doubled journeys.
 DOUBLE_LOOT = {("13a425dd", "d3a3297e"): 1770722312, ("da9a800a", "fc797a67"): 1770834863}
-# The three numeric IDs whose 17 files log the player-client events `Position`/`Loot` (EC-09) → unknown.
+# The three numeric IDs whose 17 files log the player-client events `Position`/`Loot` (EC-09) → human, flagged `id_mismatch`.
 MISMATCH_PLAYERS = {"85fd66c7", "929d4b9d", "7801beec"}
 # Synthetic IDs for made-up journeys (not from the data).
 FAKE_UUID = "00000000-0000-4000-8000-000000000001"
@@ -116,7 +116,7 @@ def test_ec06_other_same_second_repeats_are_kept(raw_data) -> None:
     assert not (repeats["event"] == "Position").any()
 
 
-def test_ec09_actor_is_classified_only_when_id_and_events_agree() -> None:
+def test_ec09_actor_is_a_bot_only_when_it_logs_botposition() -> None:
     events = pd.concat(
         [
             journey(["BotPosition"], [1], file="900001_m1"),  # numeric ID, bot events
@@ -128,9 +128,9 @@ def test_ec09_actor_is_classified_only_when_id_and_events_agree() -> None:
     )
     out = classify_actors(events).groupby("file")[["actor_kind", "id_mismatch"]].first()
     assert out.loc["900001_m1"].tolist() == ["bot", False]
-    assert out.loc["900002_m1"].tolist() == ["unknown", True]
+    assert out.loc["900002_m1"].tolist() == ["human", True]  # numeric ID, but the events say human: flagged
     assert out.loc[f"{FAKE_UUID}_m1"].tolist() == ["human", False]
-    assert out.loc[f"{FAKE_UUID}_m2"].tolist() == ["unknown", True]
+    assert out.loc[f"{FAKE_UUID}_m2"].tolist() == ["bot", True]
 
 
 def test_ec09_ec10_real_actor_counts(raw_data) -> None:
@@ -139,15 +139,15 @@ def test_ec09_ec10_real_actor_counts(raw_data) -> None:
         kind=("actor_kind", "first"), mismatch=("id_mismatch", "first"), user=("user_id", "first"),
         match=("match_id", "first"),
     )
-    assert journeys["kind"].value_counts().to_dict() == {"human": 781, "bot": 444, "unknown": 17}
-    unknown = journeys[journeys["kind"] == "unknown"]
-    assert unknown["mismatch"].all() and journeys["mismatch"].sum() == 17
-    assert unknown["user"].str.isdigit().all() and unknown["match"].nunique() == 17
-    assert set(unknown["user"].map(player_hash)) == MISMATCH_PLAYERS
+    assert journeys["kind"].value_counts().to_dict() == {"human": 798, "bot": 444}
+    flagged = journeys[journeys["mismatch"]]
+    assert (flagged["kind"] == "human").all() and len(flagged) == 17
+    assert flagged["user"].str.isdigit().all() and flagged["match"].nunique() == 17
+    assert set(flagged["user"].map(player_hash)) == MISMATCH_PLAYERS
     humans_per_match = (
         journeys[journeys["kind"] == "human"].groupby("match").size().reindex(journeys["match"].unique(), fill_value=0)
     )
-    assert humans_per_match.value_counts().to_dict() == {1: 779, 0: 16, 2: 1}
+    assert humans_per_match.value_counts().to_dict() == {1: 794, 2: 2}
 
 
 @pytest.mark.parametrize("rows", [1, 3])

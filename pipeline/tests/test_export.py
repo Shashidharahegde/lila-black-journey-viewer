@@ -124,22 +124,22 @@ def _heatmap(out, map_id: str) -> dict:
     return json.loads((out / "web" / "data" / "heatmaps" / f"{map_id}.json").read_text(encoding="utf-8"))
 
 
-def test_ec09_unknown_journeys_are_kept_whole_in_match_files(prepared, built) -> None:
+def test_ec09_flagged_journeys_are_kept_whole_in_match_files(prepared, built) -> None:
     out, _ = built
     events = prepared.events
-    unknown = events[events["actor_kind"] == "unknown"]
-    assert unknown["file"].nunique() == 17
-    for file, journey in unknown.groupby("file"):
+    flagged = events[events["id_mismatch"]]
+    assert flagged["file"].nunique() == 17
+    for file, journey in flagged.groupby("file"):
         match = json.loads((out / "web" / "data" / "matches" / f"{match_key(journey['match_id'].iat[0])}.json")
                            .read_text(encoding="utf-8"))
         actor = next(a for a in match["actors"] if a["id"] == player_hash(journey["user_id"].iat[0]))
-        assert actor["kind"] == "unknown" and actor["id_mismatch"]
+        assert actor["kind"] == "human" and actor["id_mismatch"]
         positions = journey[journey["category"] == "position"]
         assert sum(len(s) for s in actor["segments"]) == len(positions)
         assert sorted(e["raw"] for e in actor["events"]) == sorted(journey.loc[journey["category"] != "position", "raw"])
 
 
-def test_ec09_unknown_journeys_are_left_out_of_heatmaps(prepared, built) -> None:
+def test_ec09_flagged_journeys_are_counted_as_humans_in_heatmaps(prepared, built) -> None:
     out, _ = built
     events = prepared.events
     for map_id in MAPS:
@@ -151,8 +151,8 @@ def test_ec09_unknown_journeys_are_left_out_of_heatmaps(prepared, built) -> None
         assert heatmap["totals"]["deaths"]["all"] == int(humans["category"].isin(DEATH_CATEGORIES).sum())
         positions = on_map[on_map["category"] == "position"]
         traffic = traffic_grid(positions[positions["actor_kind"] == "human"]).sum()
-        with_unknown = traffic_grid(positions[positions["actor_kind"] != "bot"]).sum()
-        assert heatmap["totals"]["traffic"]["all"] == round(traffic, 1) < round(with_unknown, 1)  # every map has some
+        without_flagged = traffic_grid(positions[(positions["actor_kind"] == "human") & ~positions["id_mismatch"]]).sum()
+        assert heatmap["totals"]["traffic"]["all"] == round(traffic, 1) >= round(without_flagged, 1)
 
 
 def test_ec12_paired_kills_are_in_match_files_but_not_in_kill_totals(prepared, built) -> None:
@@ -177,9 +177,9 @@ def test_build_report_counts(built) -> None:
     assert len(report["files"]["duplicates_skipped"]) == 1 and report["files"]["failed"] == []
     assert sum(d["removed"] for d in report["doubled_journeys"]) == 190
     assert report["rows"] == {"read": 89016, "after_removing_doubled_journeys": 88826, "final": 88653}
-    assert report["journeys"]["human"] == 781 and report["journeys"]["bot"] == 444
-    assert report["journeys"]["unknown"] == report["journeys"]["id_mismatch"] == 17
-    assert report["journeys"]["matches_by_human_count"] == {"0": 16, "1": 779, "2": 1}
+    assert report["journeys"]["human"] == 798 and report["journeys"]["bot"] == 444
+    assert report["journeys"]["unknown"] == 0 and report["journeys"]["id_mismatch"] == 17
+    assert report["journeys"]["matches_by_human_count"] == {"1": 794, "2": 2}
     assert report["kill_killed_pairs"] == 3 and "self_kills_merged" not in report
 
 

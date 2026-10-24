@@ -72,17 +72,17 @@ describe('kill and death totals', () => {
     },
   )
 
-  it('kills are the BotKill rows of human files (2,223); deaths are BotKilled + KilledByStorm + paired Killed (442)', () => {
+  it('kills are the BotKill rows of human files (2,236); deaths are BotKilled + KilledByStorm + paired Killed (443)', () => {
     const raw: Record<string, number> = {}
     for (const m of matches) {
       for (const a of m.actors.filter((x) => x.kind === 'human')) {
         for (const e of a.events) if (isKill(e) || isDeath(e)) raw[e.raw] = (raw[e.raw] ?? 0) + 1
       }
     }
-    expect(raw).toEqual({ BotKill: 2223, BotKilled: 400, KilledByStorm: 39, Killed: 3 })
+    expect(raw).toEqual({ BotKill: 2236, BotKilled: 401, KilledByStorm: 39, Killed: 3 })
     const sum = (layer: HeatmapLayerKey) => MAP_IDS.reduce((s, id) => s + heatmaps[id].totals[layer].all, 0)
-    expect(sum('kills')).toBe(2223)
-    expect(sum('deaths')).toBe(442)
+    expect(sum('kills')).toBe(2236)
+    expect(sum('deaths')).toBe(443)
   })
 
   it('counts each human storm death once: 39 in all, no journey with a second death, each in one cell', () => {
@@ -106,7 +106,7 @@ describe('kill and death totals', () => {
     }
     expect(pairKills).toHaveLength(3)
     expect(pairKilled).toHaveLength(3)
-    // the paired Kill is not in the kill totals (2,223 above is BotKill only); the Killed is in the death totals
+    // the paired Kill is not in the kill totals (2,236 above is BotKill only); the Killed is in the death totals
     expect(pairKilled.every(isDeath)).toBe(true)
     expect(pairKills.some(isKill)).toBe(false)
     expect(index.matches.reduce((s, m) => s + m.counts.kill_killed_pair, 0)).toBe(3)

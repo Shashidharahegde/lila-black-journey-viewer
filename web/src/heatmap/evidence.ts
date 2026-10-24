@@ -1,5 +1,6 @@
 // How much data a heatmap rests on, and the words that say so (spec 06, "Evidence, samples and flags").
 import type { DateInfo, HeatmapFile, HeatmapLayerKey, Index } from '../data/types'
+import { ratePerJourney, sharePercent } from '../stats/terms'
 import { formatPlayerTime, plural } from './format'
 
 /** Below this many contributing matches a layer is flagged "Few matches" (S, 2026-10-22, guidelines P7). */
@@ -70,33 +71,44 @@ export interface LayerSummary {
   figures: SummaryFigure[]
 }
 
-const oneDecimal = (n: number) => (Math.round(n * 10) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 })
-const percent = (part: number, whole: number) => (whole > 0 ? `${Math.round((part / whole) * 100)}%` : '–')
+const share = (part: number, whole: number) => (whole > 0 ? sharePercent(part, whole) : '–')
 
 /**
- * The summary card of the Heatmaps panel: the total and what it means per match or per journey. Only ratios of the figures above
- * (all from the heatmap file and the index); nothing new is counted. Matches = matches on this map and date with a human journey.
+ * The summary card of the Heatmaps panel: the total and what it means per human journey. Only ratios of the figures above (all
+ * from the heatmap file and the index); nothing new is counted. Rates divide by human journeys and are rounded as stats.json
+ * stores them, so they equal the stats pages' figures for the same map and date (UX-01, tested against every slice).
  */
 export function layerSummary(layer: HeatmapLayerKey, e: Evidence): LayerSummary {
-  const matches = e.matchesWithHumans
+  const matches = { value: e.matchesWithHumans.toLocaleString('en-US'), label: 'matches with humans' }
   if (layer === 'traffic') {
     return {
       lead: { value: formatPlayerTime(e.total), label: 'estimated time humans spent on the map' },
       figures: [
         { value: e.humanJourneys > 0 ? formatPlayerTime(e.total / e.humanJourneys) : '–', label: 'per human journey' },
         { value: e.humanJourneys.toLocaleString('en-US'), label: 'human journeys' },
-        { value: matches.toLocaleString('en-US'), label: 'matches' },
+        matches,
       ],
     }
   }
-  const noun = layer === 'kills' ? 'kill' : 'death'
-  const figures: SummaryFigure[] = [
-    { value: matches > 0 ? oneDecimal(e.total / matches) : '–', label: `${noun}s per match` },
-    { value: percent(e.contributing, matches), label: `of matches had a ${noun}` },
-  ]
-  if (layer === 'deaths') figures.push({ value: `${e.stormDeaths.toLocaleString('en-US')}`, label: `storm deaths (${percent(e.stormDeaths, e.total)})` })
-  else figures.push({ value: matches.toLocaleString('en-US'), label: 'matches' })
-  return { lead: { value: e.total.toLocaleString('en-US'), label: layer === 'kills' ? 'kills by human players' : 'human deaths' }, figures }
+  if (layer === 'kills') {
+    return {
+      lead: { value: e.total.toLocaleString('en-US'), label: 'kills by human players' },
+      figures: [
+        { value: e.humanJourneys > 0 ? ratePerJourney(e.total, e.humanJourneys) : '–', label: 'kills per human journey' },
+        { value: share(e.contributing, e.matchesWithHumans), label: 'of matches with humans had a kill' },
+        matches,
+      ],
+    }
+  }
+  // a journey has at most one death, so deaths ÷ journeys is the share of journeys that ended in a death
+  return {
+    lead: { value: e.total.toLocaleString('en-US'), label: 'human deaths' },
+    figures: [
+      { value: share(e.total, e.humanJourneys), label: 'of human journeys ended in a recorded death' },
+      { value: e.stormDeaths.toLocaleString('en-US'), label: `storm deaths (${share(e.stormDeaths, e.total)})` },
+      matches,
+    ],
+  }
 }
 
 export function lowEvidenceText(layer: HeatmapLayerKey, e: Evidence): string {

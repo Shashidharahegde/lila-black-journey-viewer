@@ -95,21 +95,14 @@ export interface HeatmapFile {
   samples: Record<string, { matches: number; human_journeys: number }>
 }
 
-/** The rules the regions were qualified under (pipeline `zones.Rules`); shown, never recomputed, in the browser. */
+/** The rules a region must meet to be a hotspot (pipeline `zones.HotspotRules`); shown, never recomputed, in the browser. */
 export interface ZoneRules {
-  top_share: number
-  min_candidates: number
-  min_stability: number
   min_matches: number
-  min_players: number
   max_one_match_share: number
-  survival_rule: string
-  survival_share: number
-  required_shifts: number
-  bootstraps: number
+  max_hotspots: number
 }
 
-/** A candidate region: a block of 4 × 4 heatmap cells (zone_cells), (i, j) counted from the south-west like the grid. */
+/** A hotspot: a block of 4 × 4 heatmap cells (zone_cells), (i, j) counted from the south-west like the grid. */
 export interface ZoneRecord {
   i: number
   j: number
@@ -121,11 +114,6 @@ export interface ZoneRecord {
   players: number
   /** the largest single match's share of the region's value */
   largest_match_share: number
-  /** share of resamples of the matches in which the region is again a candidate */
-  stability: number
-  /** how many of the three half-region-shifted grids its geographic counterpart also qualifies on */
-  survived_shifts: number
-  tier: 'consistent' | 'observed'
   /** traffic only: distinct human journeys with traced time in the region */
   journeys?: number
   /** deaths only: storm deaths among its value */
@@ -135,11 +123,11 @@ export interface ZoneRecord {
 export interface ZoneLayer {
   total: number
   occupied_zones: number
-  candidates: number
-  consistent: number
+  /** how many hotspots the layer has (the length of `zones`) */
+  hotspots: number
   /** deaths only: storm deaths among the deaths of the whole selection */
   storm_deaths?: number
-  /** the candidates, strongest first */
+  /** the hotspots, strongest first */
   zones: ZoneRecord[]
 }
 

@@ -19,7 +19,7 @@ What this data cannot say. Refuse these questions, with the reason, and do not g
 - A single match or player: STATS holds only totals per map and date. Point to the Journeys & Playback tab.
 - Extraction: the game logs no extraction event. A journey that ends without a death probably extracted, which is inferred.
 - Playstyles, skill, or why players did something: the data records events and positions only.
-- Bots: humans and bots are told apart by the event types they log. Figures for "players" count humans only; unknown actors are excluded (see sample.excluded).
+- Bots: humans and bots are told apart by the event types they log. Figures for "players" count humans only. A few humans have numeric IDs, which looks like a bot ID but their events are a player client's; they are counted as humans.
 If a question is unrelated to LILA BLACK player data, say you can only help with that.`
 
 /** The full system prompt. Same stats in, same text out, so the prompt cache stays valid between requests. */

@@ -44,7 +44,7 @@ describe('histogram rows', () => {
     const rows = histogramRows(h, 'minutes', false, DEATH_SERIES.map((s) => s.key))
     expect(rows).toHaveLength(15)
     const total = (key: string) => rows.reduce((sum, r) => sum + Number(r[key]), 0)
-    expect([total('by_bot'), total('storm'), total('paired_killed')]).toEqual([400, 39, 3])
+    expect([total('by_bot'), total('storm'), total('paired_killed')]).toEqual([401, 39, 3])
     expect(histogramSummary('When deaths happen', rows.slice(0, 1), DEATH_SERIES)).toBe(
       'When deaths happen. 0–1 min: Killed by a bot 11, Storm 0, Kill/Killed pair (cause unknown) 0.',
     )
@@ -68,29 +68,29 @@ describe('figures', () => {
 
   it('the headline KPIs, all maps and all dates: plain labels, each with its reference point', () => {
     expect(texts(headlineFigures(whole))).toEqual([
-      ['Matches played', '781', 'by human players'],
-      ['Players', '245', 'unique human players'],
-      ['Median time in match', '6:07', 'per player'],
-      ['Kills per match', '2.85', 'avg per player · 2,223 total'],
-      ['Items looted per match', '16.28', 'avg per player · 12,714 total'],
-      ['Storm deaths', '4.99%', 'of matches played · 39 total'],
+      ['Human journeys', '798', 'one human player in one match'],
+      ['Players observed', '248', 'distinct recorded player IDs'],
+      ['Median recorded span', '6:04', 'first to last record, per human journey'],
+      ['Kills per human journey', '2.80', 'mean over human journeys · 2,236 total'],
+      ['Items looted per human journey', '16.08', 'mean over human journeys · 12,829 total'],
+      ['Storm deaths', '4.89%', 'of human journeys · 39 total'],
     ])
   })
 
   it('a map report uses the same six KPIs, read from that map', () => {
     const ambrose = sliceFor(stats, 'AmbroseValley', 'all')
-    expect(headlineFigures(ambrose).map((f) => f.value)).toEqual(['554', '217', '5:55', '2.99', '17.67', '3.07%'])
+    expect(headlineFigures(ambrose).map((f) => f.value)).toEqual(['568', '218', '5:52', '2.94', '17.43', '2.99%'])
   })
 
   it('no removed, undefined or jargon metric is shown', () => {
     const labels = headlineFigures(whole).map((f) => f.label).join(' ')
-    expect(labels).not.toMatch(/journey|retention|in combat|survival|movement|grid|distance|multiple matches/i)
+    expect(labels).not.toMatch(/matches played|per match|retention|in combat|survival|movement|grid|distance|multiple matches/i)
   })
 
-  it('combat adds only what the headline row lacks: deaths and how often a match ends in one', () => {
+  it('combat adds only what the headline row lacks: deaths and how often a human journey ends in one', () => {
     expect(texts(combatFigures(stats, whole))).toEqual([
-      ['Deaths', '442', '400 by bots · 39 by the storm'],
-      ['Matches ending in a death', '56.6%', '442 of 781 matches played'],
+      ['Deaths', '443', '401 by bots · 39 by the storm'],
+      ['Human journeys ending in a recorded death', '55.5%', '443 of 798 human journeys'],
     ])
   })
 
@@ -101,10 +101,10 @@ describe('figures', () => {
     expect(firstLoot.fewValues).toBe(true)
   })
 
-  it('loot adds only what the headline row lacks: how many matches found loot, and how soon', () => {
+  it('loot adds only what the headline row lacks: how many human journeys found loot, and how soon', () => {
     expect(texts(lootFigures(whole))).toEqual([
-      ['Matches with any loot', '92.7%', '724 of 781 matches played'],
-      ['Median time to first loot', '0:42', 'min:s into the match'],
+      ['Human journeys with any loot', '92.5%', '738 of 798 human journeys'],
+      ['Median time to first loot', '0:41', 'minutes:seconds into the match'],
     ])
   })
 })

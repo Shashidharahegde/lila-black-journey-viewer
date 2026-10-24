@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import math
 import zlib
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 
 import numpy as np
 
@@ -139,7 +139,7 @@ def collect(
 
     rng = np.random.default_rng(_seed(key))
     draws = rng.integers(0, n_matches, size=(rules.bootstraps, n_matches))
-    weights = np.stack([np.bincount(row, minlength=n_matches) for row in draws]).astype(np.float64)
+    weights = np.stack([np.bincount(row, minlength=n_matches) for row in draws]).astype(np.float64) if rules.bootstraps else np.zeros((0, n_matches))
     boot_cells = weights @ match_flat
 
     grids = []
@@ -273,5 +273,51 @@ def classify(evidence: LayerEvidence, rules: Rules = RULES) -> dict:
     return result
 
 
-def rules_as_dict(rules: Rules = RULES) -> dict:
+@dataclass(frozen=True)
+class HotspotRules:
+    """What makes a region a hotspot (S, 2026-10-24). Replaces the stability and shifted-grid checks of `Rules`/`classify`."""
+
+    min_matches: int = 5  # events from at least this many different matches, so a one-off never counts
+    max_one_match_share: float = 0.5  # no single match supplies more than this share of the region's value
+    max_hotspots: int = 6  # at most this many per layer, strongest first
+
+
+HOTSPOT_RULES = HotspotRules()
+# `collect` needs no resamples or shifted grids for hotspots
+HOTSPOT_EVIDENCE = {"rules": replace(RULES, bootstraps=0), "shifts": ((0, 0),)}
+
+
+def hotspots(evidence: LayerEvidence, rules: HotspotRules = HOTSPOT_RULES) -> dict:
+    """The hotspots of a layer in a selection: the regions with the largest value that pass both support checks, at most
+    `rules.max_hotspots`, strongest first (ties by index). Fewer, or none, when fewer regions qualify."""
+    base = evidence.grids[0]
+    total = evidence.cell_total
+    layer_total = float(total.sum())
+    order = np.lexsort((np.arange(base.value.size), -base.value))
+    supported = (base.value > 0) & (base.matches >= rules.min_matches) & (base.largest_match_share <= rules.max_one_match_share)
+    zones_out = []
+    for z in (int(r) for r in order if supported[r]):
+        if len(zones_out) == rules.max_hotspots:
+            break
+        record = {
+            "i": int(z // base.nj),
+            "j": int(z % base.nj),
+            "value": float(base.value[z]),
+            "share": float(base.value[z] / layer_total) if layer_total > 0 else 0.0,
+            "matches": int(base.matches[z]),
+            "players": int(base.players[z]),
+            "largest_match_share": float(base.largest_match_share[z]),
+        }
+        if base.journeys is not None:
+            record["journeys"] = int(base.journeys[z])
+        if evidence.storm_cells is not None:
+            record["storm_deaths"] = float(evidence.storm_cells[np.flatnonzero(base.zone_of_cell == z)].sum())
+        zones_out.append(record)
+    result = {"total": layer_total, "occupied_zones": int((base.value > 0).sum()), "hotspots": len(zones_out), "zones": zones_out}
+    if evidence.storm_cells is not None:
+        result["storm_deaths"] = float(evidence.storm_cells.sum())
+    return result
+
+
+def rules_as_dict(rules: HotspotRules = HOTSPOT_RULES) -> dict:
     return asdict(rules)

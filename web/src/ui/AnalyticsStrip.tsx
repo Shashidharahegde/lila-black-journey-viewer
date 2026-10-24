@@ -31,17 +31,17 @@ function StripCard({ id, title, basis, children }: { id: string; title: string; 
   )
 }
 
-/** Where matches are played: each map's matches played as a share of all of them. Valid as parts of a whole because
- * every match played belongs to exactly one map, so the map counts add up to the all-maps count (tested). */
+/** Where human journeys were recorded: each map's journeys as a share of all of them. Valid as parts of a whole because
+ * every journey belongs to exactly one map, so the map counts add up to the all-maps count (tested). */
 function ActivityDonut({ stats, date, selected }: { stats: StatsFile; date: string; selected: string }) {
   const total = countOf(sliceFor(stats, ALL, date), 'human_journeys') ?? 0
   const rows = stats.maps.map((map, i) => ({ map, value: countOf(sliceFor(stats, map, date), 'human_journeys') ?? 0, fill: MAP_SHADE[i % MAP_SHADE.length] }))
   const config: ChartConfig = Object.fromEntries(rows.map((r) => [r.map, { label: r.map, color: r.fill }]))
   const share = (n: number) => `${total ? Math.round((n / total) * 100) : 0}%`
   return (
-    <StripCard id="human_journeys" title="Where matches are played" basis="Share of all matches played">
+    <StripCard id="human_journeys" title="Where human journeys were recorded" basis="Share of all human journeys">
       <div className="flex items-center gap-3">
-        <ChartContainer config={config} className="aspect-square h-24 shrink-0" role="img" aria-label={`Matches played: ${rows.map((r) => `${r.map} ${share(r.value)}`).join(', ')}`}>
+        <ChartContainer config={config} className="aspect-square h-24 shrink-0" role="img" aria-label={`Human journeys: ${rows.map((r) => `${r.map} ${share(r.value)}`).join(', ')}`}>
           <PieChart>
             <Pie data={rows} dataKey="value" nameKey="map" innerRadius="62%" outerRadius="100%" strokeWidth={2} stroke="var(--card)" isAnimationActive={false}>
               {rows.map((r) => (
@@ -96,9 +96,9 @@ export default function AnalyticsStrip({ stats, date, selected }: { stats: Stats
   return (
     <section aria-label="Map comparison charts" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <ActivityDonut stats={stats} date={date} selected={selected} />
-      <KpiBars stats={stats} date={date} selected={selected} id="kills" basis="Average per player, per match" />
-      <KpiBars stats={stats} date={date} selected={selected} id="loot" basis="Average per player, per match" />
-      <KpiBars stats={stats} date={date} selected={selected} id="storm" basis="% of matches played" />
+      <KpiBars stats={stats} date={date} selected={selected} id="kills" basis="Mean per human journey" />
+      <KpiBars stats={stats} date={date} selected={selected} id="loot" basis="Mean per human journey" />
+      <KpiBars stats={stats} date={date} selected={selected} id="storm" basis="% of human journeys" />
     </section>
   )
 }

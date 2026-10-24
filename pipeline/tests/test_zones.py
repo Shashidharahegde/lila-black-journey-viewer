@@ -235,6 +235,45 @@ def test_the_same_inputs_give_the_same_regions_and_the_seed_comes_from_the_key()
     assert [(z["i"], z["j"], z["value"]) for z in a["zones"]] == [(z["i"], z["j"], z["value"]) for z in other["zones"]]  # values don't depend on the seed
 
 
+# --- hotspots (S, 2026-10-24) ---------------------------------------------------------------------------------------------
+
+def hotspots_synthetic(tensor, match_ids, player_ids, rules=zones.HOTSPOT_RULES):
+    evidence = zones.collect(tensor, match_ids, player_ids, key="synthetic", rules=zones.HOTSPOT_EVIDENCE["rules"], shifts=zones.HOTSPOT_EVIDENCE["shifts"])
+    return zones.hotspots(evidence, rules)
+
+
+def test_the_hotspot_rules() -> None:
+    r = zones.HOTSPOT_RULES
+    assert (r.min_matches, r.max_one_match_share, r.max_hotspots) == (5, 0.5, 6)
+
+
+def test_a_region_with_events_from_five_matches_is_a_hotspot_and_one_from_four_is_not() -> None:
+    hot = {m: [(8, 8, 2)] for m in range(5)} | {m: [(40, 40, 2)] for m in range(5, 9)}
+    tensor, matches, players = selection(10, hot, background=False)
+    zones_found = {(z["i"], z["j"]) for z in hotspots_synthetic(tensor, matches, players)["zones"]}
+    assert zones_found == {(2, 2)}  # cell (8, 8) is region (2, 2); region (10, 10) has four matches
+
+
+def test_a_region_one_match_dominates_is_not_a_hotspot() -> None:
+    hot = {0: [(8, 8, 20)]} | {m: [(8, 8, 1)] for m in range(1, 6)}
+    tensor, matches, players = selection(6, hot, background=False)
+    assert hotspots_synthetic(tensor, matches, players)["zones"] == []  # match 0 supplies 20 of 25
+
+
+def test_a_layer_with_too_little_support_has_no_hotspots_rather_than_weak_ones() -> None:
+    tensor, matches, players = selection(3, {m: [(8, 8, 3)] for m in range(3)}, background=False)
+    result = hotspots_synthetic(tensor, matches, players)
+    assert result["zones"] == [] and result["hotspots"] == 0 and result["occupied_zones"] == 1
+
+
+def test_at_most_six_hotspots_strongest_first() -> None:
+    hot = {m: [(4 * k, 4 * k, k + 1) for k in range(8)] for m in range(6)}
+    tensor, matches, players = selection(6, hot, background=False)
+    zones_found = hotspots_synthetic(tensor, matches, players)["zones"]
+    assert len(zones_found) == 6 and [z["value"] for z in zones_found] == sorted((z["value"] for z in zones_found), reverse=True)
+    assert zones_found[0]["value"] == 48 and zones_found[-1]["value"] == 18  # regions with 8 down to 3 events per match, the two weakest left out
+
+
 # --- real data -----------------------------------------------------------------------------------------------------
 
 def zones_file(out, map_id: str) -> dict:
@@ -250,21 +289,23 @@ def test_zones_files_match_the_documented_contract(built) -> None:
     for map_id in MAPS:
         f = zones_file(out, map_id)
         assert set(f) == {"schema_version", "map", "grid", "zone_cells", "zones_per_side", "rules", "selections"}
-        assert (f["map"], f["grid"], f["zone_cells"], f["zones_per_side"]) == (map_id, 64, 4, 16) and f["rules"] == zones.rules_as_dict()
+        assert (f["map"], f["grid"], f["zone_cells"], f["zones_per_side"]) == (map_id, 64, 4, 16) and f["rules"] == zones.rules_as_dict() == {"min_matches": 5, "max_one_match_share": 0.5, "max_hotspots": 6}
         heat = heatmap_file(out, map_id)
         assert set(f["selections"]) == set(heat["samples"])  # the same selections as the heatmap: all dates and each date
         for key, selection_ in f["selections"].items():
             assert set(selection_) == {"matches", "players", "layers"} and set(selection_["layers"]) == set(zones.LAYERS)
             assert selection_["matches"] == heat["samples"][key]["matches"]
             for layer, result in selection_["layers"].items():
-                assert set(result) == {"total", "occupied_zones", "candidates", "consistent", "zones"} | ({"storm_deaths"} if layer == "deaths" else set())
-                assert result["candidates"] == len(result["zones"]) and result["consistent"] == sum(z["tier"] == "consistent" for z in result["zones"])
+                assert set(result) == {"total", "occupied_zones", "hotspots", "zones"} | ({"storm_deaths"} if layer == "deaths" else set())
+                assert result["hotspots"] == len(result["zones"]) <= f["rules"]["max_hotspots"]
+                values = [z["value"] for z in result["zones"]]
+                assert values == sorted(values, reverse=True)  # strongest first
                 for z in result["zones"]:
-                    required = {"i", "j", "value", "share", "matches", "players", "largest_match_share", "stability", "survived_shifts", "tier"}
+                    required = {"i", "j", "value", "share", "matches", "players", "largest_match_share"}
                     required |= {"journeys"} if layer == "traffic" else set()
                     required |= {"storm_deaths"} if layer == "deaths" else set()
-                    assert set(z) == required and 0 <= z["i"] < 16 and 0 <= z["j"] < 16 and z["tier"] in ("consistent", "observed")
-                    assert 0 <= z["stability"] <= 1 and 0 <= z["survived_shifts"] <= 3 and 0 < z["share"] <= 1 and z["value"] > 0
+                    assert set(z) == required and 0 <= z["i"] < 16 and 0 <= z["j"] < 16
+                    assert 0 < z["share"] <= 1 and z["value"] > 0
 
 
 def test_region_totals_reconcile_with_the_heatmap_grids_for_every_selection(built) -> None:
@@ -285,7 +326,7 @@ def test_the_regions_listed_for_a_layer_never_add_up_to_more_than_the_layer(buil
                 assert sum(z["share"] for z in result["zones"]) <= 1.0001
 
 
-def test_consistent_regions_meet_the_published_rules(built) -> None:
+def test_every_hotspot_meets_the_published_rules_and_none_is_skipped_for_a_weaker_one(built) -> None:
     out, _ = built
     for map_id in MAPS:
         f = zones_file(out, map_id)
@@ -293,10 +334,7 @@ def test_consistent_regions_meet_the_published_rules(built) -> None:
         for selection_ in f["selections"].values():
             for result in selection_["layers"].values():
                 for z in result["zones"]:
-                    if z["tier"] == "consistent":
-                        assert z["stability"] >= rules["min_stability"] and z["matches"] >= rules["min_matches"]
-                        assert z["players"] >= rules["min_players"] and z["largest_match_share"] <= rules["max_one_match_share"]
-                        assert z["survived_shifts"] >= rules["required_shifts"]
+                    assert z["matches"] >= rules["min_matches"] and z["largest_match_share"] <= rules["max_one_match_share"]
 
 
 def test_contributing_matches_and_players_match_an_independent_count_from_the_events(prepared, built) -> None:

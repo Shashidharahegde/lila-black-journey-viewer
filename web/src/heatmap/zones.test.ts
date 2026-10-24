@@ -33,14 +33,11 @@ const heat = { AmbroseValley: AmbroseValleyHeat, GrandRift: GrandRiftHeat, Lockd
 const MAPS = Object.keys(files)
 const LAYERS = ['kills', 'deaths', 'traffic'] as const
 
-/** The published checks a region failed (empty when it passes them all); a test-side reading of the rules, not used by the interface. */
+/** The published rules a region failed (empty when it passes them all); a test-side reading of the rules, not used by the interface. */
 function failedChecks(z: ZoneRecord, rules: ZonesFile['rules']): string[] {
   const failed: string[] = []
-  if (z.stability < rules.min_stability) failed.push('stability')
   if (z.matches < rules.min_matches) failed.push('matches')
-  if (z.players < rules.min_players) failed.push('players')
   if (z.largest_match_share > rules.max_one_match_share) failed.push('one match')
-  if (z.survived_shifts < rules.required_shifts) failed.push('shifted grids')
   return failed
 }
 
@@ -56,17 +53,16 @@ describe('the generated region files', () => {
     }
   })
 
-  it.each(MAPS)('%s: consistent regions meet the published rules, and the counts add up', (id) => {
+  it.each(MAPS)('%s: every hotspot meets the published rules, strongest first, at most the cap, and the counts add up', (id) => {
     const { rules, selections } = files[id]
     for (const selection of Object.values(selections)) {
       for (const layer of LAYERS) {
         const result = selection.layers[layer]
-        expect(result.consistent).toBe(result.zones.filter((z) => z.tier === 'consistent').length)
-        expect(result.candidates).toBe(result.zones.length)
+        expect(result.hotspots).toBe(result.zones.length)
+        expect(result.zones.length).toBeLessThanOrEqual(rules.max_hotspots)
         expect(result.zones.reduce((sum, z) => sum + z.share, 0)).toBeLessThanOrEqual(1.0001)
-        // observed candidates fail at least one check, so leaving them out is never arbitrary
-        for (const z of result.zones.filter((r) => r.tier === 'observed')) expect(failedChecks(z, rules).length).toBeGreaterThan(0)
-        for (const z of result.zones.filter((r) => r.tier === 'consistent')) {
+        expect(result.zones.map((z) => z.value)).toEqual([...result.zones.map((z) => z.value)].sort((a, b) => b - a))
+        for (const z of result.zones) {
           expect(failedChecks(z, rules)).toEqual([])
           expect(z.matches).toBeLessThanOrEqual(selection.matches)
           expect(z.players).toBeLessThanOrEqual(selection.players)
@@ -75,10 +71,8 @@ describe('the generated region files', () => {
     }
   })
 
-  it('the approved provisional rules are the ones the files were built with', () => {
-    expect(AmbroseValleyZones.rules).toMatchObject({
-      top_share: 0.1, min_candidates: 3, min_stability: 0.8, min_matches: 5, min_players: 3, max_one_match_share: 0.5, required_shifts: 3,
-    })
+  it('the approved hotspot rules are the ones the files were built with', () => {
+    expect(AmbroseValleyZones.rules).toEqual({ min_matches: 5, max_one_match_share: 0.5, max_hotspots: 6 })
   })
 
   it.each(MAPS)('%s: storm deaths are kept inside the deaths and reported beside them', (id) => {
@@ -104,23 +98,22 @@ describe('the generated region files', () => {
 })
 
 describe('which regions are shown', () => {
-  it('hotspots are the consistent regions only, strongest first; the observed candidates are not shown', () => {
+  it('hotspots are the listed regions, strongest first', () => {
     const layer = zoneLayer(AmbroseValleyZones as unknown as ZonesFile, null, 'kills')!
     const hotspots = passingZones(layer)
-    expect(hotspots).toHaveLength(layer.consistent)
-    expect(hotspots.every((z) => z.tier === 'consistent')).toBe(true)
+    expect(hotspots).toHaveLength(layer.hotspots)
     expect(hotspots.map((z) => z.value)).toEqual([...hotspots.map((z) => z.value)].sort((a, b) => b - a))
   })
 
   it('does not force any: some layers have none', () => {
-    for (const [id, layerName] of [['GrandRift', 'deaths'], ['GrandRift', 'kills'], ['Lockdown', 'kills']] as const) {
+    for (const [id, layerName] of [['GrandRift', 'deaths']] as const) {
       expect(passingZones(zoneLayer(files[id], null, layerName)!)).toHaveLength(0)
     }
   })
 
-  it('a date with no human journeys has no region data; a date with one match cannot have a consistent region', () => {
+  it('a date with no human journeys has no region data; a date with one match cannot have a hotspot', () => {
     expect(zoneLayer(GrandRiftZones as unknown as ZonesFile, '2026-02-09', 'traffic')).toBeUndefined()
-    for (const layer of LAYERS) expect(zoneLayer(AmbroseValleyZones as unknown as ZonesFile, '2026-02-09', layer)!.consistent).toBe(0)
+    for (const layer of LAYERS) expect(zoneLayer(AmbroseValleyZones as unknown as ZonesFile, '2026-02-09', layer)!.hotspots).toBe(0)
   })
 
   it('single-date selections have their own evidence, not the all-dates verdict', () => {
@@ -198,7 +191,7 @@ describe('where a region is drawn', () => {
 
 describe('how a region is described', () => {
   const sample = (over: Partial<ZoneRecord> = {}): ZoneRecord => ({
-    i: 1, j: 1, value: 139, share: 0.084, matches: 57, players: 44, largest_match_share: 0.15, stability: 1, survived_shifts: 3, tier: 'consistent', ...over,
+    i: 1, j: 1, value: 139, share: 0.084, matches: 57, players: 44, largest_match_share: 0.15, ...over,
   })
 
   it('says what was recorded with the layer\'s own unit', () => {

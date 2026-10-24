@@ -31,12 +31,13 @@ def test_committed_evidence_is_up_to_date(generated) -> None:
         assert (EVIDENCE / name).read_text(encoding="utf-8") == text, f"{name} is stale: run tools/event_forensics.py"
 
 
-def test_ec09_evidence_lists_the_17_unknown_journeys(generated, prepared) -> None:
+def test_ec09_evidence_lists_the_17_flagged_journeys(generated, prepared) -> None:
     actors = rows(generated["actor_classification.csv"])
-    journeys = prepared.events.groupby("file").agg(kind=("actor_kind", "first"), map=("map_id", "first"))
-    unknown = journeys[journeys["kind"] == "unknown"]
+    journeys = prepared.events.groupby("file").agg(
+        kind=("actor_kind", "first"), map=("map_id", "first"), flagged=("id_mismatch", "first"))
+    unknown = journeys[journeys["flagged"]]
     assert len(actors) == len(unknown) == 17
-    assert {r["final_classification"] for r in actors} == {"unknown"}
+    assert {r["final_classification"] for r in actors} == {"human"}
     assert sorted(r["map"] for r in actors) == sorted(unknown["map"])
     assert len({r["actor"] for r in actors}) == 3
     summary = json.loads(generated["forensics_summary.json"])

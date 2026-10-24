@@ -133,17 +133,17 @@ def test_slice_flags(stats, index) -> None:
 def test_headline_figures(stats) -> None:
     """The figures spec 10 quotes (its "How to verify" list) come from this file."""
     whole = stats["slices"]["all"]["all"]
-    assert whole["sample"] == {"matches": 796, "matches_with_human": 780, "human_journeys": 781, "human_players": 245,
-                               "excluded": {"bot_journeys": 444, "unknown_journeys": 17}}
+    assert whole["sample"] == {"matches": 796, "matches_with_human": 796, "human_journeys": 798, "human_players": 248,
+                               "excluded": {"bot_journeys": 444, "unknown_journeys": 0}}
     values = whole["values"]
-    assert values["repeat_players"] == {"numerator": 139, "denominator": 245, "value": 0.5673}
-    assert values["deaths"] == {"value": 442, "parts": {"by_bot": 400, "storm": 39, "paired_killed": 3}}
+    assert values["repeat_players"] == {"numerator": 141, "denominator": 248, "value": 0.5685}
+    assert values["deaths"] == {"value": 443, "parts": {"by_bot": 401, "storm": 39, "paired_killed": 3}}
     assert values["kill_killed_pairs"] == {"value": 3}
-    assert values["journeys_with_death"]["numerator"] == 442
+    assert values["journeys_with_death"]["numerator"] == 443
     assert [stats["slices"][m]["all"]["values"]["matches"]["value"] for m in MAPS] == [566, 59, 171]
-    assert [stats["slices"][m]["all"]["values"]["matches_with_human"]["value"] for m in MAPS] == [553, 57, 170]
-    assert [stats["slices"][m]["all"]["values"]["grid_cells_observed"]["numerator"] for m in MAPS] == [1619, 1258, 1100]
-    assert stats["slices"]["AmbroseValley"]["all"]["values"]["deaths"]["value"] == 315
+    assert [stats["slices"][m]["all"]["values"]["matches_with_human"]["value"] for m in MAPS] == [566, 59, 171]
+    assert [stats["slices"][m]["all"]["values"]["grid_cells_observed"]["numerator"] for m in MAPS] == [1621, 1261, 1101]
+    assert stats["slices"]["AmbroseValley"]["all"]["values"]["deaths"]["value"] == 316
     storm = np.array(values["death_time_s"]["histogram"]["series"]["storm"])
     assert storm.sum() == 39 and storm[:10].sum() == 0  # no storm death before 600 s
 
@@ -152,18 +152,18 @@ def test_rates_and_map_score(stats) -> None:
     """Per-journey rates compare maps of different sample sizes; the score compares the map slices of one date."""
     by_map = {m: stats["slices"][m]["all"]["values"] for m in MAPS}
     assert [by_map[m]["kill_rate"] for m in MAPS] == [
-        {"numerator": 1656, "denominator": 554, "per": 1, "value": 2.99},
-        {"numerator": 179, "denominator": 57, "per": 1, "value": 3.14},
-        {"numerator": 388, "denominator": 170, "per": 1, "value": 2.28}]
-    assert [by_map[m]["loot_rate"]["value"] for m in MAPS] == [17.67, 15.37, 12.04]
-    assert [by_map[m]["storm_death_rate"]["value"] for m in MAPS] == [3.07, 8.77, 10.0]
+        {"numerator": 1669, "denominator": 568, "per": 1, "value": 2.94},
+        {"numerator": 179, "denominator": 59, "per": 1, "value": 3.03},
+        {"numerator": 388, "denominator": 171, "per": 1, "value": 2.27}]
+    assert [by_map[m]["loot_rate"]["value"] for m in MAPS] == [17.43, 14.92, 11.97]
+    assert [by_map[m]["storm_death_rate"]["value"] for m in MAPS] == [2.99, 8.47, 9.94]
     for m in MAPS:  # the rates agree with the totals they are built from
         assert by_map[m]["kill_rate"]["numerator"] == by_map[m]["kills"]["value"]
         assert by_map[m]["loot_rate"]["numerator"] == by_map[m]["loot_events"]["value"]
         assert by_map[m]["storm_death_rate"]["numerator"] == by_map[m]["deaths"]["parts"]["storm"]
-    assert [by_map[m]["map_score"]["value"] for m in MAPS] == [0.77, 0.49, 0.25]
+    assert [by_map[m]["map_score"]["value"] for m in MAPS] == [0.78, 0.44, 0.24]
     assert by_map["AmbroseValley"]["map_score"]["parts"] == {
-        "human_journeys": 1.0, "journey_span_s": 0.0, "kill_rate": 0.83, "loot_rate": 1.0, "storm_death_rate": 1.0}
+        "human_journeys": 1.0, "journey_span_s": 0.0, "kill_rate": 0.88, "loot_rate": 1.0, "storm_death_rate": 1.0}
     assert stats["slices"]["all"]["all"]["values"]["map_score"] is None  # never a score for the all-maps scope
     # 2026-02-09: only AmbroseValley has a human journey, so there is nothing to compare it with
     assert stats["slices"]["AmbroseValley"]["2026-02-09"]["values"]["map_score"] is None
@@ -339,7 +339,7 @@ def _expected(values: pd.Series) -> dict:
 
 
 def test_distributions_reconcile_with_match_files(stats, recomputed) -> None:
-    assert len(recomputed) == 781 and (recomputed["start"] == 0).all()  # every human journey starts at t = 0
+    assert len(recomputed) == 798 and (recomputed["start"] == 0).all()  # every human journey starts at t = 0
     assert recomputed["deaths"].max() == 1
     exact = {"journey_span_s": "span", "kills_per_journey": "kills", "loot_per_journey": "loot",
              "first_loot_s": "first_loot", "death_time_s": "death_t", "movement_time_s": "movement"}
@@ -364,8 +364,8 @@ def test_distributions_reconcile_with_match_files(stats, recomputed) -> None:
 def test_unique_counts_and_medians_are_not_combined_across_slices(stats, recomputed) -> None:
     whole = stats["slices"]["all"]["all"]["values"]
     by_map = [stats["slices"][m]["all"]["values"]["human_players"]["value"] for m in MAPS]
-    assert whole["human_players"]["value"] == recomputed["player"].nunique() == 245
-    assert sum(by_map) == 325 != 245  # 62 players were seen on more than one map
+    assert whole["human_players"]["value"] == recomputed["player"].nunique() == 248
+    assert sum(by_map) == 328 != 248  # 80 players were seen on more than one map
 
     median = whole["journey_span_s"]["median"]
     assert median == float(np.median(recomputed["span"]))
@@ -373,11 +373,11 @@ def test_unique_counts_and_medians_are_not_combined_across_slices(stats, recompu
     assert median not in (float(np.median(by_date)), round(float(np.mean(by_date)), 1))
 
 
-def test_bots_and_unknown_journeys_are_left_out(prepared, stats) -> None:
+def test_bot_journeys_are_left_out(prepared, stats) -> None:
     table = journey_table(prepared.events)
     whole = stats["slices"]["all"]["all"]["values"]
     assert int(table["kills"].sum()) != whole["kills"]["value"] == int(table.loc[table["kind"] == "human", "kills"].sum())
-    assert int(table["loot"].sum()) > whole["loot_events"]["value"]
+    assert int(table["loot"].sum()) >= whole["loot_events"]["value"]
     assert table["user_id"].nunique() > whole["human_players"]["value"]
 
 

@@ -3,8 +3,9 @@
 // only what the headline row doesn't already show.
 import type { BreakdownValue, StatsFile, StatsSlice } from '../data/types'
 import { KPIS, kpiContext, kpiText, type KpiId } from './comparison'
-import { MISSING, formatCount, formatPercent, formatSeconds, plural } from './format'
+import { MISSING, formatCount, formatPercent, formatSeconds } from './format'
 import { distributionOf, ratioOf } from './slices'
+import { RATE_LABEL, count } from './terms'
 
 export interface Figure {
   /** the metric whose definition the info tooltip shows */
@@ -36,7 +37,7 @@ export function headlineFigures(slice: StatsSlice): Figure[] {
 
 export const COMBAT_METRICS = ['deaths', 'journeys_with_death', 'death_time_s'] as const
 
-/** Combat & survival adds deaths and how often a match ends in one (kills and storm deaths are in the headline row). */
+/** Combat & survival adds deaths and how often a human journey ends in one (kills and storm deaths are in the headline row). */
 export function combatFigures(stats: StatsFile, slice: StatsSlice): Figure[] {
   const deaths = slice.values.deaths as BreakdownValue | null
   const withDeath = ratioOf(slice, 'journeys_with_death')
@@ -49,31 +50,31 @@ export function combatFigures(stats: StatsFile, slice: StatsSlice): Figure[] {
     },
     {
       id: 'journeys_with_death',
-      label: 'Matches ending in a death',
+      label: RATE_LABEL.deaths,
       value: withDeath ? formatPercent(withDeath) : MISSING,
-      detail: withDeath ? `${formatCount(withDeath.numerator)} of ${plural(withDeath.denominator, 'match', 'matches')} played` : undefined,
+      detail: withDeath ? `${formatCount(withDeath.numerator)} of ${count(withDeath.denominator, 'journey')}` : undefined,
     },
   ]
 }
 
 export const LOOT_METRICS = ['journeys_with_loot', 'first_loot_s'] as const
 
-/** Loot adds how many matches found anything and how soon (items per match is in the headline row). */
+/** Loot adds how many human journeys found anything and how soon (items per journey is in the headline row). */
 export function lootFigures(slice: StatsSlice): Figure[] {
   const withLoot = ratioOf(slice, 'journeys_with_loot')
   const firstLoot = distributionOf(slice, 'first_loot_s')
   return [
     {
       id: 'journeys_with_loot',
-      label: 'Matches with any loot',
+      label: 'Human journeys with any loot',
       value: withLoot ? formatPercent(withLoot) : MISSING,
-      detail: withLoot ? `${formatCount(withLoot.numerator)} of ${plural(withLoot.denominator, 'match', 'matches')} played` : undefined,
+      detail: withLoot ? `${formatCount(withLoot.numerator)} of ${count(withLoot.denominator, 'journey')}` : undefined,
     },
     {
       id: 'first_loot_s',
       label: 'Median time to first loot',
       value: firstLoot?.median != null ? formatSeconds(firstLoot.median) : MISSING,
-      detail: firstLoot?.median != null ? 'min:s into the match' : firstLoot ? 'No values in this selection' : undefined,
+      detail: firstLoot?.median != null ? 'minutes:seconds into the match' : firstLoot ? 'No values in this selection' : undefined,
       fewValues: firstLoot?.few_values,
     },
   ]

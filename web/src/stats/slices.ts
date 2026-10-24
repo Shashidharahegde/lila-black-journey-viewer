@@ -2,6 +2,7 @@
 import type { CountValue, DistributionValue, RateValue, RatioValue, ScoreValue, StatsFile, StatsSlice } from '../data/types'
 import { ALL } from '../state/statsUrl'
 import { plural } from './format'
+import { count } from './terms'
 
 /** The metrics_version this page was written for (spec 10, "Version check by consumers"). */
 export const SUPPORTED_METRICS_VERSION = 2
@@ -55,11 +56,11 @@ export function emptyText(map: string, date: string): string {
   return `No human journeys recorded on ${map === ALL ? 'any map' : map} ${date === ALL ? 'on any date' : `on ${date}`}`
 }
 
-/** "781 human journeys in 780 matches · 245 players", or the empty-state sentence. */
+/** "798 human journeys in 796 matches · 248 players observed", or the empty-state sentence. */
 export function sampleText(slice: StatsSlice, map: string, date: string): string {
   const { sample } = slice
   if (slice.flags.empty) return emptyText(map, date)
-  return `${plural(sample.human_journeys, 'human journey')} in ${plural(sample.matches_with_human, 'match', 'matches')} · ${plural(sample.human_players, 'player')}`
+  return `${count(sample.human_journeys, 'journey')} in ${count(sample.matches_with_human, 'match')} · ${count(sample.human_players, 'player')}`
 }
 
 export interface SliceBadge {

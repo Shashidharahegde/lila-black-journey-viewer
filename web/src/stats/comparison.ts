@@ -1,12 +1,13 @@
 // The level-design KPIs (S, 2026-10-23), read from each slice and compared between maps. Each map's value is its own
 // slice's stored value; ranking the maps only orders those values and never adds them up (spec 10, EC-09/EC-10).
 //
-// Wording: a "journey" in the data is one human player's recorded match, so the pages say "match played" / "per match"
-// (an average over players' matches). A journey has at most one death (stats.py checks it), so storm deaths per 100
-// journeys is the share of matches played that ended in a storm death.
+// Wording follows stats/terms.ts (UX-01): a human journey is one recorded human player in one match, and every rate names
+// that denominator. A journey has at most one death (stats.py checks it), so storm deaths per 100 journeys is also the
+// share of human journeys that ended in a storm death.
 import type { StatsFile, StatsSlice } from '../data/types'
 import { MISSING, formatCount, formatSeconds } from './format'
 import { countOf, distributionOf, rateOf, scoreOf, sliceFor } from './slices'
+import { RATE_LABEL } from './terms'
 
 export interface Kpi {
   /** the stats.json metric whose definition the ⓘ shows */
@@ -42,47 +43,47 @@ export const KPIS = {
   },
   journeys: {
     metric: 'human_journeys',
-    label: 'Matches played',
-    short: 'Matches played',
+    label: 'Human journeys',
+    short: 'Human journeys',
     read: (s) => countOf(s, 'human_journeys'),
     format: formatCount,
-    context: () => 'by human players',
+    context: () => 'one human player in one match',
     higherIsBetter: true,
   },
   players: {
     metric: 'human_players',
-    label: 'Players',
-    short: 'Players',
+    label: 'Players observed',
+    short: 'Players observed',
     read: (s) => countOf(s, 'human_players'),
     format: formatCount,
-    context: () => 'unique human players',
+    context: () => 'distinct recorded player IDs',
     higherIsBetter: true,
   },
   time: {
     metric: 'journey_span_s',
-    label: 'Median time in match',
-    short: 'Time in match',
+    label: 'Median recorded span',
+    short: 'Recorded span',
     read: (s) => distributionOf(s, 'journey_span_s')?.median ?? null,
     format: formatSeconds,
-    context: () => 'per player',
+    context: () => 'first to last record, per human journey',
     higherIsBetter: true,
   },
   kills: {
     metric: 'kill_rate',
-    label: 'Kills per match',
-    short: 'Kills per match',
+    label: RATE_LABEL.kills,
+    short: 'Kills per journey',
     read: (s) => rateOf(s, 'kill_rate')?.value ?? null,
     format: asStored,
-    context: (s) => rateTotal(s, 'kill_rate', 'avg per player'),
+    context: (s) => rateTotal(s, 'kill_rate', 'mean over human journeys'),
     higherIsBetter: true,
   },
   loot: {
     metric: 'loot_rate',
-    label: 'Items looted per match',
-    short: 'Items per match',
+    label: RATE_LABEL.loot,
+    short: 'Items per journey',
     read: (s) => rateOf(s, 'loot_rate')?.value ?? null,
     format: asStored,
-    context: (s) => rateTotal(s, 'loot_rate', 'avg per player'),
+    context: (s) => rateTotal(s, 'loot_rate', 'mean over human journeys'),
     higherIsBetter: true,
   },
   storm: {
@@ -91,7 +92,7 @@ export const KPIS = {
     short: 'Storm deaths',
     read: (s) => rateOf(s, 'storm_death_rate')?.value ?? null,
     format: (n) => `${asStored(n)}%`,
-    context: (s) => rateTotal(s, 'storm_death_rate', 'of matches played'),
+    context: (s) => rateTotal(s, 'storm_death_rate', 'of human journeys'),
     higherIsBetter: false,
   },
 } satisfies Record<string, Kpi>

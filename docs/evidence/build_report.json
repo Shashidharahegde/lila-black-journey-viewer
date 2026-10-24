@@ -57,14 +57,13 @@
     }
   },
   "journeys": {
-    "human": 781,
+    "human": 798,
     "bot": 444,
-    "unknown": 17,
+    "unknown": 0,
     "id_mismatch": 17,
     "matches_by_human_count": {
-      "0": 16,
-      "1": 779,
-      "2": 1
+      "1": 794,
+      "2": 2
     }
   },
   "events_by_category": {
@@ -118,7 +117,7 @@
     }
   ],
   "stats": {
-    "bytes": 86410,
+    "bytes": 86411,
     "slices": 28
   }
 }

@@ -40,7 +40,7 @@ describe('slices', () => {
 
   it('the header line for all maps and all dates (spec 10, How to verify 3)', () => {
     expect(scopeWords('all', 'all')).toBe('All maps · all dates')
-    expect(sampleText(sliceFor(stats, 'all', 'all'), 'all', 'all')).toBe('781 human journeys in 780 matches · 245 players')
+    expect(sampleText(sliceFor(stats, 'all', 'all'), 'all', 'all')).toBe('798 human journeys in 796 matches · 248 players observed')
   })
 
   it('an empty slice gets the empty-state sentence and no badges (How to verify 4)', () => {
@@ -53,7 +53,7 @@ describe('slices', () => {
 
   it('flags become badges with their reason', () => {
     const thin = sliceFor(stats, 'AmbroseValley', '2026-02-09')
-    expect(sampleText(thin, 'AmbroseValley', '2026-02-09')).toBe('1 human journey in 1 match · 1 player')
+    expect(sampleText(thin, 'AmbroseValley', '2026-02-09')).toBe('1 human journey in 1 match · 1 player observed')
     const badges = sliceBadges(stats, thin, '2026-02-09')
     expect(badges.map((b) => b.label)).toEqual(['Few matches', 'Partial day'])
     expect(badges[0].reason).toBe('Only 1 match with a human journey (fewer than 10): a pattern here may not hold.')

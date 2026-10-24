@@ -240,7 +240,7 @@ describe('kills and deaths: absolute count classes', () => {
     const cells = files.AmbroseValley.layers.kills.all
     const perBand = [0, 0, 0, 0]
     for (const [, , v] of cells) perBand[countBand(v)!]++
-    expect(perBand).toEqual([178, 137, 109, 36]) // 460 occupied cells (docs/evidence/spatial_analysis/count_bands.json)
+    expect(perBand).toEqual([177, 138, 110, 37]) // 462 occupied cells (docs/evidence/spatial_analysis/count_bands.json)
     expect(perBand.reduce((a, b) => a + b, 0)).toBe(cells.length)
     for (const id of Object.keys(files)) {
       for (const layer of ['kills', 'deaths'] as const) {

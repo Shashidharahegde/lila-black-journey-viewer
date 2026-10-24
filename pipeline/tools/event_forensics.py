@@ -140,10 +140,11 @@ def investigate_actors(raw: pd.DataFrame, group: pd.Series, prepared: Prepared) 
             "id_inside_bot_id_range": bool(bot_ids.min() <= int(user) <= bot_ids.max()),
         }
 
-    # the pipeline must agree: its `unknown` journeys are exactly this group
+    # the pipeline must agree: its `id_mismatch` journeys are exactly this group
     final = prepared.events.groupby("file")["actor_kind"].first()
-    assert set(final.index[final == "unknown"]) == set(anomalies.index), "pipeline unknown ≠ raw anomaly group"
-    kept = prepared.events[prepared.events["actor_kind"] == "unknown"]
+    flagged = prepared.events.groupby("file")["id_mismatch"].first()
+    assert set(flagged.index[flagged]) == set(anomalies.index), "pipeline id_mismatch ≠ raw anomaly group"
+    kept = prepared.events[prepared.events["id_mismatch"]]
 
     dates = match_dates(prepared.events)
     anomalies["actor"] = anomalies["user"].map(letters)
@@ -259,13 +260,13 @@ def top_cells(grid: np.ndarray, n: int = 10) -> set[int]:
 
 
 def heatmap_impact(prepared: Prepared) -> dict:
-    """Each human heatmap layer with the unknown journeys added back, compared with the published (human-only) one."""
+    """Each human heatmap layer without the 17 flagged (id_mismatch) journeys, compared with the published one (which counts them as humans)."""
     events = prepared.events
     result = {}
     for map_id in MAPS:
         on_map = events[events["map_id"] == map_id]
-        published = on_map[on_map["actor_kind"] == "human"]
-        with_unknown = on_map[on_map["actor_kind"].isin(["human", "unknown"])]
+        with_unknown = on_map[on_map["actor_kind"] == "human"]  # published: includes the flagged journeys
+        published = with_unknown[~with_unknown["id_mismatch"]]  # the earlier rule: flagged journeys left out
         layers = {}
         for layer, grid in (
             ("kills", lambda d: count_grid(d[counted_kills(d)])),
@@ -286,7 +287,7 @@ def heatmap_impact(prepared: Prepared) -> dict:
             }
         result[map_id] = {
             "human_journeys": int(published["file"].nunique()),
-            "unknown_journeys": int(on_map.loc[on_map["actor_kind"] == "unknown", "file"].nunique()),
+            "unknown_journeys": int(on_map.loc[on_map["id_mismatch"], "file"].nunique()),
             "layers": layers,
         }
     return result

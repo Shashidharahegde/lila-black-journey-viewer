@@ -5,7 +5,7 @@ import { distributionOf } from '@/stats/slices'
 import FigureCard from './FigureCard'
 import HistogramChart from './HistogramChart'
 
-const LOOT_SERIES = [{ key: 'value', label: 'Matches played', color: 'var(--chart-5)' }]
+const LOOT_SERIES = [{ key: 'value', label: 'Human journeys', color: 'var(--chart-5)' }]
 
 export default function LootSection({ stats, slice }: { stats: StatsFile; slice: StatsSlice }) {
   const firstLoot = distributionOf(slice, 'first_loot_s')?.histogram
@@ -21,13 +21,13 @@ export default function LootSection({ stats, slice }: { stats: StatsFile; slice:
         <HistogramChart
           title={stats.metrics.first_loot_s.label}
           metric={stats.metrics.first_loot_s}
-          description="A long wait can point to little loot near where players start. Matches with no loot are left out."
+          description="A long wait can point to little loot near where players start. Journeys with no loot are left out."
           rows={histogramRows(firstLoot, 'seconds', true)}
           series={LOOT_SERIES}
-          unit="matches played"
+          unit="human journeys"
           xLabel="time to first loot"
           xTitle="Time to first pickup (seconds into the match)"
-          yTitle="Matches played"
+          yTitle="Human journeys"
         />
       )}
     </div>

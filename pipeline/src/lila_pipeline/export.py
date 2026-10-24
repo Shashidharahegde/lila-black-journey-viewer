@@ -259,10 +259,10 @@ def selected_journeys(inputs: ZoneInputs, key: str) -> np.ndarray:
     return np.arange(len(inputs.match_of)) if key == "all" else np.flatnonzero(inputs.date_of == key)
 
 
-def build_zones(map_id: str, events: pd.DataFrame, rules: zones.Rules = zones.RULES) -> dict:
+def build_zones(map_id: str, events: pd.DataFrame, rules: zones.HotspotRules = zones.HOTSPOT_RULES) -> dict:
     """Region statistics for the interpretation layer: 16 x 16 regions of 4 x 4 cells, per selection (all dates and each date).
 
-    Definitions, rules and the shifted-grid check are in `lila_pipeline.zones`. Only counts are written: no player or
+    Definitions and the hotspot rules are in `lila_pipeline.zones`. Only counts are written: no player or
     match IDs. The same human events as the heatmap, so region values add up to the heatmap's totals.
     """
     inputs = zone_inputs(map_id, events)
@@ -276,11 +276,12 @@ def build_zones(map_id: str, events: pd.DataFrame, rules: zones.Rules = zones.RU
                 inputs.match_of[chosen],
                 inputs.player_of[chosen],
                 key=f"{map_id}|{layer}|{key}",
-                rules=rules,
+                rules=zones.HOTSPOT_EVIDENCE["rules"],
+                shifts=zones.HOTSPOT_EVIDENCE["shifts"],
                 count_journeys=layer == "traffic",
                 storm=inputs.storm[chosen].sum(axis=0) if layer == "deaths" else None,
             )
-            layers[layer] = _rounded_zones(zones.classify(evidence, rules), layer)
+            layers[layer] = _rounded_zones(zones.hotspots(evidence, rules), layer)
         selections[key] = {
             "matches": int(len(set(inputs.match_of[chosen]))),
             "players": int(len(set(inputs.player_of[chosen]))),
@@ -308,8 +309,7 @@ def _rounded_zones(result: dict, layer: str) -> dict:
     for z in result["zones"]:
         row = {
             "i": z["i"], "j": z["j"], "value": value(z["value"]), "share": round(z["share"], 4), "matches": z["matches"], "players": z["players"],
-            "largest_match_share": round(z["largest_match_share"], 3), "stability": round(z["stability"], 2),
-            "survived_shifts": z["survived_shifts"], "tier": z["tier"],
+            "largest_match_share": round(z["largest_match_share"], 3),
         }
         if "journeys" in z:
             row["journeys"] = z["journeys"]
@@ -319,8 +319,7 @@ def _rounded_zones(result: dict, layer: str) -> dict:
     out = {
         "total": value(result["total"]),
         "occupied_zones": result["occupied_zones"],
-        "candidates": result["candidates"],
-        "consistent": result["consistent"],
+        "hotspots": result["hotspots"],
         "zones": zone_list,
     }
     if "storm_deaths" in result:

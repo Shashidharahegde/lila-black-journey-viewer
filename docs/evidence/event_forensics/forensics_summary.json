@@ -186,8 +186,7 @@
     },
     "pipeline_journeys_by_kind": {
       "bot": 444,
-      "human": 781,
-      "unknown": 17
+      "human": 798
     }
   },
   "kill_killed_pairs": {

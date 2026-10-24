@@ -14,7 +14,7 @@ describe('KPIS', () => {
 
   it('plain names: no data jargon, retention claims or removed metrics', () => {
     const labels = COMPARISON_KPIS.map((id) => KPIS[id].label).join(' ')
-    expect(labels).not.toMatch(/journey|retention|return rate|in combat|movement|grid|distance|multiple matches|performance score/i)
+    expect(labels).not.toMatch(/matches played|per match|retention|return rate|in combat|movement|grid|distance|multiple matches|performance score/i)
   })
 
   it('the leading and trailing map are named constructively', () => {
@@ -26,22 +26,22 @@ describe('kpiText, all dates (verified against stats.json)', () => {
   const row = (id: (typeof COMPARISON_KPIS)[number]) => stats.maps.map((map) => kpiText(sliceFor(stats, map, ALL), id))
 
   it("reads each map's own stored value", () => {
-    expect(row('journeys')).toEqual(['554', '57', '170'])
-    expect(row('players')).toEqual(['217', '29', '79'])
-    expect(row('time')).toEqual(['5:55', '6:43', '7:07'])
-    expect(row('kills')).toEqual(['2.99', '3.14', '2.28'])
-    expect(row('loot')).toEqual(['17.67', '15.37', '12.04'])
-    // storm deaths per 100 matches played = % of matches played (a journey has at most one death)
-    expect(row('storm')).toEqual(['3.07%', '8.77%', '10.00%'])
+    expect(row('journeys')).toEqual(['568', '59', '171'])
+    expect(row('players')).toEqual(['218', '30', '80'])
+    expect(row('time')).toEqual(['5:52', '6:24', '7:07'])
+    expect(row('kills')).toEqual(['2.94', '3.03', '2.27'])
+    expect(row('loot')).toEqual(['17.43', '14.92', '11.97'])
+    // storm deaths per 100 human journeys = % of human journeys (a journey has at most one death)
+    expect(row('storm')).toEqual(['2.99%', '8.47%', '9.94%'])
     // the stored 0–1 score out of 100, the same digits
-    expect(row('score')).toEqual(['77/100', '49/100', '25/100'])
+    expect(row('score')).toEqual(['78/100', '44/100', '24/100'])
   })
 
   it('every value carries its reference point or stored total', () => {
     const lockdown = sliceFor(stats, 'Lockdown', ALL)
-    expect(kpiContext(lockdown, 'kills')).toBe('avg per player · 388 total')
-    expect(kpiContext(lockdown, 'loot')).toBe('avg per player · 2,047 total')
-    expect(kpiContext(lockdown, 'storm')).toBe('of matches played · 17 total')
+    expect(kpiContext(lockdown, 'kills')).toBe('mean over human journeys · 388 total')
+    expect(kpiContext(lockdown, 'loot')).toBe('mean over human journeys · 2,047 total')
+    expect(kpiContext(lockdown, 'storm')).toBe('of human journeys · 17 total')
     expect(kpiContext(lockdown, 'score')).toBe('vs the other maps')
   })
 

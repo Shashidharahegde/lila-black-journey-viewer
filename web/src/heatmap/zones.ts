@@ -1,6 +1,6 @@
 // The interpretation layer's pure logic (spec 06, Stage 6b): which regions are hotspots for a selection, where their footprint is,
 // and how to say what was recorded there. Region statistics are computed in the pipeline (pipeline/src/lila_pipeline/zones.py);
-// nothing here recomputes them. Only regions that pass every check are shown (S, 2026-10-23); the checks are described in docs/.
+// nothing here recomputes them. The file lists only the regions that pass the hotspot rules (S, 2026-10-24); the rules are described in docs/.
 import type { HeatmapLayerKey, MapInfo, ZoneLayer, ZoneRecord, ZonesFile } from '../data/types'
 import type { SpaceRect } from '../map/space'
 import { cellRect } from './grid'
@@ -15,9 +15,9 @@ export function zoneLayer(file: ZonesFile, date: string | null, layer: HeatmapLa
   return file.selections[date ?? 'all']?.layers[layer]
 }
 
-/** The hotspots of a layer: the regions that pass every check, strongest first. Their order is their number on the map and in the panel. */
+/** The hotspots of a layer, strongest first (the file holds nothing else). Their order is their number on the map and in the panel. */
 export function passingZones(layer: ZoneLayer): ZoneRecord[] {
-  return layer.zones.filter((z) => z.tier === 'consistent')
+  return layer.zones
 }
 
 /** A region's stable identity inside one selection, for highlighting. */

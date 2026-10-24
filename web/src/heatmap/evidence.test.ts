@@ -18,14 +18,20 @@ const matches: MatchFile[] = readdirSync('public/data/matches').map(
 describe('summary card', () => {
   it('AmbroseValley, all dates: totals and ratios of the same figures, each with its denominator in the label', () => {
     const deaths = layerSummary('deaths', evidence('AmbroseValley', 'deaths', null))
-    expect(deaths.lead).toEqual({ value: '315', label: 'human deaths' })
-    expect(deaths.figures.slice(0, 2)).toEqual([
-      { value: '0.6', label: 'deaths per match' }, // 315 / 553
-      { value: '57%', label: 'of matches had a death' }, // 314 / 553
+    expect(deaths.lead).toEqual({ value: '316', label: 'human deaths' })
+    expect(deaths.figures).toEqual([
+      { value: '55.6%', label: 'of human journeys ended in a recorded death' }, // 316 / 568
+      { value: '17', label: 'storm deaths (5.4%)' }, // 17 / 316
+      { value: '566', label: 'matches with humans' },
+    ])
+    const kills = layerSummary('kills', evidence('AmbroseValley', 'kills', null))
+    expect(kills.figures.slice(0, 2)).toEqual([
+      { value: '2.94', label: 'kills per human journey' }, // 1,669 / 568, the stats pages' kill_rate
+      { value: '75.6%', label: 'of matches with humans had a kill' }, // 428 / 566
     ])
     const traffic = layerSummary('traffic', evidence('AmbroseValley', 'traffic', null))
-    expect(traffic.figures.map((f) => f.label)).toEqual(['per human journey', 'human journeys', 'matches'])
-    expect(traffic.figures.slice(1).map((f) => f.value)).toEqual(['554', '553'])
+    expect(traffic.figures.map((f) => f.label)).toEqual(['per human journey', 'human journeys', 'matches with humans'])
+    expect(traffic.figures.slice(1).map((f) => f.value)).toEqual(['568', '566'])
   })
 
   it('storm deaths from the index agree with the region file, and never exceed the deaths', () => {
@@ -44,7 +50,7 @@ describe('summary card', () => {
 describe('evidence lines', () => {
   it('AmbroseValley deaths, all dates: the counts and the words, from the real files', () => {
     const e = evidence('AmbroseValley', 'deaths', null)
-    expect(e).toMatchObject({ kind: 'ok', total: 315, humanJourneys: 554, matchesWithHumans: 553, contributing: 314, low: false })
+    expect(e).toMatchObject({ kind: 'ok', total: 316, humanJourneys: 568, matchesWithHumans: 566, contributing: 315, low: false })
   })
 
   it('traffic says "about" and counts the matches with a human journey', () => {

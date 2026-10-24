@@ -160,6 +160,8 @@ Decisions are rows in the CLAUDE.md table. Evidence: `docs/evidence/heatmap_revi
 **Match open (S, 2026-10-23; superseded by Stage 6c, where heatmaps have their own tab):** the heatmap switch no longer disappears when a match is selected. The controls sit above the match inspector and the picture is drawn under the journeys; it is still the map-and-date aggregate ("Not filtered by the open match"), the `hide` preferences are untouched, and turning the heatmap off returns the ordinary match view. This replaces the earlier "overview only" scope.
 
 ## Stage 6b — Interpretation layer (built; S's decisions 2026-10-23)
+
+> **Superseded 2026-10-24 (hotspot rules).** Hotspots are now regions with events from ≥ 5 matches and no match over 50% of the value, at most 6 per layer, ranked by value. Steps 5–7 below (stability, the player rule, the shifted-grid check) and the `tier`, `stability`, `survived_shifts`, `candidates` and `consistent` fields no longer apply; the file lists only hotspots, with a `hotspots` count. Before/after: `docs/evidence/hotspot_rules_compare.md`. The text below is kept as the record of the earlier analysis.
 **Why.** The visual pass fixed the rendering, but a viewer still couldn't tell where the strongest concentrations are or how much weight to give
 them. An evidence-first analysis of the real data came first: `docs/evidence/spatial_analysis/REPORT.md` (data, tests, tables, and the
 grid-shift and threshold validation in its section 8), `zone_sensitivity.md`, `count_bands.json`, and `external_references.md` (research, kept
