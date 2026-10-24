@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, RefreshCwIcon } from 'lucide-react'
+import { ArrowLeftIcon, LoaderCircleIcon, RefreshCwIcon } from 'lucide-react'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -19,8 +19,6 @@ interface Props {
   indexError: string | null
   /** Called after choosing a match, e.g. to close a mobile drawer. */
   onNavigate?: () => void
-  /** Optional: provide the existing loader's retry action for a failed match file. */
-  onRetryMatch?: (matchId: string) => void
   /** Optional: provide the existing index loader's retry action. */
   onRetryIndex?: () => void
 }
@@ -36,11 +34,11 @@ export default function SidePanel({
   selection,
   indexError,
   onNavigate,
-  onRetryMatch,
   onRetryIndex,
 }: Props) {
   const selectMatch = useStore((s) => s.selectMatch)
   const matchFile = useStore((s) => s.matchFile)
+  const retryMatch = useStore((s) => s.retryMatch)
   const tab = useStore((s) => s.tab)
   const [browsing, setBrowsing] = useState(false)
   const [matchSearch, setMatchSearch] = useState('')
@@ -180,21 +178,22 @@ export default function SidePanel({
             <div role="alert" className="space-y-2 rounded-lg border border-destructive/40 p-3">
               <p className="text-sm font-medium">Could not load journeys for this match.</p>
               <p className="text-xs text-muted-foreground">{matchFile.message}</p>
-              {onRetryMatch && (
-                <Button variant="outline" size="sm" onClick={() => onRetryMatch(match.id)}>
-                  <RefreshCwIcon aria-hidden /> Retry match data
-                </Button>
-              )}
+              <Button variant="outline" size="sm" onClick={retryMatch}>
+                <RefreshCwIcon aria-hidden /> Retry
+              </Button>
             </div>
           ) : (
-            <div role="status" aria-live="polite" className="space-y-2 rounded-lg border p-3">
-              <p className="text-sm text-muted-foreground">
+            <div role="status" aria-live="polite" aria-busy="true" className="space-y-3 rounded-lg border p-3">
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <LoaderCircleIcon className="size-4 shrink-0 animate-spin" aria-hidden />
                 {loadingThisMatch ? 'Loading journeys and map layers…' : 'Preparing journey data…'}
               </p>
               <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+              <Skeleton className="h-4 w-2/3" />
             </div>
           ))}
-          <MatchCard match={match} />
+          <MatchCard match={match} file={loaded} />
         </div>
       </ScrollArea>
     </section>,

@@ -104,7 +104,7 @@ export function timeOfDay(startUtc: string): string {
 export function primaryLabel(m: MatchSummary, sort: MatchSort): string {
   switch (sort) {
     case 'duration':
-      return `${durationLabel(m.duration_s)} min`
+      return durationText(m.duration_s)
     case 'kills':
       return plural(m.counts.kill, 'kill')
     case 'deaths':
@@ -128,7 +128,7 @@ const SIGNALS: Record<MatchSort, ('duration' | 'kills' | 'deaths' | 'storm')[]> 
 /** Up to two non-zero context signals that differ from the row's primary metric. */
 export function signalLabels(m: MatchSummary, sort: MatchSort): string[] {
   const text = {
-    duration: m.duration_s > 0 ? `${durationLabel(m.duration_s)} min` : '',
+    duration: m.duration_s > 0 ? durationText(m.duration_s) : '',
     kills: m.counts.kill > 0 ? plural(m.counts.kill, 'kill') : '',
     deaths: m.counts.death > 0 ? plural(m.counts.death, 'death') : '',
     storm: m.counts.storm_death > 0 ? plural(m.counts.storm_death, 'storm death') : '',
@@ -158,6 +158,13 @@ export function recordedPlayers(m: Pick<MatchSummary, 'humans' | 'unknown' | 'bo
   return m.humans + m.unknown + m.bots
 }
 
+/** Matches on one map per start date, for the map pages' date list (dates without a match on the map are missing, i.e. 0). */
+export function mapDateCounts(matches: Pick<MatchSummary, 'map' | 'date'>[], map: string): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const m of matches) if (m.map === map) counts.set(m.date, (counts.get(m.date) ?? 0) + 1)
+  return counts
+}
+
 export function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`
 }
@@ -170,9 +177,26 @@ export function playersLabel(m: Pick<MatchSummary, 'humans' | 'unknown' | 'bots'
   return parts.join(' · ')
 }
 
+/** A moment in a match as a clock, "12:32" (timeline, tooltips, recorded spans). */
 export function durationLabel(seconds: number): string {
   const s = Math.round(seconds)
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
+
+/** A length of time with its units, "11m 14s", where a bare "11:14" could be read as a time of day. */
+export function durationText(seconds: number): string {
+  const s = Math.round(seconds)
+  const m = Math.floor(s / 60)
+  return m === 0 ? `${s}s` : `${m}m ${s % 60}s`
+}
+
+/** The same length in words for screen readers, "11 minutes 14 seconds" ("11m" can be read out as metres). */
+export function durationWords(seconds: number): string {
+  const s = Math.round(seconds)
+  const m = Math.floor(s / 60)
+  const parts = m ? [plural(m, 'minute')] : []
+  if (s % 60 || !m) parts.push(plural(s % 60, 'second'))
+  return parts.join(' ')
 }
 
 /** "4 kills · 1 death · 20 loot": kills and deaths always, the rarer types only when present. */

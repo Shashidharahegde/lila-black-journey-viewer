@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
-import type { Actor, Index, MatchEvent, MatchFile } from '../data/types'
+import type { Actor, Index, MatchEvent, MatchFile, MatchSummary } from '../data/types'
 import {
   AFTER_DEATH_NOTE,
   EVENT_ORDER,
   ID_MISMATCH_NOTE,
   KILL_KILLED_PAIR_NOTE,
   actorStats,
+  botCombat,
   buildJourneys,
   describeActor,
   describeMarker,
@@ -301,9 +302,9 @@ describe('every generated match file', () => {
           for (let i = 1; i < segment.length; i++) expect(segment[i][0] - segment[i - 1][0]).toBeLessThanOrEqual(30)
   })
 
-  it('keeps every unknown journey and both events of every Kill/Killed pair', () => {
+  it('keeps every flagged journey (id_mismatch) as a human and both events of every Kill/Killed pair', () => {
     const actors = files.flatMap((m) => m.actors)
-    expect(actors.filter((a) => a.kind === 'unknown')).toHaveLength(17)
+    expect(actors.filter((a) => a.id_mismatch && a.kind === 'human')).toHaveLength(17)
     const paired = actors.flatMap((a) => a.events.filter((e) => e.kill_killed_pair))
     expect(paired.map((e) => e.raw).sort()).toEqual(['Kill', 'Kill', 'Kill', 'Killed', 'Killed', 'Killed'])
   })
@@ -334,5 +335,46 @@ describe('every generated match file', () => {
   it('uses only event types the map knows how to draw', () => {
     const types = new Set(files.flatMap((m) => m.actors.flatMap((a) => a.events.map((e) => e.type))))
     expect([...types].every((t) => (EVENT_ORDER as string[]).includes(t))).toBe(true)
+  })
+})
+
+describe('botCombat', () => {
+  const summary: MatchSummary = {
+    id: 'test0001', full_id: 'test0001', map: 'GrandRift', date: '2026-02-10', start_utc: '2026-02-10T00:00:00Z',
+    duration_s: 300, humans: 2, bots: 1, unknown: 1,
+    counts: { kill: 1, death: 2, storm_death: 0, loot: 2, kill_killed_pair: 1 },
+  }
+
+  it('counts bot kills and deaths by bots in human files only, apart from recorded bot journeys', () => {
+    // h1: one BotKill, one BotKilled; h2: a Kill/Killed pair (counted as a pair); b1's own BotKill/BotKilled ignored
+    expect(botCombat(summary, sample)).toEqual({
+      botKills: 1, deathsByBots: 1, otherKills: 0, otherDeaths: 0, withoutBotJourneys: false,
+    })
+  })
+
+  it('flags bot combat in a match without a recorded bot journey', () => {
+    const noBots = { ...sample, actors: sample.actors.filter((a) => a.kind !== 'bot') }
+    expect(botCombat({ ...summary, bots: 0 }, noBots).withoutBotJourneys).toBe(true)
+    const quiet = { ...noBots, actors: noBots.actors.filter((a) => a.id !== 'h1') }
+    expect(botCombat({ ...summary, bots: 0, counts: { ...summary.counts, kill: 0, death: 1 } }, quiet).withoutBotJourneys).toBe(false)
+  })
+
+  it('reports counted kills and deaths that are not bot combat', () => {
+    const counts = { ...summary.counts, kill: 2, death: 3 } // one unpaired Kill and one unpaired Killed besides
+    expect(botCombat({ ...summary, counts }, sample)).toMatchObject({ otherKills: 1, otherDeaths: 1 })
+  })
+
+  it('accounts for every counted kill and death on the real match cards', () => {
+    const files = import.meta.glob<MatchFile>('../../public/data/matches/*.json', { eager: true, import: 'default' })
+    const byId = new Map(Object.values(files).map((f) => [f.id, f]))
+    for (const m of index.matches) {
+      const c = botCombat(m, byId.get(m.id)!)
+      expect([c.otherKills, c.otherDeaths]).toEqual([0, 0])
+      if (c.withoutBotJourneys) expect(m.bots).toBe(0)
+    }
+    // a match with one human file, eight bot kills and a death by a bot, and no bot journey
+    expect(botCombat(index.matches.find((m) => m.id === '95042608')!, byId.get('95042608')!)).toEqual({
+      botKills: 8, deathsByBots: 1, otherKills: 0, otherDeaths: 0, withoutBotJourneys: true,
+    })
   })
 })

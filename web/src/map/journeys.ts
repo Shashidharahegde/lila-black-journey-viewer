@@ -1,6 +1,6 @@
 // Turns a match file into what the map draws: paths, lone samples and event markers,
 // all in the drawing space from space.ts. No deck.gl here, so it can be unit-tested.
-import type { Actor, ActorKind, MapInfo, MatchEvent, MatchFile } from '../data/types'
+import type { Actor, ActorKind, MapInfo, MatchEvent, MatchFile, MatchSummary } from '../data/types'
 import { durationLabel } from '../state/matches'
 import type { LayerKey } from '../state/url'
 import { EVENT_ORDER, type EventType } from './encoding'
@@ -196,6 +196,8 @@ const KIND_LABEL: Record<ActorKind, string> = { human: 'Human', unknown: 'Unknow
 export const ID_MISMATCH_NOTE =
   'Unknown: numeric (bot-style) ID but player-client events (Position, Loot); not counted as human or bot'
 export const AFTER_DEATH_NOTE = "Logged after this player's death; timing uncertain"
+// shown on the match card when human files log bot combat but no bot journey was recorded
+export const BOT_ACTIVITY_NOTE = 'Bot activity detected, but no bot movement data is available for playback.'
 export const KILL_KILLED_PAIR_NOTE =
   "Kill and Killed logged in the same second; the data can't show whether this was self-inflicted or a trade with an unrecorded player"
 
@@ -312,6 +314,43 @@ export function actorStats(actor: Actor, map: MapInfo): ActorStats {
     loot: count('loot'),
     killKilledPairs: live.filter((e) => e.type === 'kill' && e.kill_killed_pair).length,
     afterDeath: actor.events.length - live.length,
+  }
+}
+
+export interface BotCombat {
+  /** `BotKill` rows in human files: a recorded human killed a bot */
+  botKills: number
+  /** `BotKilled` rows in human files: a recorded human was killed by a bot */
+  deathsByBots: number
+  /** counted kills and deaths in human files that aren't bot combat (unpaired `Kill` / `Killed`) */
+  otherKills: number
+  otherDeaths: number
+  /** bot combat was logged, but the match has no recorded bot journey to draw or play back */
+  withoutBotJourneys: boolean
+}
+
+/**
+ * Bot combat for the match card, kept apart from recorded bot journeys: human files log fights with bots whose own
+ * files are often not in the data, so "no bot journey" doesn't mean "no bots". Same scope as the card's other counts
+ * (events in human files, late events included); the Killed half of a Kill/Killed pair is counted as a pair, not here.
+ */
+export function botCombat(summary: MatchSummary, match: MatchFile): BotCombat {
+  let botKills = 0
+  let deathsByBots = 0
+  for (const a of match.actors) {
+    if (a.kind !== 'human') continue
+    for (const e of a.events) {
+      if (e.raw === 'BotKill') botKills++
+      else if (e.raw === 'BotKilled') deathsByBots++
+    }
+  }
+  const c = summary.counts
+  return {
+    botKills,
+    deathsByBots,
+    otherKills: c.kill - botKills,
+    otherDeaths: c.death - deathsByBots - c.kill_killed_pair,
+    withoutBotJourneys: summary.bots === 0 && botKills + deathsByBots > 0,
   }
 }
 

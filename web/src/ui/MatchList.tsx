@@ -11,7 +11,8 @@ import {
   botsLabel,
   compositionLabel,
   dateLabel,
-  durationLabel,
+  durationText,
+  durationWords,
   filterGroups,
   matchCountsLabel,
   pickerGroups,
@@ -80,7 +81,7 @@ function MatchRow({ serial, match: m, sort, selected, onPick }: RowProps) {
       <button
         type="button"
         aria-pressed={selected}
-        aria-label={`${serial}. ${selected ? 'Selected match' : 'Select match'} ${m.id}. ${playersLabel(m)}. ${matchCountsLabel(m)}. Duration ${durationLabel(m.duration_s)}.`}
+        aria-label={`${serial}. ${selected ? 'Selected match' : 'Select match'} ${m.id}. ${playersLabel(m)}. ${matchCountsLabel(m)}. Duration ${durationWords(m.duration_s)}.`}
         title={`${m.full_id} · ${playersLabel(m)} · ${matchCountsLabel(m)}`}
         onClick={onPick}
         className={cn(
@@ -104,7 +105,7 @@ function MatchRow({ serial, match: m, sort, selected, onPick }: RowProps) {
           )}
         </span>
         <span className="font-mono text-xs text-muted-foreground tabular-nums">
-          {sort === 'recent' ? `${durationLabel(m.duration_s)} long` : timeOfDay(m.start_utc)}
+          {sort === 'recent' ? `${durationText(m.duration_s)} long` : timeOfDay(m.start_utc)}
         </span>
         <span className="min-w-0 truncate text-xs text-muted-foreground" title={details || undefined}>
           {details}
@@ -206,7 +207,7 @@ export default function MatchList({
             size="sm"
             pressed={botsOnly}
             onPressedChange={setBotsOnly}
-            title="Show only matches with bot journeys"
+            title="Show only matches with recorded bot journeys"
             className="data-[state=on]:border-bot/60 data-[state=on]:bg-bot/15"
           >
             <ActorAvatar kind="bot" size="sm" />

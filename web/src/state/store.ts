@@ -31,6 +31,8 @@ interface State {
   /** Null until the URL is parsed, so we never overwrite a shared link during initialization. */
   selection: Selection | null
   matchFile: MatchFileState
+  /** bumped to try loading the selected match's file again */
+  matchAttempt: number
   hoveredActor: string | null
   pinnedActor: string | null
   matchSort: MatchSort
@@ -70,6 +72,7 @@ interface State {
   selectMatch: (id: string | null) => void
   toggleLayer: (key: LayerKey) => void
   setMatchFile: (matchFile: MatchFileState) => void
+  retryMatch: () => void
   hoverActor: (id: string | null) => void
   pinActor: (id: string | null) => void
   setMatchSort: (sort: MatchSort) => void
@@ -162,6 +165,7 @@ export const useStore = create<State>((set, get) => ({
   index: null,
   selection: null,
   matchFile: { status: 'idle' },
+  matchAttempt: 0,
   hoveredActor: null,
   pinnedActor: null,
   matchSort: DEFAULT_SORT,
@@ -218,6 +222,7 @@ export const useStore = create<State>((set, get) => ({
     if (next.status !== 'idle' && next.id !== get().selection?.match) return
     set({ matchFile: next })
   },
+  retryMatch: () => set((s) => ({ matchAttempt: s.matchAttempt + 1 })),
   hoverActor: (id) => {
     if (get().hoveredActor !== id) set({ hoveredActor: id })
   },

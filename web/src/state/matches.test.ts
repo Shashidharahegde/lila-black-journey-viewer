@@ -6,7 +6,10 @@ import {
   compositionLabel,
   dateLabel,
   durationLabel,
+  durationText,
+  durationWords,
   filterGroups,
+  mapDateCounts,
   matchCountsLabel,
   pickerGroups,
   pickerMatches,
@@ -139,6 +142,21 @@ describe('match picker', () => {
       }
     }
   })
+
+  it('date counts are per map: each equals the match list for that map and date, and the maps add up to the all-maps count', () => {
+    const maps = Object.keys(index.maps)
+    const perMap = maps.map((map) => mapDateCounts(index.matches, map))
+    for (const { date, matches } of index.dates) {
+      maps.forEach((map, i) => expect(perMap[i].get(date) ?? 0).toBe(pickerMatches(index.matches, map, date).length))
+      expect(perMap.reduce((sum, counts) => sum + (counts.get(date) ?? 0), 0)).toBe(matches)
+    }
+  })
+
+  it('a date with no match on a map has no count for it, so the date list can mark it', () => {
+    const counts = mapDateCounts([match('a', 1, 0, 60, 'Lockdown', '2026-02-10'), match('b', 1, 0, 60, 'GrandRift', '2026-02-11')], 'Lockdown')
+    expect(counts.get('2026-02-10')).toBe(1)
+    expect(counts.has('2026-02-11')).toBe(false)
+  })
 })
 
 describe('labels', () => {
@@ -155,11 +173,10 @@ describe('labels', () => {
     expect(matchCountsLabel({ counts })).toBe('0 kills · 1 death · 1 Kill/Killed pair · 3 loot')
   })
 
-  it('on the real index: 781 human, 17 unknown and 444 bot journeys; 3 matches with a Kill/Killed pair', () => {
-    expect(index.matches.reduce((n, m) => n + m.humans, 0)).toBe(781)
-    expect(index.matches.reduce((n, m) => n + m.unknown, 0)).toBe(17)
+  it('on the real index: 798 human, 0 unknown and 444 bot journeys; 3 matches with a Kill/Killed pair', () => {
+    expect(index.matches.reduce((n, m) => n + m.humans, 0)).toBe(798)
+    expect(index.matches.reduce((n, m) => n + m.unknown, 0)).toBe(0)
     expect(index.matches.reduce((n, m) => n + m.bots, 0)).toBe(444)
-    expect(index.matches.filter((m) => m.unknown > 0)).toHaveLength(17)
     expect(index.matches.filter((m) => m.counts.kill_killed_pair > 0)).toHaveLength(3)
   })
 
@@ -175,7 +192,7 @@ describe('labels', () => {
       counts: { kill: 16, death: 0, storm_death: 1, loot: 20, kill_killed_pair: 0 },
     }
     expect(primaryLabel(m, 'kills')).toBe('16 kills')
-    expect(primaryLabel(m, 'duration')).toBe('12:32 min')
+    expect(primaryLabel(m, 'duration')).toBe('12m 32s')
     expect(primaryLabel(m, 'recent')).toBe('21:54 UTC')
     expect(compositionLabel(m)).toBe('')
     expect(compositionLabel({ humans: 1, unknown: 0 })).toBe('')
@@ -184,13 +201,22 @@ describe('labels', () => {
     expect(botsLabel({ bots: 1 })).toBe('1 bot')
     expect(botsLabel({ bots: 14 })).toBe('14 bots')
     expect(signalLabels(m, 'duration')).toEqual(['16 kills', '1 storm death'])
-    expect(signalLabels(m, 'kills')).toEqual(['1 storm death', '12:32 min'])
-    expect(signalLabels(m, 'loot')).toEqual(['16 kills', '12:32 min'])
+    expect(signalLabels(m, 'kills')).toEqual(['1 storm death', '12m 32s'])
+    expect(signalLabels(m, 'loot')).toEqual(['16 kills', '12m 32s'])
   })
 
   it('formats durations as m:ss', () => {
     expect(durationLabel(0)).toBe('0:00')
     expect(durationLabel(65)).toBe('1:05')
     expect(durationLabel(752)).toBe('12:32')
+  })
+
+  it('writes lengths of time with units, and in words for screen readers', () => {
+    expect(durationText(45)).toBe('45s')
+    expect(durationText(65)).toBe('1m 5s')
+    expect(durationText(720)).toBe('12m 0s')
+    expect(durationWords(0)).toBe('0 seconds')
+    expect(durationWords(61)).toBe('1 minute 1 second')
+    expect(durationWords(720)).toBe('12 minutes')
   })
 })

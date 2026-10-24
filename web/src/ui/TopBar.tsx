@@ -1,10 +1,12 @@
 import { LinkIcon, PanelLeftIcon } from 'lucide-react'
+import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { DateInfo, Index } from '@/data/types'
+import { mapDateCounts } from '@/state/matches'
 import { useStore } from '@/state/store'
 import type { Selection } from '@/state/url'
 import { ContextBar, FILTER_TRIGGER, MapToggle } from './ContextBar'
@@ -21,9 +23,11 @@ function partialReason(d: DateInfo): string {
   return `Partial day: data observed from ${utc(d.observed_from_utc)} to ${utc(d.observed_to_utc)}`
 }
 
-/** The map pages' date filter. Partial days are marked in its list only. */
+/** The map pages' date filter. Counts are for the selected map, and a date without a match on it can't be picked (it stays shown
+ * if it is already selected, e.g. after switching maps). Partial days are marked in its list only. */
 function DatePicker({ index, selection }: { index: Index; selection: Selection }) {
   const setDate = useStore((s) => s.setDate)
+  const counts = useMemo(() => mapDateCounts(index.matches, selection.map), [index.matches, selection.map])
   return (
     <Select value={selection.date ?? ALL_DATES} onValueChange={(value) => setDate(value === ALL_DATES ? null : value)}>
       <SelectTrigger aria-label="Match start date (UTC)" className={`${FILTER_TRIGGER} w-40`}>
@@ -32,17 +36,20 @@ function DatePicker({ index, selection }: { index: Index; selection: Selection }
       </SelectTrigger>
       <SelectContent position="popper" align="start">
         <SelectGroup>
-          <SelectLabel>Match start date (UTC)</SelectLabel>
+          <SelectLabel>Match start date (UTC) · matches on {selection.map}</SelectLabel>
           <SelectItem value={ALL_DATES}>All dates</SelectItem>
-          {index.dates.map((d) => (
-            <SelectItem key={d.date} value={d.date} title={d.partial ? partialReason(d) : undefined}>
-              <span className="font-mono tabular-nums">{d.date}</span>
-              <span className="text-muted-foreground tabular-nums">
-                {d.matches} {d.matches === 1 ? 'match' : 'matches'}
-              </span>
-              {d.partial && <Badge variant="outline">Partial</Badge>}
-            </SelectItem>
-          ))}
+          {index.dates.map((d) => {
+            const n = counts.get(d.date) ?? 0
+            return (
+              <SelectItem key={d.date} value={d.date} disabled={n === 0} title={d.partial ? partialReason(d) : undefined}>
+                <span className="font-mono tabular-nums">{d.date}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {n} {n === 1 ? 'match' : 'matches'}
+</span>
+                {d.partial && <Badge variant="outline">Partial</Badge>}
+              </SelectItem>
+            )
+          })}
         </SelectGroup>
       </SelectContent>
     </Select>

@@ -6,6 +6,7 @@ import { useStore } from './store'
 /** Loads the selected match's file. Drawing it is feature 4. */
 export function useMatchFile(): void {
   const id = useStore((s) => s.selection?.match ?? null)
+  const attempt = useStore((s) => s.matchAttempt)
   const setMatchFile = useStore((s) => s.setMatchFile)
 
   useEffect(() => {
@@ -24,5 +25,5 @@ export function useMatchFile(): void {
         toast.error(`Could not load match ${id}`)
       })
     return () => controller.abort()
-  }, [id, setMatchFile])
+  }, [id, attempt, setMatchFile])
 }

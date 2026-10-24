@@ -176,6 +176,13 @@ describe('heatmap state', () => {
     useStore.getState().retryHeatmap()
     expect(useStore.getState().heatmapAttempt).toBe(2)
   })
+
+  it('match retry bumps its own attempt, so only the match file is asked for again', () => {
+    const before = useStore.getState()
+    before.retryMatch()
+    expect(useStore.getState().matchAttempt).toBe(before.matchAttempt + 1)
+    expect(useStore.getState().heatmapAttempt).toBe(before.heatmapAttempt)
+  })
 })
 
 describe('selected region (interpretation layer)', () => {
