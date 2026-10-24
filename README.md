@@ -25,6 +25,21 @@ Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/), Node.js 20.19+ or 
 Without uv: `cd pipeline && pip install -r requirements.txt && pip install -e .`
 `pipeline/requirements.txt` is generated from `uv.lock`. Run `make requirements` after changing Python dependencies.
 
+## Deploying
+The site is static: Vercel builds only `web/` and never runs the pipeline (the generated data and minimaps are committed). Import the GitHub repo in Vercel and enter:
+
+| Setting | Value |
+|---|---|
+| Root Directory | `web` |
+| Framework Preset | Vite |
+| Build Command | `npm run build` (default) |
+| Output Directory | `dist` (default) |
+| Install Command | `npm install` (default) |
+| Node.js Version | 22.x or newer (Vite needs 20.19+ / 22.12+) |
+| Environment variables | none |
+
+`web/vercel.json` sends every path except `/assets/`, `/data/` and `/maps/` to `index.html`, so deep links such as `/journeys?map=…&match=…` work, and sets the cache headers (hashed assets: one year; minimaps: one week; data files: 5 minutes, revalidated). Every push to `main` redeploys; only the production URL goes in "Live URL" above.
+
 ## Environment variables
 None.
 
