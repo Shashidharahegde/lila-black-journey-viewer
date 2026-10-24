@@ -4,7 +4,7 @@
 A browser tool for LILA's Level Designers to see how players move, fight, loot and die on the three LILA BLACK maps.
 
 ## Live URL
-Not deployed yet.
+https://lila-black-journey-viewer.vercel.app/
 
 ## Tech stack
 | Layer | Tools |

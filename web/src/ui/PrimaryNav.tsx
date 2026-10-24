@@ -24,8 +24,8 @@ const ACTIVE = 'bg-primary text-primary-foreground shadow-sm hover:bg-primary ho
 
 const ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboardIcon },
-  { id: 'heatmaps', label: 'Heatmaps', icon: FlameIcon },
   { id: 'journeys', label: 'Journeys', icon: RouteIcon },
+  { id: 'heatmaps', label: 'Heatmaps', icon: FlameIcon },
 ] as const
 
 /**
