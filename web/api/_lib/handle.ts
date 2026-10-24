@@ -1,10 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { StatsFile } from '../../src/data/types.ts'
+import { MAX_QUESTION_CHARS } from '../../src/state/chat.ts'
 import { buildSystemPrompt } from './prompt.ts'
 import type { RateLimiter } from './rateLimit.ts'
 
 export const DEFAULT_MODEL = 'claude-haiku-5-5'
-export const MAX_QUESTION_CHARS = 500
+export { MAX_QUESTION_CHARS }
 // Headroom for the model's own reasoning at low effort as well as the visible answer.
 export const MAX_OUTPUT_TOKENS = 1500
 
