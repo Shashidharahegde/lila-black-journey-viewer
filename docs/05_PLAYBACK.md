@@ -19,7 +19,8 @@ Watch a match unfold: players move, events appear when they happen, and a design
 | Speeds | 0.5×, 1×, 2×, 4×, 8× (default 4×) | 15 minutes takes ~3¾ min at 4× and under 2 min at 8×. S added 8× on 2026-10-22 because playback felt too slow. Replaces 1×/4×/16× |
 | Events | A marker appears once `t ≥ event time`; past events stay, slightly faded | Shows what has happened so far |
 | Timeline ticks | Kill and death times marked on the slider; click to jump | Jump straight to the action |
-| Full-path mode | A toggle shows complete paths (feature 4's static view) | Sometimes the whole journey is what matters |
+| Full-path mode | A "Full paths" checkbox in the dock shows complete paths (feature 4's static view), with the current positions on top. **On by default** (S, 2026-10-23, "important"): a match opens showing whole journeys, and unticking it returns to the path-so-far view | Designers usually want the whole journey first; playback is a closer look |
+| Dock placement | The dock is drawn over the bottom of the map, not beside it; the map keeps one row (56 px) of room under it on both tabs, so opening a match or switching tabs never moves or rescales the map (CLAUDE.md "Fixed map frame") | Removes the jump the map made when the dock appeared (S, 2026-10-23) |
 | URL | Adds `t=` (current time), written with a replace once the time has settled and never while playing; opening the link starts paused at that time | Share "look at minute 6:40 of this match" without filling the Back history with every pause and seek |
 
 ## Implementation
@@ -36,10 +37,11 @@ Paths cut at the current time (`PathLayer`) with a current-position marker per a
 `t=` in the URL; opening the link starts paused at that time.
 
 ## How to verify
-1. Play the busiest AmbroseValley match at 4× from start to end: movement is smooth, no jumps across gaps.
+1. Play the busiest AmbroseValley match at 4× from start to end: movement is smooth, no jumps across gaps. (Untick "Full paths" first: it is on by default.)
 2. Pause at a death tick: the death marker appears at that moment, at the end of that player's trail.
 3. Check one event time against the raw data: (event `ts` − earliest `ts` in the match) equals the time shown.
 4. Share a link with `t=`; it opens at that moment.
+5. Open a match: whole paths show at 00:00 and "Full paths" is ticked. The map doesn't move when the dock appears or when switching to Heatmaps and back.
 
 ## Out of scope
 Aggregated heatmaps (feature 6).

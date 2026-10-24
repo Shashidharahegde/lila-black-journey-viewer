@@ -1,6 +1,8 @@
 import { BitmapLayer, DeckGL, OrthographicView, type Layer, type OrthographicViewState, type PickingInfo } from 'deck.gl'
-import { LoaderCircleIcon, MaximizeIcon, MinusIcon, PlusIcon } from 'lucide-react'
+import { MaximizeIcon, MinusIcon, PlusIcon } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { FadeCover } from '@/components/fade'
+import { LoadingIndicator } from '@/components/loading-indicator'
 import { MapTooltip } from '@/components/map-tooltip'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -11,6 +13,7 @@ import { MapOverview } from './MapOverview'
 import { measureContent } from './content'
 import { useMinimap } from './minimap'
 import { SPACE_WIDTH, type SpaceRect, clampTarget, contentRect, fitRectZoom, fitZoom, focusZoom, imageBounds, isInsideMap, spaceHeight, spaceToUv, uvToWorld, viewportRect } from './space'
+import { type Camera, ZOOM_MOTION, cameraAt, frameRect, moveDuration, prefersReducedMotion } from './zoom'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: true })
 
@@ -55,11 +58,17 @@ interface Props {
   pickAt?: (x: number, y: number) => unknown
   /** the clicked object, or null for a click on empty map */
   onClickObject?: (object: unknown) => void
+  /** extra classes for the hover card, to restyle it for one view */
+  tooltipClassName?: string
+  /** when this changes (not on first render) the camera eases back out to the whole map, e.g. on a change of page */
+  refitKey?: string
   /**
-   * Something to bring into view: when `id` changes to a new value the camera moves to `centre` (drawing space) and zooms in until
-   * `extent` (its width in drawing units) fills about a third of the view, never zooming out. Null changes nothing.
+   * Something to bring into view, with the eased move of `zoom.ts`. It moves once per `id` (an id seen before, e.g. on returning to a
+   * tab, changes nothing; null changes nothing).
    */
-  focus?: { id: string; centre: [number, number]; extent: number } | null
+  focus?: MapFocus | null
+  /** what is loading for the map's overlays (e.g. "Loading match…"), or null; shown only if it takes a while */
+  loading?: string | null
   /**
    * Space kept clear for panels drawn over the map, in screen px: the camera fits, zooms and stops panning inside the rest. It should
    * stay the same while panels open, close or change (it reserves their room instead), so the map never moves or rescales with them.
@@ -68,6 +77,12 @@ interface Props {
   /** where panels cover the map right now, so the coordinate readout and the overview move out from under them */
   covered?: Insets
 }
+
+/**
+ * A spot (a hotspot): the camera centres on `centre` (drawing space) and zooms in until `extent` (its width in drawing units) fills
+ * about a third of the view, never zooming out. A rect (a match's journeys): the camera frames it, zooming in or out (`MATCH_FRAMING`).
+ */
+export type MapFocus = { id: string; centre: [number, number]; extent: number } | { id: string; rect: SpaceRect }
 
 export interface Insets {
   left: number
@@ -97,15 +112,9 @@ function frameTarget([x, y]: readonly number[], zoom: number, frame: Insets): [n
 
 
 
-/**
- * Only what the camera needs. deck.gl hands back view states carrying transition settings
- * (from scroll zoom and inertia); keeping those made later button zooms look like part of
- * a finished transition, and deck ignored them. So nothing else is ever stored.
- */
-interface Camera {
-  target: [number, number]
-  zoom: number
-}
+// The camera stores only target and zoom (`Camera` in zoom.ts). deck.gl hands back view states carrying transition settings
+// (from scroll zoom and inertia); keeping those made later button zooms look like part of a finished transition, and deck ignored
+// them. So nothing else is ever stored, and eased moves are run here, frame by frame, not by deck.gl.
 
 /** A camera the user has moved on one map. Null (or another map's) means "fitted". */
 type MovedCamera = Camera & { mapId: string }
@@ -138,7 +147,7 @@ const CONTROLLER = {
   // no smooth scroll: deck.gl's smoothing lags behind the wheel; one notch ≈ ¾ of a zoom level
   scrollZoom: { speed: 0.02, smooth: false },
   inertia: 250,
-  doubleClickZoom: true,
+  doubleClickZoom: false, // handled in MapView so it is eased
   keyboard: false, // our own shortcuts (F, Esc, ?) are global; arrows are kept for playback (spec 05)
 }
 
@@ -199,17 +208,17 @@ function CoordinateReadout({ point }: { point: Signal<WorldPoint> }) {
 
 type Picked = { x: number; y: number; object: unknown } | null
 
-function HoverCard({ picked: signal, render }: { picked: Signal<Picked>; render?: (object: unknown) => ReactNode }) {
+function HoverCard({ picked: signal, render, className }: { picked: Signal<Picked>; render?: (object: unknown) => ReactNode; className?: string }) {
   const picked = useSignal(signal)
   const content = picked && render ? render(picked.object) : null
   return picked && content ? (
-    <MapTooltip x={picked.x} y={picked.y}>
+    <MapTooltip x={picked.x} y={picked.y} className={className}>
       {content}
     </MapTooltip>
   ) : null
 }
 
-export default function MapView({ mapId: wantedId, map: wantedMap, overlays, renderTooltip, onHoverObject, pickAt, onClickObject, focus, frame: frameProp, covered: coveredProp }: Props) {
+export default function MapView({ mapId: wantedId, map: wantedMap, overlays, renderTooltip, onHoverObject, pickAt, onClickObject, tooltipClassName, refitKey, focus, loading, frame: frameProp, covered: coveredProp }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const [canvas, setCanvas] = useState<Size | null>(null)
   const [moved, setMoved] = useState<MovedCamera | null>(null)
@@ -251,7 +260,61 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
   const camera: Camera | null = !size ? null : moved?.mapId === mapId ? bounded(map, size, moved.target, moved.zoom) : fitted(map, size, content)
   const limits = size ? zoomLimits(map, size) : null
 
-  const fit = useCallback(() => setMoved(null), [])
+  // An eased move in progress (its animation frame), stopped by any user move of the camera.
+  const tween = useRef(0)
+  const stopTween = useCallback(() => {
+    cancelAnimationFrame(tween.current)
+    tween.current = 0
+  }, [])
+  useEffect(() => stopTween, [stopTween])
+  const userMove = useCallback(
+    (next: MovedCamera | null) => {
+      stopTween()
+      setMoved(next)
+    },
+    [stopTween],
+  )
+
+  // The latest camera and view, for moves started from an event handler or an effect.
+  const cameraNow = useRef({ camera, size })
+  cameraNow.current = { camera, size }
+
+  // Ease the camera to `to` (ZOOM_MOTION, longer for farther moves), or jump at once when the user prefers reduced motion.
+  // Every move the app makes goes through here: a picked match or hotspot, the +/− buttons, Fit and a double-click.
+  const flyTo = useCallback(
+    (to: Camera, done?: () => void) => {
+      const { camera: from, size: view } = cameraNow.current
+      stopTween()
+      if (!from || !view) return
+      const end = bounded(map, view, to.target, to.zoom)
+      if (prefersReducedMotion()) {
+        setMoved({ mapId, ...end })
+        return done?.()
+      }
+      // the clock starts at the first frame, not when the move was asked for, so a slow render doesn't eat the start of it
+      const duration = moveDuration(from, end, view.width, view.height)
+      let start: number | null = null
+      const step = (now: number) => {
+        start ??= now
+        const t = Math.min(1, (now - start) / duration)
+        const at = cameraAt(from, end, ZOOM_MOTION.easing(t))
+        setMoved({ mapId, ...bounded(map, view, at.target, at.zoom) })
+        if (t < 1) tween.current = requestAnimationFrame(step)
+        else {
+          tween.current = 0
+          done?.()
+        }
+      }
+      tween.current = requestAnimationFrame(step)
+    },
+    [map, mapId, stopTween],
+  )
+
+  // Fit goes back to the fitted camera, then lets go of it so a resize refits again.
+  const fit = useCallback(() => {
+    const { size: view } = cameraNow.current
+    if (view) flyTo(fitted(map, view, content), () => setMoved(null))
+  }, [flyTo, map, content])
 
   // F fits the map (FRONTEND_GUIDELINES §6 Keyboard)
   useEffect(() => {
@@ -266,22 +329,43 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
 
   // Buttons zoom one level around the centre of the view, like Google Maps' +/−.
   const zoomBy = (step: number) => {
-    if (size && camera) setMoved({ mapId, ...bounded(map, size, camera.target, camera.zoom + step) })
+    if (camera) flyTo({ target: camera.target, zoom: camera.zoom + step })
   }
 
-  // Bring a newly selected thing into view. The jump is instant (no deck.gl transition: stored transition fields broke the +/− buttons).
-  const cameraNow = useRef({ camera, size })
-  cameraNow.current = { camera, size }
+  // Changing page zooms back out to the whole map; a pick on the new page then zooms in again.
+  const refitSeen = useRef(refitKey)
+  useEffect(() => {
+    if (refitSeen.current === refitKey) return
+    refitSeen.current = refitKey
+    fit()
+  }, [refitKey, fit])
+
+  // Bring a newly selected thing into view.
   const focusId = focus?.id
   const focusAt = useRef(focus)
   focusAt.current = focus
+  const focused = useRef(new Set<string>())
+  const ready = size !== null && !switching
   useEffect(() => {
     const target = focusAt.current
-    const { camera: now, size: view } = cameraNow.current
-    if (!focusId || !target || !now || !view) return
-    const wanted = focusZoom(view.width, view.height, target.extent)
-    setMoved({ mapId, ...bounded(map, view, target.centre, Math.max(now.zoom, wanted)) })
-  }, [focusId, mapId, map])
+    const { camera: from, size: view } = cameraNow.current
+    if (!ready || !focusId || !target || !from || !view || focused.current.has(focusId)) return
+    focused.current.add(focusId)
+    const { minZoom } = zoomLimits(map, view)
+    flyTo(
+      'rect' in target
+        ? frameRect(target.rect, view.width, view.height, minZoom)
+        : { target: target.centre, zoom: Math.max(from.zoom, focusZoom(view.width, view.height, target.extent)) },
+    )
+  }, [focusId, ready, map, flyTo])
+
+  // A double-click zooms one level in about the clicked point, eased like every other move (deck.gl's own would jump).
+  const lastClick = useRef({ time: 0, x: 0, y: 0 })
+  const zoomAbout = (point: [number, number]) => {
+    if (!camera) return
+    const [px, py] = point
+    flyTo({ target: [px + (camera.target[0] - px) / 2, py + (camera.target[1] - py) / 2], zoom: camera.zoom + 1 })
+  }
 
   // Pointer events can arrive faster than frames; picking and the readout are done once per frame, for the latest position.
   const pendingHover = useRef<PickingInfo | null>(null)
@@ -342,7 +426,7 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
             // only user input reaches here, because the view is controlled
             const { target, zoom } = next as OrthographicViewState
             const z = Number(zoom)
-            setMoved({ mapId, ...bounded(map, size, target ? frameTarget(target, z, frame) : camera.target, z) })
+            userMove({ mapId, ...bounded(map, size, target ? frameTarget(target, z, frame) : camera.target, z) })
           }}
           controller={CONTROLLER}
           layers={layers}
@@ -350,6 +434,10 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
           onClick={(info) => {
             const [px, py] = info.coordinate ?? []
             const object = info.object ?? (px !== undefined && py !== undefined && isInsideMap(px, py, map) ? (pickAt?.(px, py) ?? null) : null)
+            const now = performance.now()
+            const again = now - lastClick.current.time < 350 && Math.hypot(info.x - lastClick.current.x, info.y - lastClick.current.y) < 8
+            lastClick.current = again ? { time: 0, x: 0, y: 0 } : { time: now, x: info.x, y: info.y }
+            if (again && px !== undefined && py !== undefined) return zoomAbout([px, py])
             onClickObject?.(object)
           }}
           getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab')}
@@ -357,20 +445,19 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
       )}
       {/* a switch: the previous map dims while the next loads; the next fades in from the stage colour */}
       <div aria-hidden className={`pointer-events-none absolute inset-0 bg-stage transition-opacity duration-200 ${switching ? 'opacity-60' : 'opacity-0'}`} />
-      {shown && <div key={shown.mapId} aria-hidden className="pointer-events-none absolute inset-0 bg-stage animate-out fade-out fill-mode-forwards duration-300" />}
-      {(switching || (!shown && minimap.status === 'loading')) && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center" style={{ left: frame.left, bottom: frame.bottom }}>
-          <p role="status" className="flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
-            <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden /> Loading {wantedId}…
-          </p>
-        </div>
-      )}
+      {shown && <FadeCover fadeKey={shown.mapId} className="bg-stage" />}
+      {/* the minimap first (a map switch), then what is drawn on it (a match) */}
+      <LoadingIndicator
+        active={switching || (!shown && minimap.status === 'loading') || !!loading}
+        label={switching || !shown ? `Loading ${wantedId}…` : loading}
+        style={{ left: frame.left, bottom: frame.bottom }}
+      />
       {minimap.status === 'error' && (
         <p role="alert" className="absolute inset-x-0 top-1/2 text-center text-sm text-white">
           Could not load the {wantedId} minimap ({minimap.message}). Reload the page to try again.
         </p>
       )}
-      <HoverCard picked={hoverCard} render={renderTooltip} />
+      <HoverCard picked={hoverCard} render={renderTooltip} className={tooltipClassName} />
       <div className="absolute top-3 right-3 flex flex-col gap-1">
         <MapButton label="Zoom in" onClick={() => zoomBy(1)} disabled={!camera || !limits || camera.zoom >= limits.maxZoom}>
           <PlusIcon />
@@ -388,7 +475,7 @@ export default function MapView({ mapId: wantedId, map: wantedMap, overlays, ren
             map={map}
             image={image}
             viewport={viewportRect(camera.target, camera.zoom, size.width, size.height, map)}
-            onNavigate={(x, y) => setMoved({ mapId, ...bounded(map, size, [x, y], camera.zoom) })}
+            onNavigate={(x, y) => userMove({ mapId, ...bounded(map, size, [x, y], camera.zoom) })}
           />
         )}
         <CoordinateReadout point={readout} />
