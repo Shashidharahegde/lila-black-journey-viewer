@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import statsJson from '../../public/data/stats.json'
 import type { StatsFile } from '../data/types'
-import { DEFAULT_STATS_SCOPE, SECTIONS, exploreLinkFor, overviewLinkFor, parseStatsScope, serializeStatsScope, statsLinkFor } from './statsUrl'
+import { DEFAULT_STATS_SCOPE, SECTIONS, overviewLinkFor, parseStatsScope, serializeStatsScope, statsLinkFor } from './statsUrl'
 
 const stats = statsJson as unknown as StatsFile
 const parse = (query: string) => parseStatsScope(new URLSearchParams(query), stats)
@@ -67,19 +67,10 @@ describe('serializeStatsScope', () => {
     expect(statsLinkFor('Lockdown', date)).toBe(`/stats?map=Lockdown&date=${date}`)
   })
 
-  it('the primary nav\'s Overview link keeps the date but never a map', () => {
+  it('the primary nav\'s Overview link keeps the date, and the map when one was chosen', () => {
     expect(overviewLinkFor(null)).toBe('/stats')
     expect(overviewLinkFor(date)).toBe(`/stats?date=${date}`)
-  })
-})
-
-describe('exploreLinkFor', () => {
-  it('defaults to Heatmaps and omits a missing date', () => {
-    expect(exploreLinkFor('GrandRift', null)).toBe('/explore?map=GrandRift&tab=heatmaps')
-    expect(exploreLinkFor('Lockdown', date)).toBe(`/explore?map=Lockdown&tab=heatmaps&date=${date}`)
-  })
-
-  it('can target Journeys & Playback instead', () => {
-    expect(exploreLinkFor('AmbroseValley', null, 'journeys')).toBe('/explore?map=AmbroseValley&tab=journeys')
+    expect(overviewLinkFor(date, 'all')).toBe(`/stats?date=${date}`)
+    expect(overviewLinkFor(null, 'GrandRift')).toBe('/stats?map=GrandRift')
   })
 })

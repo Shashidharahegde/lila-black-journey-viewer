@@ -10,22 +10,31 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import './index.css'
 import App from './App.tsx'
+import { parseTab } from './state/url'
+import ChatPage from './ui/ChatPage'
 import StatsPage from './ui/StatsPage'
 
-/** `/` and unknown paths open the all-maps Overview. A query string means a legacy link to the old map root
- * (`/?map=…&match=…`), so those still go to Explore with it. */
+/** `/` and unknown paths open the all-maps Overview. An old Explore link (`/explore?tab=…`) or a link to the old map root
+ * (`/?map=…&match=…`) goes to the map page it meant, with its query; the map page then drops the old `tab=`. */
 function RedirectToLanding() {
-  const { search } = useLocation()
-  return <Navigate to={search ? `/explore${search}` : '/stats'} replace />
+  const { pathname, search } = useLocation()
+  if (pathname === '/explore' || search) return <Navigate to={`/${parseTab(new URLSearchParams(search))}${search}`} replace />
+  return <Navigate to="/stats" replace />
 }
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <TooltipProvider>
-        {/* the three top-level destinations: Overview (/stats, the landing page) and Explore (/explore) */}
+        {/* the three destinations: Overview (/stats, the landing page), Heatmaps and Journeys. The two map pages share one
+            App, so switching between them keeps the map, its camera and the loaded files. AI Chat is hidden from the nav for now
+            (S, 2026-10-24) but still answers at /chat. */}
         <Routes>
           <Route path="/stats" element={<StatsPage />} />
-          <Route path="/explore" element={<App />} />
+          <Route element={<App />}>
+            <Route path="/heatmaps" />
+            <Route path="/journeys" />
+          </Route>
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="*" element={<RedirectToLanding />} />
         </Routes>
       </TooltipProvider>

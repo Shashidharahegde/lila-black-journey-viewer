@@ -1,67 +1,87 @@
-import { CompassIcon, LayoutDashboardIcon, MessageSquareTextIcon } from 'lucide-react'
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import { FlameIcon, LayoutDashboardIcon, RouteIcon } from 'lucide-react'
+import type { MouseEvent, ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { overviewLinkFor } from '@/state/statsUrl'
 import { useStore } from '@/state/store'
-import { ThemeToggle } from './TopBar'
+import { mapPageHref } from '@/state/useUrlSync'
+
+export type Destination = 'overview' | 'heatmaps' | 'journeys'
 
 interface Props {
-  current: 'overview' | 'explore' | 'chat'
-  /** where the Overview link goes; defaults to the all-maps page */
-  overviewHref?: string
-  /** where the Explore link goes; defaults to Explore's own map picker */
-  exploreHref?: string
-  /** the page's own date filter, shown beside the theme toggle */
-  utilities?: ReactNode
-  /** false where the page shows the theme toggle itself (Explore keeps it in its side panel, beside the date filter) */
-  theme?: boolean
+  /** the page shown; null on a page outside the three destinations (the hidden AI Chat page) */
+  current: Destination | null
+  /** the Overview's map ('all' or a map) and date, when the Overview is the page shown; the map pages read theirs from the store */
+  overview?: { map: string; date: string }
+  /** the secondary actions on the right: Copy link on the map pages, then the settings menu */
+  actions?: ReactNode
 }
 
 const LINK =
   'flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground outline-none transition hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring'
 const ACTIVE = 'bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground'
 
+const ITEMS = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboardIcon },
+  { id: 'heatmaps', label: 'Heatmaps', icon: FlameIcon },
+  { id: 'journeys', label: 'Journeys', icon: RouteIcon },
+] as const
+
 /**
- * Brand on the left, the three destinations in the centre, the page's date filter and the theme on the right; the map
- * filter sits in the row below (it sets the data context). Leaving Explore pauses playback, as leaving the Journeys &
- * Playback tab already did.
+ * Row 1 on every page: brand on the left, the three destinations in the centre, the secondary actions on the right (S,
+ * 2026-10-24). The links carry the map and date between pages, and the map pages' own state (match, playback time, heatmap
+ * view) between Heatmaps and Journeys. Leaving Journeys pauses playback.
  */
-export default function PrimaryNav({ current, overviewHref = '/stats', exploreHref = '/explore', utilities, theme = true }: Props) {
-  const pause = () => useStore.getState().pause()
-  const items = [
-    { id: 'overview', to: overviewHref, label: 'Overview', icon: LayoutDashboardIcon },
-    { id: 'explore', to: exploreHref, label: 'Explore', icon: CompassIcon },
-    { id: 'chat', to: '/chat', label: 'AI Chat', icon: MessageSquareTextIcon },
-  ] as const
+export default function PrimaryNav({ current, overview, actions }: Props) {
+  const navigate = useNavigate()
+  // re-render when the state the links carry changes (the playback time is read on click instead, so playing doesn't re-render the nav)
+  const selection = useStore((s) => s.selection)
+  const overviewMap = useStore((s) => s.overviewMap)
+  useStore((s) => `${s.heatmapLayer} ${s.densityOn} ${s.outlinesOn} ${s.heatmapMode}`)
+
+  // from the Overview, the map pages open its map ("All maps": the last map used) and date
+  const context = overview ? { map: overview.map === 'all' ? null : overview.map, date: overview.date === 'all' ? null : overview.date } : undefined
+  const hrefFor = (id: Destination) =>
+    id === 'overview'
+      ? overview
+        ? overviewLinkFor(context!.date, overview.map)
+        : overviewLinkFor(selection?.date ?? null, overviewMap)
+      : mapPageHref(id, context)
+
+  const go = (id: Destination) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (id !== current) useStore.getState().pause()
+    // a plain click navigates with the link as it is now (the playback time included); modified clicks open the rendered href
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    navigate(hrefFor(id))
+  }
 
   return (
-    // phones drop the brand and stop centring the links, so nothing overlaps; from md the links sit in the true centre
+    // phones drop the brand and the link labels, so nothing overlaps; from md the links sit in the true centre
     <nav aria-label="Primary" className="flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-card px-4 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-3">
       <Link
-        to="/stats"
-        onClick={pause}
+        to={hrefFor('overview')}
+        onClick={go('overview')}
         className="hidden justify-self-start rounded-md text-sm font-bold tracking-wide whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-ring md:block"
       >
         LILA BLACK
       </Link>
       <div className="flex items-center gap-1">
-        {items.map(({ id, to, label, icon: Icon }) => (
+        {ITEMS.map(({ id, label, icon: Icon }) => (
           <Link
             key={id}
-            to={to}
+            to={hrefFor(id)}
             aria-current={current === id ? 'page' : undefined}
             aria-label={label}
             className={`${LINK} ${current === id ? ACTIVE : ''}`}
-            onClick={id === 'explore' ? undefined : pause}
+            onClick={go(id)}
           >
-            <Icon className="size-4" aria-hidden="true" />
+            {/* the icon only stands in for the label on phones */}
+            <Icon className="size-4 sm:hidden" aria-hidden="true" />
             <span className="hidden sm:inline">{label}</span>
           </Link>
         ))}
       </div>
-      <div className="flex min-w-0 items-center justify-self-end gap-2">
-        {utilities}
-        {theme && <ThemeToggle />}
-      </div>
+      <div className="flex min-w-0 items-center justify-self-end gap-1">{actions}</div>
     </nav>
   )
 }

@@ -1,5 +1,6 @@
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useLocation } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -8,10 +9,10 @@ import { buildJourneys } from './map/journeys'
 import { loadMinimap, prefetchMinimap } from './map/minimap'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { overviewLinkFor } from './state/statsUrl'
 import { useStore } from './state/store'
 import { useHeatmapFile, useZonesFile } from './state/useHeatmap'
 import { useMatchFile } from './state/useMatchFile'
+import { tabFromPath } from './state/url'
 import { useUrlSync } from './state/useUrlSync'
 import JourneyCard from './ui/JourneyCard'
 import MapStage from './ui/MapStage'
@@ -19,14 +20,17 @@ import PlaybackDock from './ui/PlaybackDock'
 import PrimaryNav from './ui/PrimaryNav'
 import SidePanel from './ui/SidePanel'
 import HeatmapMapControls from './ui/HeatmapMapControls'
-import TabBar from './ui/TabBar'
-import TopBar, { ExploreUtilities } from './ui/TopBar'
+import TopBar, { CopyLinkButton } from './ui/TopBar'
+import SettingsMenu from './ui/SettingsMenu'
+import { AboutDataContent } from './ui/HelpPopovers'
 import { isTypingTarget } from './ui/shortcuts'
 
 /** Side panel width on desktop (w-80). */
 const PANEL_WIDTH = 320
-/** Room kept under the map for the playback dock (one row), on both tabs, so opening a match never rescales the map. */
+/** Room kept under the map for the playback dock (one row), on both pages, so opening a match never rescales the map. */
 const DOCK_RESERVE = 56
+
+const TAB_TITLE = { heatmaps: 'Heatmaps', journeys: 'Journeys' } as const
 
 const desktopQuery = '(min-width: 1024px)'
 function subscribeDesktop(onChange: () => void) {
@@ -55,6 +59,8 @@ export default function App() {
   const selection = useStore((s) => s.selection)
   const matchFile = useStore((s) => s.matchFile)
   const tab = useStore((s) => s.tab)
+  // the page the path names: the nav and title follow it at once, the content once the URL is applied to the store
+  const page = tabFromPath(useLocation().pathname) ?? tab
   const setIndex = useStore((s) => s.setIndex)
   const pinActor = useStore((s) => s.pinActor)
   const collapsed = useStore((s) => s.panelCollapsed)
@@ -74,6 +80,14 @@ export default function App() {
       })
   }, [setIndex])
   useEffect(fetchIndex, [fetchIndex])
+
+  useEffect(() => {
+    const previous = document.title
+    document.title = `${TAB_TITLE[page]} · LILA BLACK Journeys`
+    return () => {
+      document.title = previous
+    }
+  }, [page])
   useUrlSync()
   useMatchFile()
   useHeatmapFile()
@@ -99,7 +113,7 @@ export default function App() {
     return () => wide.removeEventListener('change', close)
   }, [])
 
-  // Esc clears the selected actor on the Journeys tab and the selected region on the Heatmaps tab (FRONTEND_GUIDELINES §6 Keyboard);
+  // Esc clears the selected actor on Journeys and the selected region on Heatmaps (FRONTEND_GUIDELINES §6 Keyboard);
   // open menus and dialogs handle their own Esc
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -113,14 +127,14 @@ export default function App() {
 
   const map = index && selection ? index.maps[selection.map] : null
   // only the selected match's own file: never a previous match's data while the next one loads
-  // Journeys & Playback only: the Heatmaps tab never draws a match, so none is built while it is shown
+  // Journeys only: Heatmaps never draws a match, so none is built while it is shown
   const loaded =
     tab === 'journeys' && matchFile.status === 'ready' && matchFile.id === selection?.match && matchFile.data.map === selection.map ? matchFile.data : null
   const hide = selection?.hide
   const journeys = useMemo(() => (loaded && map && hide ? buildJourneys(loaded, map, hide) : null), [loaded, map, hide])
   const summary = tab === 'journeys' && index && selection?.match ? index.matches.find((m) => m.id === selection.match) : undefined
 
-  // The map, date and tab are already on screen in the controls; only a selected match's id is new information on the map.
+  // The map, date and page are already on screen in the controls; only a selected match's id is new information on the map.
   const viewTitle = tab === 'journeys' && selection?.match ? `Match ${selection.match}` : null
 
   // The map is framed once, with room for the side panel and the dock reserved, so opening or closing either never moves it.
@@ -140,13 +154,16 @@ export default function App() {
   return (
     <div className="flex h-full flex-col">
       <PrimaryNav
-        current="explore"
-        overviewHref={overviewLinkFor(selection?.date ?? null)}
-        utilities={<ExploreUtilities ready={Boolean(index && selection)} />}
-        theme={false}
+        current={page}
+        actions={
+          <>
+            <CopyLinkButton ready={Boolean(index && selection)} />
+            <SettingsMenu shortcuts about={{ label: 'About this data', content: <AboutDataContent /> }} />
+          </>
+        }
       />
+      <h1 className="sr-only">LILA BLACK Journeys · {TAB_TITLE[page]}</h1>
       <TopBar index={index} selection={selection} onOpenPanel={() => setPanelOpen(true)} />
-      <TabBar />
       {/* The stage never changes size: the panel and the dock are drawn over the map, in room the camera keeps clear (MapView `frame`). */}
       <div className="relative min-h-0 flex-1 overflow-hidden bg-stage">
         <main className="absolute inset-0">
@@ -158,7 +175,7 @@ export default function App() {
           aria-label="Side panel"
           inert={collapsed}
           className={cn(
-            'absolute inset-y-0 left-0 z-20 hidden w-80 flex-col border-r bg-card transition-transform duration-200 ease-out motion-reduce:transition-none lg:flex',
+            'absolute inset-y-0 left-0 z-20 hidden w-80 flex-col border-r bg-card transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:flex',
             collapsed && '-translate-x-full',
           )}
         >
@@ -175,7 +192,7 @@ export default function App() {
         </Sheet>
         {/* map controls follow the uncovered part of the stage */}
         <div
-          className="pointer-events-none absolute inset-0 z-10 transition-[left,bottom] duration-200 ease-out motion-reduce:transition-none *:pointer-events-auto"
+          className="pointer-events-none absolute inset-0 z-10 transition-[left,bottom] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none *:pointer-events-auto"
           style={{ left: covered.left, bottom: covered.bottom }}
         >
           {/* desktop only: below 1024 px the panel is a drawer opened from the top bar */}

@@ -1,65 +1,31 @@
-import { ExternalLinkIcon, InfoIcon, KeyboardIcon } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { ExternalLinkIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
-import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { SHORTCUTS, isTypingTarget } from './shortcuts'
+import { PopoverDescription, PopoverHeader, PopoverTitle } from '@/components/ui/popover'
+import { SHORTCUTS } from './shortcuts'
 
 const EDGE_CASES_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer/blob/main/EDGE_CASES.md'
 
-export function TopBarButton({ label, children }: { label: string; children: ReactNode }) {
+/** The keyboard shortcuts, opened from the settings menu or with "?" (the list itself says so). */
+export function ShortcutsContent() {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={label}>
-            {children}
-          </Button>
-        </PopoverTrigger>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-/** "?" opens it from anywhere, as the list itself says. */
-export function ShortcutsPopover() {
-  const [open, setOpen] = useState(false)
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== '?' || event.ctrlKey || event.metaKey || event.altKey || isTypingTarget(event.target)) return
-      event.preventDefault()
-      setOpen((o) => !o)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <TopBarButton label="Keyboard shortcuts (?)">
-        <KeyboardIcon />
-      </TopBarButton>
-      <PopoverContent align="end" className="w-72">
-        <PopoverHeader>
-          <PopoverTitle>Keyboard shortcuts</PopoverTitle>
-        </PopoverHeader>
-        <dl className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
-          {SHORTCUTS.map(({ keys, action }) => (
-            <div key={action} className="contents">
-              <dt>
-                {keys.map((k) => (
-                  <Kbd key={k}>{k}</Kbd>
-                ))}
-              </dt>
-              <dd className="text-muted-foreground">{action}</dd>
-            </div>
-          ))}
-        </dl>
-      </PopoverContent>
-    </Popover>
+    <>
+      <PopoverHeader>
+        <PopoverTitle>Keyboard shortcuts</PopoverTitle>
+      </PopoverHeader>
+      <dl className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
+        {SHORTCUTS.map(({ keys, action }) => (
+          <div key={action} className="contents">
+            <dt>
+              {keys.map((k) => (
+                <Kbd key={k}>{k}</Kbd>
+              ))}
+            </dt>
+            <dd className="text-muted-foreground">{action}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
   )
 }
 
@@ -77,39 +43,35 @@ const NOTES: { badge?: string; text: string }[] = [
   { text: 'There is no extraction event, so any extraction view is inferred.' },
 ]
 
-export function AboutDataPopover() {
+/** What the recordings can and can't tell you, opened from the settings menu on the map pages. */
+export function AboutDataContent() {
   return (
-    <Popover>
-      <TopBarButton label="About this data">
-        <InfoIcon />
-      </TopBarButton>
-      <PopoverContent align="end" className="w-96">
-        <PopoverHeader>
-          <PopoverTitle>About this data</PopoverTitle>
-          <PopoverDescription>What the recordings can and can’t tell you.</PopoverDescription>
-        </PopoverHeader>
-        <ul className="flex list-disc flex-col gap-2 pl-4">
-          {NOTES.map(({ badge, text }) => (
-            <li key={text}>
-              {badge && (
-                <Badge variant="outline" className="mr-1.5 align-text-bottom">
-                  {badge}
-                </Badge>
-              )}
-              {text}
-            </li>
-          ))}
-        </ul>
-        <a
-          href={EDGE_CASES_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1 text-brand-strong underline-offset-4 hover:underline"
-        >
-          Every data issue and how it’s handled
-          <ExternalLinkIcon className="size-3.5" />
-        </a>
-      </PopoverContent>
-    </Popover>
+    <>
+      <PopoverHeader>
+        <PopoverTitle>About this data</PopoverTitle>
+        <PopoverDescription>What the recordings can and can’t tell you.</PopoverDescription>
+      </PopoverHeader>
+      <ul className="flex list-disc flex-col gap-2 pl-4">
+        {NOTES.map(({ badge, text }) => (
+          <li key={text}>
+            {badge && (
+              <Badge variant="outline" className="mr-1.5 align-text-bottom">
+                {badge}
+              </Badge>
+            )}
+            {text}
+          </li>
+        ))}
+      </ul>
+      <a
+        href={EDGE_CASES_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1 text-brand-strong underline-offset-4 hover:underline"
+      >
+        Every data issue and how it’s handled
+        <ExternalLinkIcon className="size-3.5" />
+      </a>
+    </>
   )
 }

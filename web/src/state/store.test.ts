@@ -23,6 +23,14 @@ describe('filter changes', () => {
     expect(selection()).toEqual({ map: 'Lockdown', date: match.date, match: null, hide: [] })
   })
 
+  it('a map the user picks becomes the Overview\'s map too; a link opening a map does not', () => {
+    useStore.setState({ overviewMap: 'all' })
+    useStore.getState().setSelection({ map: 'Lockdown', date: null, match: null, hide: [] })
+    expect(useStore.getState().overviewMap).toBe('all')
+    useStore.getState().setMap('AmbroseValley')
+    expect(useStore.getState().overviewMap).toBe('AmbroseValley')
+  })
+
   it('choosing the same map changes nothing', () => {
     const before = selection()
     useStore.getState().setMap('GrandRift')

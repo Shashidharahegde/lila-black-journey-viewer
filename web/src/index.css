@@ -183,6 +183,30 @@
   }
 }
 
+/* The map toggle's "All maps" segment: it exists only on the Overview, and slides in or out when the page changes */
+@keyframes map-all-in {
+  from {
+    max-width: 0;
+    opacity: 0;
+    padding-inline: 0;
+  }
+  to {
+    max-width: 7rem;
+    opacity: 1;
+  }
+}
+@keyframes map-all-out {
+  from {
+    max-width: 7rem;
+    opacity: 1;
+  }
+  to {
+    max-width: 0;
+    opacity: 0;
+    padding-inline: 0;
+  }
+}
+
 /* §6 Motion: no animation when the user asks for reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

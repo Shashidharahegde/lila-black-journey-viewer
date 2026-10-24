@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import indexJson from '../../public/data/index.json'
 import type { Index } from '../data/types'
-import { DEFAULT_HEATMAP_VIEW, DEFAULT_MAP, HEATMAP_LAYERS, LAYER_KEYS, parseHeatmapView, parseSelection, parseTab, parseTime, serializeSelection, urlTime } from './url'
+import { DEFAULT_HEATMAP_VIEW, DEFAULT_MAP, HEATMAP_LAYERS, LAYER_KEYS, mapPageLink, parseHeatmapView, parseSelection, parseTab, parseTime, serializeSelection, tabFromPath, urlTime } from './url'
 
 const index = indexJson as Index
 const parse = (query: string) => parseSelection(new URLSearchParams(query), index)
@@ -68,9 +68,9 @@ describe('?hide=', () => {
 
   it('is written with plain commas and left out when nothing is hidden', () => {
     expect(serializeSelection({ map: 'Lockdown', date: null, match: null, hide: ['bots', 'loot'] })).toBe(
-      'map=Lockdown&tab=journeys&hide=bots,loot',
+      'map=Lockdown&hide=bots,loot',
     )
-    expect(serializeSelection({ map: 'Lockdown', date: null, match: null, hide: [] })).toBe('map=Lockdown&tab=journeys')
+    expect(serializeSelection({ map: 'Lockdown', date: null, match: null, hide: [] })).toBe('map=Lockdown')
   })
 
   it('round-trips through parseSelection', () => {
@@ -81,9 +81,9 @@ describe('?hide=', () => {
 
 describe('serializeSelection', () => {
   it('always names the map and leaves out empty filters', () => {
-    expect(serializeSelection({ map: 'AmbroseValley', date: null, match: null, hide: [] })).toBe('map=AmbroseValley&tab=journeys')
+    expect(serializeSelection({ map: 'AmbroseValley', date: null, match: null, hide: [] })).toBe('map=AmbroseValley')
     expect(serializeSelection({ map: 'GrandRift', date: '2026-02-10', match: 'abc', hide: [] })).toBe(
-      'map=GrandRift&date=2026-02-10&tab=journeys&match=abc',
+      'map=GrandRift&date=2026-02-10&match=abc',
     )
   })
 
@@ -99,7 +99,7 @@ describe('playback time in the URL (t=)', () => {
 
   it('opens a shared link at its time', () => {
     expect(time(`match=${grandRift.id}&t=40`)).toBe(40)
-    expect(serializeSelection(selection, 40)).toBe(`map=GrandRift&tab=journeys&match=${grandRift.id}&t=40`)
+    expect(serializeSelection(selection, 40)).toBe(`map=GrandRift&match=${grandRift.id}&t=40`)
   })
 
   it('keeps the time within the match', () => {
@@ -109,7 +109,7 @@ describe('playback time in the URL (t=)', () => {
   it('drops a time without a match, or one that is not whole seconds', () => {
     expect(time('map=GrandRift&t=40')).toBeNull()
     for (const t of ['abc', '-5', '4.5', '0', '']) expect(time(`match=${grandRift.id}&t=${t}`)).toBeNull()
-    expect(serializeSelection({ ...selection, match: null }, 40)).toBe('map=GrandRift&tab=journeys')
+    expect(serializeSelection({ ...selection, match: null }, 40)).toBe('map=GrandRift')
   })
 
   it('writes whole seconds, and nothing at 00:00', () => {
@@ -162,11 +162,11 @@ describe('tabs and the heatmap view in the URL', () => {
   const base = `map=GrandRift&date=${grandRift.date}`
 
   it('each tab writes only its own parameters, so playback and heatmap parameters never conflict', () => {
-    expect(serializeSelection(selection, 40, DEFAULT_HEATMAP_VIEW, 'journeys')).toBe(`${base}&tab=journeys&match=${grandRift.id}&hide=bots&t=40`)
-    expect(serializeSelection(selection, 40, { layer: 'deaths', density: false, outlines: true, mode: 'all' }, 'journeys')).toBe(`${base}&tab=journeys&match=${grandRift.id}&hide=bots&t=40`)
-    expect(serializeSelection(selection, 40, DEFAULT_HEATMAP_VIEW, 'heatmaps')).toBe(`${base}&tab=heatmaps`)
-    expect(serializeSelection(selection, 40, { layer: 'deaths', density: false, outlines: true, mode: 'all' }, 'heatmaps')).toBe(`${base}&tab=heatmaps&layer=deaths&density=off&intensity=all`)
-    expect(serializeSelection(selection, 40, { layer: 'kills', density: true, outlines: false, mode: 'focused' }, 'heatmaps')).toBe(`${base}&tab=heatmaps&layer=kills&outlines=off`)
+    expect(serializeSelection(selection, 40, DEFAULT_HEATMAP_VIEW, 'journeys')).toBe(`${base}&match=${grandRift.id}&hide=bots&t=40`)
+    expect(serializeSelection(selection, 40, { layer: 'deaths', density: false, outlines: true, mode: 'all' }, 'journeys')).toBe(`${base}&match=${grandRift.id}&hide=bots&t=40`)
+    expect(serializeSelection(selection, 40, DEFAULT_HEATMAP_VIEW, 'heatmaps')).toBe(`${base}`)
+    expect(serializeSelection(selection, 40, { layer: 'deaths', density: false, outlines: true, mode: 'all' }, 'heatmaps')).toBe(`${base}&layer=deaths&density=off&intensity=all`)
+    expect(serializeSelection(selection, 40, { layer: 'kills', density: true, outlines: false, mode: 'focused' }, 'heatmaps')).toBe(`${base}&layer=kills&outlines=off`)
   })
 
   it('round-trips: what a tab writes reads back as the same tab, selection and view', () => {
@@ -206,5 +206,35 @@ describe('tabs and the heatmap view in the URL', () => {
     const oldHeat = new URLSearchParams('map=AmbroseValley&layer=kills')
     expect(parseTab(oldHeat)).toBe('heatmaps')
     expect(parseHeatmapView(oldHeat).layer).toBe('kills')
+  })
+})
+
+describe('map pages in the path', () => {
+  it('the path names the page; any other path names none', () => {
+    expect(tabFromPath('/heatmaps')).toBe('heatmaps')
+    expect(tabFromPath('/journeys/')).toBe('journeys')
+    expect(tabFromPath('/explore')).toBeNull()
+    expect(tabFromPath('/stats')).toBeNull()
+  })
+
+  const selection = { map: 'GrandRift', date: grandRift.date, match: grandRift.id, hide: ['bots' as const] }
+  const kills = { ...DEFAULT_HEATMAP_VIEW, layer: 'kills' as const }
+  const state = { index, selection, time: 40, view: kills }
+
+  it('a nav link keeps the map, date, match, hidden layers, time and heatmap view', () => {
+    expect(mapPageLink(state, 'journeys')).toBe(`/journeys?map=GrandRift&date=${grandRift.date}&match=${grandRift.id}&hide=bots&t=40`)
+    expect(mapPageLink(state, 'heatmaps')).toBe(`/heatmaps?map=GrandRift&date=${grandRift.date}&layer=kills`)
+  })
+
+  it('from the Overview: its map and date win, the match stays only if it still fits, and "All maps" keeps the last map', () => {
+    expect(mapPageLink(state, 'journeys', { map: 'Lockdown', date: null })).toBe('/journeys?map=Lockdown&hide=bots')
+    expect(mapPageLink(state, 'journeys', { map: null, date: null })).toBe(`/journeys?map=GrandRift&match=${grandRift.id}&hide=bots&t=40`)
+    expect(mapPageLink(state, 'heatmaps', { map: null, date: otherDate })).toBe(`/heatmaps?map=GrandRift&date=${otherDate}&layer=kills`)
+  })
+
+  it('before a map page was ever opened, it opens the default map with the given date', () => {
+    const fresh = { index: null, selection: null, time: 0, view: DEFAULT_HEATMAP_VIEW }
+    expect(mapPageLink(fresh, 'heatmaps')).toBe(`/heatmaps?map=${DEFAULT_MAP}`)
+    expect(mapPageLink(fresh, 'journeys', { map: 'Lockdown', date: otherDate })).toBe(`/journeys?map=Lockdown&date=${otherDate}`)
   })
 })

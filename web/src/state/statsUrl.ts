@@ -50,24 +50,14 @@ export function serializeStatsScope(scope: StatsScope): string {
   return params.toString()
 }
 
-/** The all-maps Overview, keeping only the date: the primary nav's Overview link never lands on one map. */
-export function overviewLinkFor(date: string | null): string {
-  const search = serializeStatsScope({ map: ALL, date: date ?? ALL, section: DEFAULT_SECTION })
+/** The Overview for a date and map ('all' by default): the primary nav's Overview link. A single map chosen on any page
+ * opens that map's report; "All maps" stays all maps (S, 2026-10-24). */
+export function overviewLinkFor(date: string | null, map: string = ALL): string {
+  const search = serializeStatsScope({ map, date: date ?? ALL, section: DEFAULT_SECTION })
   return search ? `/stats?${search}` : '/stats'
 }
 
 /** One map's report on its Overview section, for that map and date (map comparison cards, "View detailed analysis"). */
 export function statsLinkFor(map: string, date: string | null): string {
   return `/stats?${serializeStatsScope({ map, date: date ?? ALL, section: DEFAULT_SECTION })}`
-}
-
-/**
- * Explore, opened on a specific map (and date, when given) and tool. Used by "Explore this map" and by the report's
- * "Open in Explore" link. Explore's own `tab=` contract (journeys|heatmaps) is unchanged at this stage; heatmap queries
- * there read only map and date, never a match.
- */
-export function exploreLinkFor(map: string, date: string | null, tool: 'heatmaps' | 'journeys' = 'heatmaps'): string {
-  const params = new URLSearchParams({ map, tab: tool })
-  if (date) params.set('date', date)
-  return `/explore?${params.toString()}`
 }

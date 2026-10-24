@@ -1,7 +1,8 @@
-// URL contract. Common: ?map=&date=&tab=journeys|heatmaps. Journeys & Playback adds match=, hide=, t=. Heatmaps adds layer=,
-// density=off, outlines=off, intensity=all. Each tab writes only its own parameters, so the two never conflict; the other
-// tab's state is kept in the store, not the URL. Links without tab= still work: a match= means journeys, otherwise heatmaps
-// (the overview a link opened before the tabs existed); the old heatmap=off means density=off. Unknown values fall back safely.
+// URL contract. The page is the path: /heatmaps or /journeys (S, 2026-10-24: they are primary nav destinations). Common:
+// ?map=&date=. Journeys adds match=, hide=, t=. Heatmaps adds layer=, density=off, outlines=off, intensity=all. Each page writes
+// only its own parameters, so the two never conflict; the other page's state is kept in the store, not the URL. Older links
+// (/explore?tab=… and /?map=…) are forwarded to the path parseTab picks: tab= when given, else a match= means journeys and
+// anything else heatmaps; the old heatmap=off means density=off. Unknown values fall back safely.
 import type { HeatmapLayerKey, Index } from '../data/types'
 import { DEFAULT_HEATMAP_MODE, HEATMAP_MODES, type HeatmapMode } from '../heatmap/scale'
 
@@ -13,9 +14,14 @@ export type LayerKey = (typeof LAYER_KEYS)[number]
 export const HEATMAP_LAYERS: readonly HeatmapLayerKey[] = ['traffic', 'kills', 'deaths']
 export const DEFAULT_HEATMAP_LAYER: HeatmapLayerKey = 'traffic'
 
-/** The two top-level workspaces (S, 2026-10-23). */
+/** The two map pages, each a primary nav destination with its own path (S, 2026-10-23; paths 2026-10-24). */
 export const TABS = ['journeys', 'heatmaps'] as const
 export type Tab = (typeof TABS)[number]
+
+/** The map page a path names, or null for any other path. */
+export function tabFromPath(pathname: string): Tab | null {
+  return TABS.find((tab) => pathname.replace(/\/+$/, '') === `/${tab}`) ?? null
+}
 
 /**
  * What the Heatmaps tab shows: one metric, and two independent switches (the density overlay and the hotspot outlines, any of the
@@ -80,7 +86,7 @@ export function urlTime(selection: Selection, time: number): number | null {
   return selection.match && t > 0 ? t : null
 }
 
-/** The tab from `tab=`; a link without it opens Journeys & Playback when it names a match and Heatmaps otherwise (as it did before the tabs). */
+/** The page an old /explore or /?map= link meant: `tab=`, else Journeys when it names a match and Heatmaps otherwise (as before the tabs). */
 export function parseTab(params: URLSearchParams): Tab {
   return TABS.find((tab) => tab === params.get('tab')) ?? (params.get('match') ? 'journeys' : 'heatmaps')
 }
@@ -96,7 +102,7 @@ export function canonicalHide(keys: readonly string[]): LayerKey[] {
   return LAYER_KEYS.filter((key) => keys.includes(key))
 }
 
-/** The query string for a tab: the common parameters, then only that tab's own. */
+/** The query string for a page: the common parameters, then only that page's own (the page itself is the path). */
 export function serializeSelection(
   selection: Selection,
   time: number | null = null,
@@ -105,7 +111,6 @@ export function serializeSelection(
 ): string {
   const params = new URLSearchParams({ map: selection.map })
   if (selection.date) params.set('date', selection.date)
-  params.set('tab', tab)
   if (tab === 'journeys') {
     if (selection.match) params.set('match', selection.match)
     if (selection.hide.length) params.set('hide', canonicalHide(selection.hide).join(','))
@@ -121,4 +126,27 @@ export function serializeSelection(
 
 export function sameSelection(a: Selection | null, b: Selection | null): boolean {
   return !!a && !!b && a.map === b.map && a.date === b.date && a.match === b.match && a.hide.join() === b.hide.join()
+}
+
+export interface MapPageState {
+  index: Index | null
+  selection: Selection | null
+  /** the playback time, written as t= only for the match it belongs to */
+  time: number
+  view: HeatmapView
+}
+
+/**
+ * The link to a map page that keeps everything already chosen: the map, date, match, hidden layers, playback time and heatmap
+ * view. `context` is the map and date to open with instead (from the Overview); a null map keeps the last map used, since the
+ * map pages need one map and the Overview's "All maps" isn't one.
+ */
+export function mapPageLink(state: MapPageState, tab: Tab, context?: { map: string | null; date: string | null }): string {
+  const current = state.selection
+  const map = context?.map ?? current?.map ?? DEFAULT_MAP
+  const date = context ? context.date : (current?.date ?? null)
+  const match = current?.match && state.index && matchFits(state.index, current.match, map, date) ? current.match : null
+  const selection: Selection = { map, date, match, hide: current?.hide ?? [] }
+  const time = tab === 'journeys' && match ? urlTime(selection, state.time) : null
+  return `/${tab}?${serializeSelection(selection, time, state.view, tab)}`
 }

@@ -60,6 +60,8 @@ interface State {
   fullPaths: boolean
   /** the desktop side panel is folded away so the map takes its width; the panel stays mounted, so nothing in it is lost */
   panelCollapsed: boolean
+  /** the Overview's map ('all' or a map id), for the nav's Overview link: a map chosen on a map page carries over, "All maps" stays */
+  overviewMap: string
   setIndex: (index: Index) => void
   /** `time` also sets the playback time (a linked `t=`); without it a new match starts at 00:00 */
   setSelection: (selection: Selection, time?: number) => void
@@ -98,6 +100,7 @@ interface State {
   /** one animation frame of `elapsed` real seconds */
   tickPlayback: (elapsed: number) => void
   setFullPaths: (fullPaths: boolean) => void
+  setOverviewMap: (map: string) => void
   setPanelCollapsed: (collapsed: boolean) => void
 }
 
@@ -176,6 +179,7 @@ export const useStore = create<State>((set, get) => ({
   playback: INITIAL_PLAYBACK,
   fullPaths: true,
   panelCollapsed: false,
+  overviewMap: 'all',
   setIndex: (index) => set({ index }),
   setSelection: (selection, time) => {
     const state = get()
@@ -187,7 +191,8 @@ export const useStore = create<State>((set, get) => ({
   setMap: (map) => {
     const { selection, index } = get()
     if (!selection || selection.map === map || !index || !Object.prototype.hasOwnProperty.call(index.maps, map)) return
-    set(withSelection(get(), { ...selection, map, match: null }))
+    // the user's own choice of map, so the Overview opens it too (a link opening a map doesn't count)
+    set({ ...withSelection(get(), { ...selection, map, match: null }), overviewMap: map })
   },
   setDate: (date) => {
     const { selection, index } = get()
@@ -307,6 +312,9 @@ export const useStore = create<State>((set, get) => ({
   },
   setFullPaths: (fullPaths) => {
     if (get().fullPaths !== fullPaths) set({ fullPaths })
+  },
+  setOverviewMap: (overviewMap) => {
+    if (get().overviewMap !== overviewMap) set({ overviewMap })
   },
   setPanelCollapsed: (panelCollapsed) => {
     if (get().panelCollapsed !== panelCollapsed) set({ panelCollapsed })

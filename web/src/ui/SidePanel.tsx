@@ -1,8 +1,9 @@
 import { ArrowLeftIcon, RefreshCwIcon } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Fade } from '@/components/fade'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Index } from '@/data/types'
 import { useStore } from '@/state/store'
@@ -11,7 +12,6 @@ import HeatmapPanel from './HeatmapPanel'
 import Legend from './Legend'
 import MatchCard from './MatchCard'
 import MatchList from './MatchList'
-import { ContextRow } from './TopBar'
 
 interface Props {
   index: Index | null
@@ -98,8 +98,14 @@ export default function SidePanel({
     return <p role="status" className="p-4 text-sm text-muted-foreground">Restoring your map and match filters…</p>
   }
 
-  // the Heatmaps workspace has its own panel; it never shows a match, a path or a marker
-  if (tab === 'heatmaps') return <HeatmapPanel index={index} selection={selection} />
+  // Heatmaps has its own panel; it never shows a match, a path or a marker
+  // Each page's panel fades in when the page changes; the panel itself stays mounted, so its search and scroll are kept.
+  const reveal = (content: ReactNode) => (
+    <Fade fadeKey={tab} className="flex min-h-0 flex-1 flex-col">
+      {content}
+    </Fade>
+  )
+  if (tab === 'heatmaps') return reveal(<HeatmapPanel index={index} selection={selection} />)
 
   const match = matchId ? index.matches.find((m) => m.id === matchId) : undefined
   if (matchId && !match) {
@@ -132,14 +138,7 @@ export default function SidePanel({
         }}
       />
     )
-    return (
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="shrink-0 px-4 pt-4">
-          <ContextRow index={index} selection={selection} />
-        </div>
-        {list}
-      </div>
-    )
+    return reveal(list)
   }
 
   // A stale response for another match must NEVER be shown as this match's data.
@@ -147,10 +146,9 @@ export default function SidePanel({
   const loadingThisMatch = matchFile.status === 'loading' && matchFile.id === match.id
   const errorThisMatch = matchFile.status === 'error' && matchFile.id === match.id
 
-  return (
+  return reveal(
     <section aria-labelledby="selected-match-title" className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 flex-col gap-3 border-b px-4 py-3">
-        <ContextRow index={index} selection={selection} />
         <div className="flex items-center justify-between gap-2">
           <h2 id="selected-match-title" ref={inspectorHeading} tabIndex={-1} className="min-w-0 text-base font-semibold outline-none">
             Selected match
@@ -199,6 +197,6 @@ export default function SidePanel({
           <MatchCard match={match} />
         </div>
       </ScrollArea>
-    </section>
+    </section>,
   )
 }
