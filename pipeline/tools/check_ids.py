@@ -19,8 +19,8 @@ from lila_pipeline.ingest import DEFAULT_DATA_DIR
 
 REPO = Path(__file__).resolve().parents[2]
 SKIP_SUFFIXES = {".png", ".webp", ".jpg", ".jpeg", ".gif", ".ico", ".woff", ".woff2", ".parquet", ".lock", ".zip"}
-# Already committed before this check existed: the data README's worked example, copied into GLOBAL_CONTEXT.md. Reported, not failed.
-KNOWN = {"GLOBAL_CONTEXT.md"}
+# Already committed before this check existed: the data README's worked example, in LILA's own README and copied into GLOBAL_CONTEXT.md. Reported, not failed.
+KNOWN = {"docs/source/DATA_README.md", "docs/archive/GLOBAL_CONTEXT.md"}
 SECRET = re.compile(r"(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|(?i:api[_-]?key|secret|passwd|password)\s*[:=]\s*['\"][^'\"\s]{8,}['\"])")
 
 

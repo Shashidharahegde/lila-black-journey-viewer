@@ -132,4 +132,4 @@ None of these is a coding error. Each is an interpretation or method choice that
 | Rates and distributions | Exact | Valid with sample-size caveats (B2, B3) |
 | Map performance score | Exact (±0.0003) | Not a quality measure (B1) |
 
-No source record, production file, expected value or test was modified by this audit. All audit output lives in `docs/evidence/forensic_audit/` and holds no raw account identifiers (`tools/check_ids.py` reports nothing in it).
+No source record, production file, expected value or test was modified by this audit. All audit output lives in `docs/audits/forensic/` and holds no raw account identifiers (`tools/check_ids.py` reports nothing in it).

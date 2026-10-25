@@ -1,79 +1,64 @@
 # Architecture
 
-> Covers features 1–6 (pipeline, map and filters, journeys, playback, heatmaps). Deploy (7) is added when built.
+Live: https://lila-black-journey-viewer.vercel.app/ · Full detail, evidence and every edge case: [TECHNICAL_REPORT.md](docs/reports/TECHNICAL_REPORT.md) · Register: [EDGE_CASES.md](docs/reports/EDGE_CASES.md)
 
 ## What I built with and why
 | Layer | Choice | Why |
 |---|---|---|
-| Data pipeline | Python (pandas, pyarrow, Pillow) run once with `make data`; pytest | The data is ~8 MB and fixed, so every query is known in advance. Parsing before deploy means a visitor downloads small, ready-to-draw JSON instead of 1,243 parquet files. |
-| Frontend | React + TypeScript + Vite, deck.gl, Zustand, shadcn/ui; Vitest | deck.gl draws the minimap, paths, markers and grids in one WebGL view with zoom and pan. One store holds the selection and the playback clock and is mirrored in the URL, so every view is a shareable link and Back works. |
+| Data pipeline | Python (pandas, pyarrow, numpy, Pillow), run once with `make data`; pytest | The data is small (~8 MB) and fixed, so every query is known in advance. Parsing before deploy means a visitor downloads small, ready-to-draw JSON instead of 1,243 parquet files. |
+| Frontend | React + TypeScript + Vite, deck.gl, Zustand, React Router, shadcn/ui; Vitest | deck.gl draws the minimap, paths, icons, playback and heatmaps in one WebGL view. One store holds the selection and playback clock, mirrored in the URL, so every view is a shareable link. |
 | Hosting | Vercel, static files, no backend | Nothing to start up or fail on a reviewer's first visit. |
 
 ## Data flow
 ```
-data/raw/  1,243 parquet files + 3 minimaps
-  → ingest     read each file once, decode event bytes, skip identical copies
-  → normalize  ts → seconds → match time; sort; human / bot / unknown; drop rows after death; split paths at gaps > 30 s
-  → project    world (x, z) → UV 0–1                ← the only coordinate conversion
-  → aggregate  index.json, one JSON per match, 64×64 heatmap grids and 16×16 region statistics per map × date
-  → web/public/data/*.json + maps/*.webp            committed; minimaps at most 4,096 px
-  → browser    index on load, a match file when opened; filtering and playback run in memory
+data/raw/  1,243 parquet files + 3 minimaps (gitignored)
+  → ingest     check schema, decode event bytes (UTF-8), read the one duplicated file once
+  → normalize  ts as seconds → match time; stable sort; remove 3 doubled journeys; bot = logs BotPosition
+  → journeys   events from the file owner's view; flag Kill/Killed pairs; drop positions after death; split paths at gaps > 30 s
+  → project    world (x, z) → UV 0–1                         ← the only coordinate conversion
+  → aggregate  64×64 heatmap grids, 16×16 hotspot regions, stats for 28 map × date slices
+  → web/public/data/*.json (5.7 MB) + maps/*.webp (1.3 MB)   committed; byte-identical on rebuild
+  → browser    index.json on load, one match file when opened; filtering and playback in memory
 ```
-On screen:
-- **Map:** one deck.gl canvas for all three maps; the minimap and all data share one drawing space (below).
-- **Journeys:** a line per path piece, an icon badge per event. Humans blue and solid, bots amber and dashed, unknown grey, each with its own shape. Where markers overlap, the rarer event wins; zooming in reveals the rest.
-- **Playback:** one match time `t` in the store; the loaded match is cut at `t`. Paths run up to `t`; each actor's position is estimated on the straight line between two samples of one path piece, and isn't shown in a gap or after its last sample; events appear at their time. A link with `t=` opens at that moment.
+Three pages share one map row (map toggle, date filter): **Overview** (`/stats`, compares the maps), **Journeys** (`/journeys`: match list, routes, markers, playback) and **Heatmaps** (`/heatmaps`: Traffic, Kills or Deaths across matches, with hotspots). On the map, humans are solid blue and drawn on top; bots are dashed amber. Each event type has its own icon; where icons overlap, kills and deaths win over loot. Playback cuts every path at time `t` on each frame. Heatmap cells are painted as small soft bumps (display only: neighbours are never added together). Hotspots are 16×16 regions with events from ≥ 5 matches and ≤ 50 % from any one match, top 6 per layer.
 
 ## Coordinate mapping
 1. **Formula** (data README, verified): `u = (x − origin_x) / scale`, `v = (z − origin_z) / scale`. `y` is elevation and is ignored.
-2. **Store UV, not pixels.** The README says 1024 px, but the real images are 4320², 2160×2158 and 9000². UV doesn't depend on image size, so resizing images can't break alignment.
-3. **Flip y at draw time.** Image rows count from the top, while world z increases the other way: `pixel_y = (1 − v) · H`.
-4. **Worked example** (README row, AmbroseValley, scale 900, origin −370/−473): x = −301.45, z = −355.55 → u = 0.0762, v = 0.1305 → (78, 890) at 1024 px, as the README says, and (329, 3756) on the real 4320 px image.
-5. **One drawing space.** deck.gl draws the image and all data at `X = u·1000`, `Y = (1 − v)·1000·H/W`, so zoom and pan can't make them drift. Playback positions are interpolated between points already in this space, so they can't drift either. GrandRift's 2160×2158 image gives a ≤ 0.1 % stretch.
-6. **Validation.** Tests on the production functions (`pipeline/tests/test_projection.py`): the README example, corners → image corners, centre → centre (GrandRift: 1080, 1079), +x right / +z up, no position off the map. The browser's drawing space is tested against values from the Python projection (`web/src/map/space.test.ts`). Ten GrandRift journeys start inside the map with the flip and outside it without ([report](docs/evidence/grandrift_validation.md)). No ground-truth landmarks exist, so this shows consistency, not independent proof.
+2. **Real image sizes, not 1024 px:** AmbroseValley 4320², GrandRift 2160×2158, Lockdown 9000². So the pipeline stores **UV, not pixels**; the web images (≤ 4,096 px) can be any size without breaking alignment.
+3. **Flip y:** image rows count from the top while world z grows upward, so `px = u·W`, `py = (1 − v)·H`, with W and H separate (GrandRift isn't square).
+4. **Worked example** (README row, AmbroseValley, scale 900, origin −370 / −473): x = −301.45, z = −355.55 → u = 0.0762, v = 0.1305 → (78, 890) at 1024 px, as the README says, and (312, 3562) on the 4096 px WebP. Without the flip, y would be 535: mirrored.
+5. **One drawing space:** deck.gl draws the image and all data at `X = u·1000`, `Y = (1 − v)·1000·H/W`, so zoom, pan and playback can't drift.
+6. **Checked four ways:**
+   - maths tests on the production function: README example, corners, centre, axis directions (`test_projection.py`);
+   - GrandRift overlays with and without the flip: with it, routes sit on roads and named places; without it, they start in the black area beyond the edge ([evidence](docs/evidence/coordinates/grandrift_validation.md));
+   - every exported point sent back to world space through the browser code: error ≤ 0.07 units, which is the JSON rounding ([evidence](docs/evidence/coordinates/reverse_mapping_validation.md));
+   - an independent audit: 99.7–100 % of samples land on map content, and every wrong flip scores lower.
+
+   No landmarks with known coordinates exist, so this shows consistency (about ±10 world units), not ground truth.
 
 ## Assumptions where the data was ambiguous
-Full list with evidence: [EDGE_CASES.md](EDGE_CASES.md).
-
 | Ran into | Handled by |
 |---|---|
-| `ts` is typed ms but holds epoch seconds | Read as seconds; match time = ts − earliest ts in the match |
-| 17 numeric-ID journeys (3 actors) log player-client events (`Position`, `Loot`) | **Unknown** unless both README rules agree (UUID + `Position` = human, numeric ID + `BotPosition` = bot). Shown, but left out of human counts and heatmaps (≤ 1.63 % of any total; [evidence](docs/evidence/event_forensics/README.md)) |
-| `Kill`/`Killed` only as same-file, same-second pairs (3) | Both kept and flagged; no cause claimed; the paired `Kill` isn't counted as a kill |
-| An event's x/z and meaning depend on whose file it is | Kill marker = where the killer stood, death = where the victim fell. Counts say their scope (human files, markers on the map, one journey) |
-| 743 of 796 matches have one recorded player | Heatmaps from human journeys; the match list shows humans and bots per match |
-| Position gaps up to 518 s | Paths break at gaps > 30 s; playback draws no movement across them |
-| No extraction event | Nothing is shown as an extraction; a journey's last point is labelled "last recorded position" |
-| 3 journeys logged twice in full | First half kept, copy discarded (190 rows); identical-looking rows elsewhere kept |
-| Rows logged after death (174 journeys) | Positions dropped, so nobody moves after dying; 2 late kills kept and flagged |
-| Matches crossing midnight; folders aren't UTC days | Date = UTC date of the first event; dates generated from the data; partial days flagged |
-| A player crosses ~1 heatmap cell per 5 s sample | Traffic time traced along each step, not only at sample points |
-
-### Heatmap architecture
-
-Kills, deaths, and traffic heatmaps are precomputed in Python as 64×64 grids per map and date, then served as static JSON. This avoids repeated aggregation in the browser and keeps the application backend-free.
-
-Only confirmed human journeys contribute to these aggregates; bots and ambiguous actors are excluded. Traffic uses segment-traced movement with a 30-second discontinuity threshold rather than relying solely on sampled positions.
-
-The frontend renders unsmoothed cells using the same UV coordinate mapping as player journeys. Heatmaps are map/date-level aggregates, independent of the selected match and playback time.
-
-Because the supplied telemetry does not necessarily represent complete match populations, empty cells mean **no observed human activity**, not that the area was never used.
-
+| `ts` typed ms, but read as ms the data spans 6.6 min in 1970 | Read as epoch **seconds**; match time = ts − earliest ts in the match; matches then last 13–887 s |
+| `event` stored as bytes | Decoded as UTF-8; an unknown event type stops the build |
+| README: numeric ID = bot. 17 numeric-ID files never log `BotPosition` and loot like players | **Bot = the file logs `BotPosition`**, else human. The 17 count as humans, flagged `id_mismatch` (≤ 1.63 % of any heatmap total) |
+| An event's x/z is the file owner's position | Kill marker = where the killer stood; death marker = where the victim fell |
+| `Kill`/`Killed` only as 3 same-file, same-second pairs | Both kept, flagged; cause unknown (not called self-kills); the `Kill` isn't counted as a kill |
+| Folders aren't UTC days; one match's files span two folders | Group by `match_id`; date = UTC date of the first event; partial days flagged |
+| One file in two folders; 3 journeys logged twice in full | Identical file read once; doubled journeys keep their first half (190 rows). Same-second repeat loots elsewhere are kept |
+| 172 journeys log positions after death | Those 173 positions dropped, so no one moves after dying; 2 late `BotKill`s kept, flagged |
+| Positions every ~5 s, gaps up to 518 s | Paths and playback break at gaps > 30 s; traffic time is traced along each shorter step |
+| No extraction event | Nothing is drawn as an extraction; a journey ends at its "last recorded position" |
+| 743 of 796 matches record one file | Figures say "recorded"; every heatmap shows its sample size; under 10 matches is flagged "Few matches" |
 
 ## Trade-offs
 | Considered | Chose | Because |
 |---|---|---|
-| FastAPI/DuckDB backend vs static files | Static files | Fixed, small data; fewer moving parts. Revisit if the data goes live. |
-| Convert coordinates in the browser vs the pipeline | Pipeline (UV) | One tested function; paths, markers, playback and heatmaps can't disagree. |
-| Actor kind by ID, by behaviour, or only when both agree | Both must agree, else `unknown` | Each single rule forces a label on 17 journeys that the data can't support. |
-| Blurred heatmap vs grid cells | Grid cells, log scale for traffic | No invented hotspots; skewed traffic stays readable. |
-| Playback: GPU `TripsLayer` with a 30 s fading trail vs paths cut in code with full history | Cut in code ⏳ *awaiting S's confirmation* | Testable, keeps the route styling, final journeys stay inspectable; ≤ 16 actors and 1,174 samples per match keep it cheap. |
-| Real player IDs vs hashes | Short unsalted hashes | The tool doesn't need identities. The 94 numeric IDs are recoverable by trial; accepted (EC-30). |
+| FastAPI + DuckDB backend vs static files | Static files | Fixed, small data; fewer moving parts. Revisit if the data goes live. |
+| Parse parquet in the browser (DuckDB-WASM) vs a pipeline | Python pipeline | Fast first load; tested and reproducible. |
+| Convert coordinates in the browser vs the pipeline | Pipeline, stored as UV | One tested function; paths, markers, playback and heatmaps can't disagree. |
+| Bots by ID vs by behaviour | Behaviour, mismatches flagged | Follows what the client logged; the flag keeps it reversible. |
+| Hotspots by resampling stability vs simple match guards | ≥ 5 matches, ≤ 50 % from one, top 6 | Explainable to a designer; one match can't make a hotspot. |
+| `TripsLayer` fading trail vs paths cut at `t` | Paths cut at `t`, full history visible | Same styling as the static view; testable; ≤ 16 actors per match. |
 
-### Interpretation layer
-
-A heatmap shows where things were recorded, not how much weight the pattern deserves, so a separate layer of **16×16 regions** (blocks of 4×4 grid cells) says which concentrations are supported. The pipeline computes, per map, date and layer, each candidate region's value, share of the layer, contributing matches and recorded players, and how stable it is when the matches are resampled; a region only counts as a *consistent concentration* if it also holds when the grid is shifted by half a region. The rest are reported as *observed*, with their measurements kept. The numbers are precomputed with fixed seeds into static `zones/<map>.json`, because the browser has no per-cell match information, and they are tested for reconciliation with the heatmap totals. The 64×64 grids stay the numerical source and the detailed picture; the stability figures describe this sample only and are not population-level significance. Method, results and validation: [spec 06](docs/06_HEATMAPS.md) and the [evidence report](docs/evidence/spatial_analysis/REPORT.md).
-
-## Tabs and the shared map (feature 6c)
-
-One `MapView` (one deck.gl canvas, one minimap) serves two tabs. `MapStage` chooses the layers from the `tab` in the Zustand store: journey layers on Journeys & Playback; the 64×64 density picture and/or the 16×16 outlines on Heatmaps. The URL is written by `useUrlSync` with `tab` and only that tab's parameters; heatmap and region files load only while the Heatmaps tab is open. Leaving Journeys pauses playback in the store (`setTab`), keeping the match and time. Clicking a region sets `selectedZone`; `MapStage` passes a `focus` to `MapView`, which moves the camera, and `RegionCard` reads the same record. See `docs/06_HEATMAPS.md`, Stage 6c.
+**Next:** an inferred-extraction layer, loot and storm heatmaps, and per-match heatmaps.

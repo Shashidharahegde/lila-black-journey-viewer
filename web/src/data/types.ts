@@ -1,4 +1,4 @@
-// Shapes of the files the pipeline writes to web/public/data (contract: docs/02_DATA_PIPELINE.md).
+// Shapes of the files the pipeline writes to web/public/data (contract: docs/specs/02_DATA_PIPELINE.md).
 
 export interface MapInfo {
   image: string
@@ -147,7 +147,7 @@ export interface ZonesFile {
   selections: Record<string, ZoneSelection>
 }
 
-// web/public/data/stats.json: overall statistics for every map scope × date scope (contract: docs/10_DASHBOARD.md).
+// web/public/data/stats.json: overall statistics for every map scope × date scope (contract: docs/specs/10_DASHBOARD.md).
 // The browser only reads and formats these; it never computes a statistic of its own.
 
 export type StatKind = 'count' | 'ratio' | 'rate' | 'distribution' | 'histogram' | 'breakdown' | 'score'

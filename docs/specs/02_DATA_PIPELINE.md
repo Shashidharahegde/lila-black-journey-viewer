@@ -8,9 +8,9 @@ The README that ships with the data is wrong or incomplete in several places. Ea
 
 1. **Timestamps are seconds, not milliseconds** (EC-01). `ts` is typed `timestamp[ms]`, but the integer inside is Unix epoch **seconds**. Read as milliseconds, the whole dataset spans 6.6 minutes in January 1970. Read as seconds, events run 2026-02-09 23:58:55 → 02-14 15:01:40 UTC and matches last 13–890 s. Resolution is 1 second, so several events can share a timestamp. 3 files store their rows out of time order (EC-02).
 2. **The event column is bytes** (`b'Position'`) and must be decoded to text (EC-08).
-3. **Some journeys are neither clearly human nor clearly bot** (EC-09, EC-10). The README gives two rules: humans have UUIDs and log `Position`; bots have numeric IDs and log `BotPosition`. 17 files (17 journeys, 3 actors, 17 matches) have numeric IDs but log `Position` and never `BotPosition`; 14 of them log `Loot`, which no `BotPosition` file does. They are in matches with 6–14 bot files; in 16 of them there is no UUID human, and in the 17th they share the match with one. One of the three actors is an ordinary bot (with `BotPosition`) in 3 other matches, so they may be internal or test clients. The data shows player-client events, not that a person played, so these journeys are **unknown** ([evidence](evidence/event_forensics/actor_classification.md)). Result: 781 human, 444 bot and 17 unknown journeys; 779 matches with one human, 1 with two, 16 with none.
+3. **Some journeys are neither clearly human nor clearly bot** (EC-09, EC-10). The README gives two rules: humans have UUIDs and log `Position`; bots have numeric IDs and log `BotPosition`. 17 files (17 journeys, 3 actors, 17 matches) have numeric IDs but log `Position` and never `BotPosition`; 14 of them log `Loot`, which no `BotPosition` file does. They are in matches with 6–14 bot files; in 16 of them there is no UUID human, and in the 17th they share the match with one. One of the three actors is an ordinary bot (with `BotPosition`) in 3 other matches, so they may be internal or test clients. The data shows player-client events, not that a person played, so these journeys are **unknown** ([evidence](../evidence/event_forensics/actor_classification.md)). Result: 781 human, 444 bot and 17 unknown journeys; 779 matches with one human, 1 with two, 16 with none.
 4. **Event meaning depends on whose file it's in** (EC-11). Both humans and bots record `BotKill` / `BotKilled`. In a bot's file, `BotKilled` means *that bot* died. Every event's x/z is the **file owner's** position: a kill marker shows where the killer stood, a death marker where the victim fell.
-5. **`Kill`/`Killed` only appear as same-second pairs, cause unknown** (EC-12). Only 3 `Kill` and 3 `Killed` events exist, and each pair is in the *same* file, in adjacent rows, at the same second and identical x/y/z. All three are single-file matches, and each journey ends 0–2 s later. Identical x/y/z is expected either way (every event carries the owner's position), and most matches record only one player, so the rows can't tell a self-inflicted death from a trade with an unrecorded player. Both events are kept ([evidence](evidence/event_forensics/kill_killed_pairs.md)).
+5. **`Kill`/`Killed` only appear as same-second pairs, cause unknown** (EC-12). Only 3 `Kill` and 3 `Killed` events exist, and each pair is in the *same* file, in adjacent rows, at the same second and identical x/y/z. All three are single-file matches, and each journey ends 0–2 s later. Identical x/y/z is expected either way (every event carries the owner's position), and most matches record only one player, so the rows can't tell a self-inflicted death from a trade with an unrecorded player. Both events are kept ([evidence](../evidence/event_forensics/kill_killed_pairs.md)).
 6. **Most matches have one recorded player** (EC-25). 743 of 796 matches are a single file. 53 matches have several files: 52 of them include bot files (5–16 files each), and 1 (`a71c3aa8`) has two humans and no bots. Maps: AmbroseValley 566 matches, Lockdown 171, GrandRift 59.
 7. **Positions are sampled every ~5 s** (EC-16), with 312 gaps over 30 s in 237 journeys; the longest is 518 s. Straight lines across long gaps would draw movement that never happened.
 8. **Rows after death** (EC-14). 174 human journeys have rows logged 1–6 s after their first death, almost always at the death spot. In 172 there is one trailing row: a `Position` in 170 and a `BotKill` in 2. The other 2 have two trailing `Position` rows.
@@ -89,7 +89,7 @@ web/public/data/zones/<map>.json             (interpretation layer, spec 06 Stag
                   "2026-02-10": { ... } } }
   (region (i, j) covers cells i*4 .. i*4+3 and j*4 .. j*4+3 of the heatmap grid; candidates only, strongest first; definitions in lila_pipeline/zones.py)
 
-web/public/data/stats.json                   (overall statistics for the dashboard and the chat; full contract in docs/10_DASHBOARD.md)
+web/public/data/stats.json                   (overall statistics for the dashboard and the chat; full contract in docs/specs/10_DASHBOARD.md)
 { "schema_version": 1, "metrics_version": 1, "source": { "fingerprint": "sha256:<16 hex>", "files": 800 },
   "thresholds": { "few_matches": 10, "few_values": 10 }, "grid": 64, "maps": [...], "dates": [...],
   "metrics": { "<metric id>": { "label", "section", "unit", "kind", "definition", "population", "denominator", "limitations", "scopes" } },
@@ -156,13 +156,13 @@ All steps are built (not yet committed). Tests are in `pipeline/tests/`, named a
 `images.py`: resize to `min(original, 4096)` px on the longest side, WebP quality 85, alpha dropped (images are opaque). Output: AmbroseValley 4096², GrandRift 2160×2158, Lockdown 4096²; 1.3 MB in total.
 
 **Commit 9 — `test: validate minimap alignment`** *(built)*
-Mandatory pass/fail: the mathematical tests in `test_projection.py`. Supporting evidence, reviewed by S: `pipeline/validate_map_alignment.py` draws real journeys with the production mapping and with the y-flip removed (`docs/evidence/grandrift_*`). No pixel-colour threshold.
+Mandatory pass/fail: the mathematical tests in `test_projection.py`. Supporting evidence, reviewed by S: `pipeline/validate_map_alignment.py` draws real journeys with the production mapping and with the y-flip removed (`docs/evidence/coordinates/grandrift_*`). No pixel-colour threshold.
 
 ## How to verify
 1. `make data` runs end to end and prints file counts (1,243 found, 1,242 read, 1 duplicate skipped, 0 failed), rows (89,016 read → 88,826 after doubled journeys → 88,653 final), 190 rows removed from 3 doubled journeys, and 173 post-death positions dropped.
 2. `make test` passes.
 3. Run `make data` twice: `git status` shows no change after the second run.
-4. Review `docs/evidence/grandrift_validation.md` and its images.
+4. Review `docs/evidence/coordinates/grandrift_validation.md` and its images.
 5. Open one match file and compare a few events with the raw parquet rows for that file.
 
 ## Out of scope

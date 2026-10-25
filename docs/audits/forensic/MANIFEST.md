@@ -1,5 +1,7 @@
 # Audit manifest
 
+> Paths in this audit are as they were when it was written (2026-10-24). Since 2026-10-25: `AUDIT/taskOverview.md` → `docs/source/ASSIGNMENT_BRIEF.md`, `AUDIT/README.md` → `docs/source/DATA_README.md`, `docs/evidence/forensic_audit/` → `docs/audits/forensic/`, feature specs `docs/NN_…` → `docs/specs/NN_…`. Index: [docs/README.md](../../README.md).
+
 ## Revision and inputs
 - Repository: HEAD `4d5ed57e782045190ccb0363c2bd0cd7a64378a1`. `pipeline/` had no local changes during the audit.
 - Raw parquet set: 1,243 files in `data/raw/player_data/February_{10..14}/`, 89,104 rows. Set fingerprint = SHA-256 of the sorted `sha256sum` list of the files: `0b4a35dd5fa0d54c72adb01276efd325aff8f3ab5cba0ed558d4509f41a073e3`.
@@ -24,7 +26,7 @@ Scripts `a00`–`a12` were hashed in the same seal. They are unchanged since.
 Run from the repository root. `$S` is a scratch folder outside git: intermediate tables contain raw IDs and never go in the repo.
 ```sh
 PY=pipeline/.venv/Scripts/python      # or: cd pipeline && uv run python
-A=docs/evidence/forensic_audit/scripts
+A=docs/audits/forensic/scripts
 # Part 1 (independent; reads raw files with pyarrow only)
 $PY $A/a00_schema.py data/raw/player_data
 $PY $A/a01_load.py data/raw/player_data $S/raw_all.parquet
@@ -33,7 +35,7 @@ $PY $A/a03_events_time.py $S/raw_all.parquet
 $PY $A/a04_files_matches.py $S/raw_all.parquet $S/files.parquet
 for s in a05_dates_loot a06_matches_actors a07_pairing a08_deaths a10_change_only a11_identity_overlap; do $PY $A/$s.py $S/raw_all.parquet $S/files.parquet; done
 $PY $A/a09_gaps_minimaps.py $S/raw_all.parquet $S/files.parquet data/raw/player_data/minimaps
-$PY $A/a12_counts.py $S/raw_all.parquet $S/files.parquet docs/evidence/forensic_audit/01_independent/independent_counts.json
+$PY $A/a12_counts.py $S/raw_all.parquet $S/files.parquet docs/audits/forensic/01_independent/independent_counts.json
 # Part 2: README claims
 T=6 $PY $A/b01_registration.py $S/raw_all.parquet data/raw/player_data/minimaps $S   # also T=30 (default)
 $PY $A/b02_readme_claims.py $S/raw_all.parquet
@@ -41,18 +43,18 @@ $PY $A/b02_readme_claims.py $S/raw_all.parquet
 (cd pipeline && .venv/Scripts/python -m pytest -q)                                     # 125 passed
 (cd pipeline && .venv/Scripts/python -m lila_pipeline.build --web-dir $S/rebuild/web --report $S/rebuild/build_report.json)
 diff -rq web/public/data $S/rebuild/web/data; cmp web/public/maps/*.webp …             # identical
-$PY $A/c01_reconstruct.py $S/raw_all.parquet $S/files.parquet web/public/data docs/evidence/forensic_audit/02_reconciliation/c01_reconstruction.json
-(cd pipeline && .venv/Scripts/python ../$A/c02_traffic_sensitivity.py ../docs/evidence/forensic_audit/02_reconciliation/c02_traffic_sensitivity.json)
-(cd pipeline && .venv/Scripts/python ../$A/c03_other_sensitivity.py ../docs/evidence/forensic_audit/02_reconciliation/c03_other_sensitivity.json)
+$PY $A/c01_reconstruct.py $S/raw_all.parquet $S/files.parquet web/public/data docs/audits/forensic/02_reconciliation/c01_reconstruction.json
+(cd pipeline && .venv/Scripts/python ../$A/c02_traffic_sensitivity.py ../docs/audits/forensic/02_reconciliation/c02_traffic_sensitivity.json)
+(cd pipeline && .venv/Scripts/python ../$A/c03_other_sensitivity.py ../docs/audits/forensic/02_reconciliation/c03_other_sensitivity.json)
 $PY $A/c04_doc_claims.py $S/raw_all.parquet $S/files.parquet data/raw/player_data/minimaps
-$PY $A/c05_verify_stats.py $S/raw_all.parquet $S/files.parquet web/public/data docs/evidence/forensic_audit/02_reconciliation/c05_stats_verification.json   # 7,792 values, 0 differences
+$PY $A/c05_verify_stats.py $S/raw_all.parquet $S/files.parquet web/public/data docs/audits/forensic/02_reconciliation/c05_stats_verification.json   # 7,792 values, 0 differences
 # negative control: plant 3 changes in a copy ($S/rebuild/web/data/stats.json) and rerun c05 against it -> 3 differences
 # Part 3 (follow-up): d01, d04, d05 audit code only; d02, d03 vary inputs/seeds of production zones rules
-$PY $A/d01_emission_rule.py $S/raw_all.parquet $S/files.parquet web/public/data docs/evidence/forensic_audit/03_followup/d01_emission_rule.json
-(cd pipeline && .venv/Scripts/python ../$A/d02_allocation_models.py ../docs/evidence/forensic_audit/03_followup/d02_allocation_models.json)
-(cd pipeline && .venv/Scripts/python ../$A/d03_zone_robustness.py ../docs/evidence/forensic_audit/03_followup/d03_zone_robustness.json)   # ~45 min
-$PY $A/d04_bot_presence.py $S/raw_all.parquet $S/files.parquet web/public/data docs/evidence/forensic_audit/03_followup/d04_bot_presence.json
-$PY $A/d05_map_score.py $S/raw_all.parquet $S/files.parquet web/public/data docs/evidence/forensic_audit/03_followup/d05_map_score.json
+$PY $A/d01_emission_rule.py $S/raw_all.parquet $S/files.parquet web/public/data docs/audits/forensic/03_followup/d01_emission_rule.json
+(cd pipeline && .venv/Scripts/python ../$A/d02_allocation_models.py ../docs/audits/forensic/03_followup/d02_allocation_models.json)
+(cd pipeline && .venv/Scripts/python ../$A/d03_zone_robustness.py ../docs/audits/forensic/03_followup/d03_zone_robustness.json)   # ~45 min
+$PY $A/d04_bot_presence.py $S/raw_all.parquet $S/files.parquet web/public/data docs/audits/forensic/03_followup/d04_bot_presence.json
+$PY $A/d05_map_score.py $S/raw_all.parquet $S/files.parquet web/public/data docs/audits/forensic/03_followup/d05_map_score.json
 (cd pipeline && .venv/Scripts/python tools/check_ids.py)                               # nothing found in this folder
 ```
 

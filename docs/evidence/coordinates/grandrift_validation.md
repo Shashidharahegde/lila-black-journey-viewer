@@ -92,6 +92,6 @@ The near-black share is **not** a pass/fail measure. The map's roads and some bu
 - **Pass/fail:** the mathematical tests in `pipeline/tests/test_projection.py` are mandatory: README example, corners, centre, orientation, non-square image. The production mapping is kept for Stage 2 as long as they pass.
 - **No pixel-colour criterion:** the near-black threshold was removed.
 - **Evidence:** this report and its overlays are supporting evidence, reviewed by S.
-- **Final check:** rendered alignment on screen is verified in Stage 3 (`docs/03_MAP_AND_FILTERS.md`, "How to verify" step 5).
+- **Final check:** rendered alignment on screen is verified in Stage 3 (`docs/specs/03_MAP_AND_FILTERS.md`, "How to verify" step 5).
 
 If LILA can provide world coordinates for two or three landmarks, a landmark test would turn "consistent" into "verified".

@@ -12,6 +12,7 @@ import './index.css'
 import App from './App.tsx'
 import { parseTab } from './state/url'
 import AboutPage from './ui/AboutPage'
+import CaseStudyPage from './ui/CaseStudyPage'
 import StatsPage from './ui/StatsPage'
 
 /** `/` and unknown paths open the all-maps Overview. An old Explore link (`/explore?tab=…`) or a link to the old map root
@@ -34,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/journeys" />
           </Route>
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/how-i-built-this" element={<CaseStudyPage />} />
           <Route path="*" element={<RedirectToLanding />} />
         </Routes>
       </TooltipProvider>

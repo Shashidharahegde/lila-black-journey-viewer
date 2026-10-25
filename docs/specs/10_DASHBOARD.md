@@ -187,7 +187,7 @@ Rules:
 **Commit 1 — `data: add overall statistics to the pipeline`**
 - `pipeline/src/lila_pipeline/stats.py` (new): per-journey table from `prepared.events`, slice builder, metric definitions, fingerprint.
 - `build.py`: write `stats.json` after the other files, and add its size and slice count to the build report.
-- `docs/02_DATA_PIPELINE.md`: add `stats.json` to the output-format list, with a pointer to this spec.
+- `docs/specs/02_DATA_PIPELINE.md`: add `stats.json` to the output-format list, with a pointer to this spec.
 - `pipeline/tests/test_stats.py`:
   - **Contract:** every key in the contract above; 28 slices; every metric in `metrics` has every documented field; value shapes by kind; byte-identical rebuild.
   - **Definitions on small synthetic journeys:** median for odd and even counts; a Kill/Killed pair counts as a pair and its `Killed` as a death; a gap over 30 s adds no distance or movement time; an `after_death` kill counts; an empty slice has `null` values.

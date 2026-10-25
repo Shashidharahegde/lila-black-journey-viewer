@@ -12,7 +12,7 @@ that whole chain against the raw parquet data and the real images:
 5. Same world point on the original image and the exported WebP (different sizes).
 6. Pictures: real positions on each exported minimap, with probes, plus wrong-orientation controls.
 
-It only reads data and writes evidence files (docs/evidence/reverse_*). The controls exist for
+It only reads data and writes evidence files (docs/evidence/coordinates/reverse_*). The controls exist for
 comparison and must not be used anywhere else.
 
 Run from pipeline/:  uv run python validate_reverse_mapping.py [--data-dir PATH]
@@ -37,7 +37,7 @@ from lila_pipeline.projection import MAPS, uv_to_pixel, world_to_uv
 REPO = Path(__file__).resolve().parent.parent
 WEB_DATA = REPO / "web" / "public" / "data"
 SPACE_TS = REPO / "web" / "src" / "map" / "space.ts"
-OUT_DIR = REPO / "docs" / "evidence"
+OUT_DIR = REPO / "docs" / "evidence" / "coordinates"
 DRAW_WIDTH = 2048  # px of the evidence pictures (the exported images are downscaled to this)
 CONTROL_WIDTH = 760
 GRID_STEP = 100  # world units between labelled grid lines

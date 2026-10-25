@@ -1,4 +1,4 @@
-"""Shape the cleaned events into the files the website loads (format: docs/02_DATA_PIPELINE.md)."""
+"""Shape the cleaned events into the files the website loads (format: docs/specs/02_DATA_PIPELINE.md)."""
 
 from __future__ import annotations
 

@@ -155,7 +155,7 @@ Changes, all display-only (the 64 × 64 grids, totals, reconciliation tests and 
 - **Palettes per layer**, a **master On/Off switch**, compact legend and tooltip, methods under "About this heatmap".
 - **Default fit** follows the minimap's content (`map/content.ts`).
 - URL: `heatmap=off` and `intensity=all` join `layer=`.
-Decisions are rows in the CLAUDE.md table. Evidence: `docs/evidence/heatmap_review/`.
+Decisions are rows in the CLAUDE.md table. Evidence: `docs/evidence/screenshots/heatmap_review/`.
 
 **Match open (S, 2026-10-23; superseded by Stage 6c, where heatmaps have their own tab):** the heatmap switch no longer disappears when a match is selected. The controls sit above the match inspector and the picture is drawn under the journeys; it is still the map-and-date aggregate ("Not filtered by the open match"), the `hide` preferences are untouched, and turning the heatmap off returns the ordinary match view. This replaces the earlier "overview only" scope.
 
@@ -236,7 +236,7 @@ Kill/death balance maps, danger scores, deaths-per-visit, inferred extraction, a
 - **Decision for S:** the thresholds are absolute, as asked, and that hides most of GrandRift's traffic: 84 % of its cells are under 30 s and only 5 % reach 60 s (Lockdown: 30 % reach 60 s). A single day of GrandRift is almost empty in this view. "All activity" shows everything; a per-map threshold would be a different rule.
 - Kills and Deaths keep the count classes (1 / 2–3 / 4–9 / 10+), with slightly stronger opacity steps, and no time threshold.
 
-Code: `heatmap/scale.ts` (`trafficFocusedStyle`, `TRAFFIC_FOCUS`), `heatmap/zones.ts` (`zoneOutline`), `heatmap/layers.ts` (`outlineLayers`), `map/space.ts` (`focusZoom`), `state/url.ts`, `state/useUrlSync.ts` (`visibleConsistent` and `ui/RegionCard.tsx` were removed in Stage 6d). Evidence: `docs/evidence/tabs_and_outlines/`.
+Code: `heatmap/scale.ts` (`trafficFocusedStyle`, `TRAFFIC_FOCUS`), `heatmap/zones.ts` (`zoneOutline`), `heatmap/layers.ts` (`outlineLayers`), `map/space.ts` (`focusZoom`), `state/url.ts`, `state/useUrlSync.ts` (`visibleConsistent` and `ui/RegionCard.tsx` were removed in Stage 6d). Evidence: `docs/evidence/screenshots/tabs_and_outlines/`.
 
 ## Stage 6d — Sidebar redesign and refinement (S, 2026-10-23)
 

@@ -1,6 +1,6 @@
 # Part 2 — Reconciliation evidence (after reading the README, pipeline, tests, docs and outputs)
 
-Order of work: the data README (`AUDIT/README.md`), then the pipeline code and tests, then the generated outputs, then `EDGE_CASES.md`, `docs/02_DATA_PIPELINE.md`, `ARCHITECTURE.md`, `INSIGHTS.md` and `docs/evidence/`.
+Order of work: the data README (`AUDIT/README.md`), then the pipeline code and tests, then the generated outputs, then `EDGE_CASES.md`, `docs/specs/02_DATA_PIPELINE.md`, `ARCHITECTURE.md`, `INSIGHTS.md` and `docs/evidence/`.
 Part 1 is not edited. Where this part corrects Part 1, it says so (§9).
 Labels: **F** fact · **I** inference · **C** convention · **A** unresolved ambiguity · **E** error.
 

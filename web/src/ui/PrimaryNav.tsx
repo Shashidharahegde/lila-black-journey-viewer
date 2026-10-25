@@ -5,16 +5,17 @@ import { overviewLinkFor } from '@/state/statsUrl'
 import { useStore } from '@/state/store'
 import { mapPageHref } from '@/state/useUrlSync'
 import AboutButton from './AboutButton'
+import CaseStudyButton from './CaseStudyButton'
 import SettingsMenu from './SettingsMenu'
 
 export type Destination = 'overview' | 'heatmaps' | 'journeys'
 
 interface Props {
-  /** the page shown; null on a page outside the three destinations (the About page) */
+  /** the page shown; null on a page outside the three destinations (About, How I built this) */
   current: Destination | null
   /** the Overview's map ('all' or a map) and date, when the Overview is the page shown; the map pages read theirs from the store */
   overview?: { map: string; date: string }
-  /** page-specific actions on the right, before the About button and the settings menu every page has (Copy link on the map pages) */
+  /** page-specific actions on the right, after How I built this and About and before the settings menu (Copy link on the map pages) */
   actions?: ReactNode
 }
 
@@ -84,8 +85,9 @@ export default function PrimaryNav({ current, overview, actions }: Props) {
         ))} 
       </div>
       <div className="flex min-w-0 items-center justify-self-end gap-1">
-        {actions}
+        <CaseStudyButton />
         <AboutButton />
+        {actions}
         <SettingsMenu shortcuts={current === 'heatmaps' || current === 'journeys'} />
       </div>
     </nav>

@@ -5,7 +5,7 @@ import { GLOSSARY } from '@/stats/terms'
 import { shortcutsFor } from './shortcuts'
 
 export const REPO_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer'
-export const EDGE_CASES_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer/blob/main/EDGE_CASES.md'
+export const EDGE_CASES_URL = 'https://github.com/Shashidharahegde/lila-black-journey-viewer/blob/main/docs/reports/EDGE_CASES.md'
 
 /** The keyboard shortcuts of the page shown, opened from the settings menu or with "?" (the list itself says so). */
 export function ShortcutsContent() {

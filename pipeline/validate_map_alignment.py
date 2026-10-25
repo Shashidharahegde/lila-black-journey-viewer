@@ -3,7 +3,7 @@
 Draws about ten human journeys on the original GrandRift minimap twice: once with the
 production mapping, and once with the y-flip deliberately removed (a control that should
 look wrong). Also writes matching zoomed crops and `grandrift_metrics.json`, the numbers
-quoted in docs/evidence/grandrift_validation.md.
+quoted in docs/evidence/coordinates/grandrift_validation.md.
 
 The script only reads data and writes evidence files. The no-flip version exists here for
 comparison and must not be used anywhere else.
@@ -42,7 +42,7 @@ CROP_AREAS = {
     "area_C_engineers_quarters": (1620, 800),  # east edge: journey 8's start in both orientations
 }
 NEAR_BLACK_RGB_SUM = 30  # descriptive only: dark roads are walkable, so this is no pass/fail test
-OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "evidence"
+OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "evidence" / "coordinates"
 
 # Bright, distinct colours that stand out on the dark brown map.
 PALETTE = [

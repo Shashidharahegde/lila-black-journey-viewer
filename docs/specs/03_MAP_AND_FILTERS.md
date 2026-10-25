@@ -44,7 +44,7 @@ Convert the cursor position back to world x/z using the map's scale and origin f
 2. On AmbroseValley, hovering at the README example's pixel position shows roughly x = −301, z = −356.
 3. The date list matches `index.json`: six dates from 2026-02-09 (1 match) to 2026-02-14, with the partial dates labelled. Changing the date updates the match list; the busiest matches are at the top.
 4. Copy the URL, open it in a new tab: the same map, date and match are selected.
-5. **Rendered alignment (D4, final check).** On GrandRift, open the matches listed in `docs/evidence/grandrift_validation.md` once paths are drawn (feature 4), and compare with `docs/evidence/grandrift_correct.png`: the same start points (north-east corner, east edge by Engineer's Quarters) and routes. Also check the README example on AmbroseValley (step 2) and one corner of each map.
+5. **Rendered alignment (D4, final check).** On GrandRift, open the matches listed in `docs/evidence/coordinates/grandrift_validation.md` once paths are drawn (feature 4), and compare with `docs/evidence/coordinates/grandrift_correct.png`: the same start points (north-east corner, east edge by Engineer's Quarters) and routes. Also check the README example on AmbroseValley (step 2) and one corner of each map.
 
 ## Out of scope
 Drawing paths and markers (feature 4), playback (5), heatmaps (6).

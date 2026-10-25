@@ -216,7 +216,7 @@ def test_ec27_no_numeric_player_id_or_uuid_prefix_in_any_output(built, prepared)
         assert not {s.split("_")[0] for s in strings} & uuid_prefixes, f"{path.name} contains a player ID prefix"
 
 
-# The frontend data contract (docs/02_DATA_PIPELINE.md, "Output format"). A change here is a change for every later feature.
+# The frontend data contract (docs/specs/02_DATA_PIPELINE.md, "Output format"). A change here is a change for every later feature.
 INDEX_KEYS = {"schema_version", "maps", "dates", "matches"}
 MAP_KEYS = {"image", "width", "height", "scale", "origin_x", "origin_z"}
 DATE_KEYS = {"date", "matches", "boundary", "partial", "observed_from_utc", "observed_to_utc"}

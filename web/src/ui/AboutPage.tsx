@@ -17,7 +17,7 @@ const STATS_NOTES = [
   'There is no extraction event: a journey without a death has no death recorded.',
 ]
 
-// Choices made where the data or its README left a question open. Each is also a row in EDGE_CASES.md.
+// Choices made where the data or its README left a question open. Each is also a row in docs/reports/EDGE_CASES.md.
 const ASSUMPTIONS: { title: string; text: string }[] = [
   {
     title: 'Who is a bot',

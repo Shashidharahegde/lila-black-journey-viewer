@@ -48,10 +48,14 @@ None.
 data/raw/     raw parquet files and minimaps (gitignored)
 pipeline/     Python package: raw data → web/public/data and web/public/maps
 web/          React app that loads the generated files
-docs/         build specs, one per feature
+docs/         everything else: reports, feature specs, audits, evidence (index: docs/README.md)
 ```
 
 ## Docs
-- [ARCHITECTURE.md](ARCHITECTURE.md): how it's built and why
-- [EDGE_CASES.md](EDGE_CASES.md): data issues found and how each is handled
+- [ARCHITECTURE.md](ARCHITECTURE.md): how it's built and why, on one page
 - [INSIGHTS.md](INSIGHTS.md): what the tool shows about the game
+- [docs/README.md](docs/README.md): index of every other document, by who it's for. The main ones:
+  - [TECHNICAL_REPORT.md](docs/reports/TECHNICAL_REPORT.md): the full version: data audit, every edge case and its handling, coordinate validation, verification
+  - [ARTICLE.md](docs/reports/ARTICLE.md): the build story: system design, decisions and why some were reversed, problems hit, every file
+  - [EDGE_CASES.md](docs/reports/EDGE_CASES.md): data issues found and how each is handled
+  - [Assumptions and evidence](docs/evidence/README.md): every assumption with the evidence behind it

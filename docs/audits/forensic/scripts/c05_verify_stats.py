@@ -1,7 +1,7 @@
 """C05: independent recomputation of every value in stats.json (all 28 map x date slices), compared leaf by leaf.
 
 No lila_pipeline imports: rows are cleaned with this audit's own c01 loader, metric definitions are implemented from the
-written definitions in stats.json / docs/10_DASHBOARD.md, traffic cells are traced with an independently written exact
+written definitions in stats.json / docs/specs/10_DASHBOARD.md, traffic cells are traced with an independently written exact
 line-grid intersection, and quantiles/histograms are computed here.
 Usage: python c05_verify_stats.py raw_all.parquet files.parquet web_data_dir out_json
 """
