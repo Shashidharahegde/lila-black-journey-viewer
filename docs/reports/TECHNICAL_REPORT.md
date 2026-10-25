@@ -111,7 +111,7 @@ data/raw/player_data/  1,243 parquet files + 3 minimaps (gitignored)
   images.py      minimaps → WebP at min(original, 4096) px, never upscaled
   export.py      index.json, one JSON per match, heatmaps/<map>.json, zones/<map>.json
   build.py       runs the stages above; writes docs/evidence/build_report.json
-→ web/public/data (5.7 MB) + web/public/maps (1.3 MB), committed
+→ web/public/data (3.9 MB) + web/public/maps (1.3 MB), committed
 → Vercel builds web/ only
 ```
 

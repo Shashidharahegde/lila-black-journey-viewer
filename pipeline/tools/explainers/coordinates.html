@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mapping game coordinates to the minimap</title>
+<style>${style}
+.maps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+.maps4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+.tag { display: inline-flex; align-items: center; gap: 1.5mm; font-size: 8pt; font-weight: 600; }
+.tag i { width: 2.4mm; height: 2.4mm; border-radius: 50%; display: inline-block; }
+.code { font-family: "Geist Mono"; font-size: 7.6pt; line-height: 1.55; background: var(--stage); color: #d6deea; border-radius: 2mm; padding: 3mm 3.5mm; white-space: pre; }
+.code .k { color: #8fb8f5; }
+.code .c { color: #6b7a93; }
+.calc { font-family: "Geist Mono"; font-size: 9pt; line-height: 1.75; }
+.calc .eq { color: var(--faint); }
+.calc .res { color: var(--brand-strong); font-weight: 500; }
+.cover-maps { position: absolute; left: 15mm; right: 15mm; bottom: 14mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; z-index: 1; }
+.cover-maps figure img { border: 1px solid #24304a; }
+.cover-maps figcaption { color: #aab4c5; }
+</style>
+</head>
+<body>
+
+<!-- 1 · cover -->
+<section class="page cover">
+  <div class="head" style="margin-top: 6mm; gap: 3mm;">
+    <span class="eyebrow">LILA BLACK journey viewer · How I built this</span>
+    <h1>Mapping game coordinates<br>to the minimap</h1>
+    <p class="intro" style="font-size: 11pt; max-width: 180mm;">Players move in world units; the minimap is a picture in pixels. A wrong scale or a missing axis flip still draws a believable map, with every event in the wrong place. This is how the conversion works and how it was checked.</p>
+  </div>
+  <div class="grid4" style="max-width: 225mm;">
+    <div class="kpi"><span class="v">1</span><span class="l">Conversion function</span><span class="d">in the pipeline; the browser gets map positions only</span></div>
+    <div class="kpi"><span class="v">${trip_points}</span><span class="l">Path points converted</span><span class="d">${positions_outside} outside their map's square</span></div>
+    <div class="kpi"><span class="v">${trip_worst}</span><span class="l">Worst round trip, world units</span><span class="d">${worst_px} of a pixel; all from JSON rounding</span></div>
+    <div class="kpi"><span class="v">${tests_py} + ${tests_web}</span><span class="l">Coordinate tests passing</span><span class="d">pipeline + browser, ${tests_date}</span></div>
+  </div>
+  <div class="cover-band" style="height: 92mm;"></div>
+  <div class="cover-maps">
+    <figure><img src="${assets}/AmbroseValley_correct.jpg" style="height: 66mm; object-fit: cover;"><figcaption>AmbroseValley · every recorded path</figcaption></figure>
+    <figure><img src="${assets}/GrandRift_correct.jpg" style="height: 66mm; object-fit: cover;"><figcaption>GrandRift · every recorded path</figcaption></figure>
+    <figure><img src="${assets}/Lockdown_correct.jpg" style="height: 66mm; object-fit: cover;"><figcaption>Lockdown · every recorded path</figcaption></figure>
+  </div>
+  <div class="foot" style="color: #6b7a93; border-color: #24304a; z-index: 2;"><span>Humans blue, bots amber, drawn from the shipped match files on the shipped minimaps. Numbers computed by <span class="mono">pipeline/tools/explainer_pdfs.py</span>.</span><span>1</span></div>
+</section>
+
+<!-- 2 · the spaces -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">The problem</span>
+    <h2>Four coordinate systems, two of them upside down to each other</h2>
+    <p class="intro">The game logs x, y, z in world units with z pointing north. Images count rows from the top. The trick is to go through a neutral 0 to 1 space in between, and to do it in exactly one place.</p>
+  </div>
+  <svg viewBox="0 0 1000 330" width="100%">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0f1729"/></marker>
+      <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2589f5"/></marker>
+    </defs>
+    <!-- world -->
+    <text x="0" y="16" font-size="12" font-weight="600">1 · World</text>
+    <text x="0" y="32" font-size="9.5" fill="#5b6475">game units, from the parquet</text>
+    <rect x="20" y="52" width="180" height="180" fill="#f5f7fa" stroke="#c9d1dc"/>
+    <line x1="20" y1="232" x2="216" y2="232" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <line x1="20" y1="232" x2="20" y2="40" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="218" y="246" font-size="11" font-weight="600" class="mono">x</text>
+    <text x="8" y="44" font-size="11" font-weight="600" class="mono">z</text>
+    <circle cx="20" cy="232" r="4" fill="#0f1729"/>
+    <text x="24" y="250" font-size="9" class="mono">(origin_x, origin_z)</text>
+    <circle cx="200" cy="52" r="4" fill="#0f1729"/>
+    <text x="196" y="48" font-size="9" class="mono" text-anchor="end">(+scale, +scale)</text>
+    <circle cx="80" cy="190" r="6" fill="#2589f5"/>
+    <text x="110" y="148" font-size="9.5" fill="#5b6475" text-anchor="middle">north is +z</text>
+    <text x="0" y="276" font-size="9.5" fill="#5b6475">y is height: ignored for a 2D map</text>
+
+    <!-- arrow 1 -->
+    <line x1="226" y1="142" x2="282" y2="142" stroke="#2589f5" stroke-width="2.5" marker-end="url(#ab)"/>
+    <text x="254" y="128" font-size="9" fill="#1672d4" text-anchor="middle" font-weight="600">pipeline</text>
+
+    <!-- uv -->
+    <text x="290" y="16" font-size="12" font-weight="600">2 · Map position (u, v)</text>
+    <text x="290" y="32" font-size="9.5" fill="#5b6475">0 to 1, stored in the JSON</text>
+    <rect x="300" y="52" width="180" height="180" fill="#e8f3ff" stroke="#2589f5"/>
+    <line x1="300" y1="232" x2="496" y2="232" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <line x1="300" y1="232" x2="300" y2="40" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="498" y="246" font-size="11" font-weight="600" class="mono">u</text>
+    <text x="288" y="44" font-size="11" font-weight="600" class="mono">v</text>
+    <text x="304" y="250" font-size="9" class="mono">(0, 0)</text>
+    <text x="476" y="48" font-size="9" class="mono" text-anchor="end">(1, 1)</text>
+    <circle cx="360" cy="190" r="6" fill="#2589f5"/>
+    <text x="390" y="148" font-size="9.5" fill="#1672d4" text-anchor="middle">same orientation</text>
+    <text x="390" y="162" font-size="9.5" fill="#1672d4" text-anchor="middle">as the world</text>
+    <text x="290" y="276" font-size="9.5" fill="#5b6475">no image size involved</text>
+
+    <!-- arrow 2 -->
+    <line x1="506" y1="142" x2="562" y2="142" stroke="#2589f5" stroke-width="2.5" marker-end="url(#ab)"/>
+    <text x="534" y="128" font-size="9" fill="#1672d4" text-anchor="middle" font-weight="600">browser</text>
+
+    <!-- drawing space -->
+    <text x="570" y="16" font-size="12" font-weight="600">3 · Drawing space</text>
+    <text x="570" y="32" font-size="9.5" fill="#5b6475">deck.gl, 1000 units wide</text>
+    <image href="${assets}/space_thumb.jpg" x="580" y="52" width="180" height="180" opacity="0.55"/>
+    <rect x="580" y="52" width="180" height="180" fill="none" stroke="#0f1729"/>
+    <line x1="580" y1="52" x2="776" y2="52" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <line x1="580" y1="52" x2="580" y2="248" stroke="#0f1729" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="778" y="56" font-size="11" font-weight="600" class="mono">X</text>
+    <text x="566" y="252" font-size="11" font-weight="600" class="mono">Y</text>
+    <text x="584" y="44" font-size="9" class="mono">(0, 0)</text>
+    <text x="760" y="246" font-size="9" class="mono" text-anchor="end">(1000, 1000·H/W)</text>
+    <circle cx="640" cy="190" r="6" fill="#2589f5" stroke="#fff" stroke-width="1.5"/>
+    <text x="570" y="276" font-size="9.5" fill="#5b6475">Y grows downward, like image rows</text>
+
+    <!-- arrow from image -->
+    <line x1="842" y1="142" x2="786" y2="142" stroke="#0f1729" stroke-width="2" marker-end="url(#a)"/>
+    <text x="814" y="128" font-size="9" text-anchor="middle" font-weight="600">stretched over</text>
+
+    <!-- image -->
+    <text x="850" y="16" font-size="12" font-weight="600">4 · Minimap image</text>
+    <text x="850" y="32" font-size="9.5" fill="#5b6475">pixels, W × H</text>
+    <image href="${assets}/space_thumb.jpg" x="850" y="52" width="140" height="140"/>
+    <rect x="850" y="52" width="140" height="140" fill="none" stroke="#0f1729"/>
+    <text x="852" y="208" font-size="9" class="mono">row 0 is the top</text>
+    <text x="850" y="276" font-size="9.5" fill="#5b6475">BitmapLayer bounds</text>
+    <text x="850" y="290" font-size="9.5" fill="#5b6475" class="mono">[0, 1000·H/W, 1000, 0]</text>
+  </svg>
+  <div class="grid3" style="gap: 5mm;">
+    <div class="formula"><span class="c"># 1 → 2 · projection.py</span><br>u = (x − <span class="hl">origin_x</span>) / <span class="hl">scale</span><br>v = (z − <span class="hl">origin_z</span>) / <span class="hl">scale</span></div>
+    <div class="formula"><span class="c"># 2 → 3 · space.ts</span><br>X = u × 1000<br>Y = (1 − v) × 1000 × H / W</div>
+    <div class="formula"><span class="c"># 2 → pixel (for checks and figures)</span><br>px = u × W<br>py = (1 − v) × H</div>
+  </div>
+  <p class="small">The <b>1 − v</b> is the flip: world z grows north (up the page) while image rows and the drawing space grow down. The <b>H / W</b> factor keeps a non-square image in proportion.</p>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>2</span></div>
+</section>
+
+
+<!-- 3 · calibration -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Calibration</span>
+    <h2>Each map is a world square laid over its image</h2>
+    <p class="intro">The data README gives a scale and an origin per map: the world square from the origin to origin + scale on both axes covers the whole image. Its formula is right. Its image size is not: it says 1024 px, and none of the three minimaps is.</p>
+  </div>
+  <table>
+    <tr><th>Map</th><th class="num">Scale</th><th class="num">Origin x</th><th class="num">Origin z</th><th class="num">World x</th><th class="num">World z</th><th class="num">Original image</th><th class="num">Shipped WebP</th><th class="num">World units per px, x / z</th></tr>
+    ${rows_cal}
+  </table>
+  <div class="row" style="gap: 8mm; flex: 1; min-height: 0;">
+    <div class="grow stack">
+      <h3>Why go through 0 to 1 instead of straight to pixels</h3>
+      <p class="small" style="color: var(--ink);">Images get resized. Lockdown's ${Lockdown_src} px original ships as ${Lockdown_web}, and the README assumed 1024. A position stored as a share of the map is right at every size, so the pipeline stores u and v, and each consumer multiplies by its own width and height. The README's own example lands at the same spot on all three sizes:</p>
+      <svg viewBox="0 0 470 225" style="width: 64%;">
+        <rect x="10" y="115" width="80" height="80" fill="#f5f7fa" stroke="#8a93a3"/>
+        <circle cx="16.1" cy="184.6" r="4" fill="#2589f5"/>
+        <text x="10" y="100" font-size="10" font-weight="600">1,024 px</text><text x="10" y="86" font-size="9" fill="#5b6475">README</text>
+        <text x="10" y="212" font-size="9" class="mono">${r_pxx}, ${r_pxy}</text>
+        <rect x="120" y="55" width="140" height="140" fill="#e8f3ff" stroke="#2589f5"/>
+        <circle cx="130.7" cy="176.7" r="4" fill="#2589f5"/>
+        <text x="120" y="40" font-size="10" font-weight="600">${r_web} px</text><text x="120" y="26" font-size="9" fill="#5b6475">shipped WebP</text>
+        <text x="120" y="212" font-size="9" class="mono">${r_wpx}, ${r_wpy}</text>
+        <rect x="290" y="45" width="150" height="150" fill="#f5f7fa" stroke="#8a93a3"/>
+        <circle cx="301.4" cy="175.4" r="4" fill="#2589f5"/>
+        <text x="290" y="30" font-size="10" font-weight="600">${r_srcw} px</text><text x="290" y="16" font-size="9" fill="#5b6475">original PNG</text>
+        <text x="290" y="212" font-size="9" class="mono">${r_opx}, ${r_opy}</text>
+      </svg>
+      <p class="small">Same u = ${ru}, v = ${rv} every time; only the multiplier changes. The README expects (78, 890) on 1024 px.</p>
+      <div class="card warn" style="padding: 3mm 4mm;"><h3>GrandRift isn't square</h3><p class="small" style="color: var(--ink);">Its image is ${gr_w} × ${gr_h}. Treating it as square would put the south edge ${gr_square_err} px off, so width and height are always used separately (drawing space height ${gr_space_h}).</p></div>
+    </div>
+    <figure style="width: 98mm; flex: none;">
+      ${grid_svg}
+      <figcaption>AmbroseValley with world grid lines every 100 units (labels are world x along the bottom, world z up the side), placed with the production formulas. Red: world x = 0 and z = 0. The square runs from x −370 to 530 and z −473 to 427, so the lines don't fall on round pixel positions.</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>3</span></div>
+</section>
+
+<!-- 4 · worked examples and code -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Worked through</span>
+    <h2>Two positions, step by step</h2>
+    <p class="intro">First the data README's own example, which the unit tests reproduce. Then a real kill from the data, the same one followed in the data-flow PDF.</p>
+  </div>
+  <div class="grid2" style="gap: 7mm;">
+    <div class="card">
+      <span class="pill">README example · AmbroseValley</span>
+      <div class="calc" style="margin-top: 3mm;">
+        x = ${rx}, z = ${rz}<span class="eq">  ·  scale ${r_scale}, origin (${r_ox}, ${r_oz})</span><br>
+        u = (${rx} − (${r_ox})) / ${r_scale} <span class="eq">=</span> ${r_dx} / ${r_scale} <span class="eq">=</span> <span class="res">${ru}</span><br>
+        v = (${rz} − (${r_oz})) / ${r_scale} <span class="eq">=</span> ${r_dz} / ${r_scale} <span class="eq">=</span> <span class="res">${rv}</span><br>
+        px = ${ru} × ${r_px} <span class="eq">=</span> <span class="res">${r_pxx}</span><br>
+        py = (1 − ${rv}) × ${r_px} <span class="eq">=</span> ${r1v} × ${r_px} <span class="eq">=</span> <span class="res">${r_pxy}</span>
+      </div>
+      <p class="small" style="margin-top: 2mm;">Matches the README's (78, 890). Without the flip, py = ${rv} × ${r_px} = ${r_noflip}: the point would jump from near the bottom of the map to near the top.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Real kill · ${ex_map} · match ${ex_match}</span>
+      <div class="calc" style="margin-top: 3mm;">
+        x = ${ex_x}, z = ${ex_z}<span class="eq">  ·  y = ${ex_y} ignored</span><br>
+        u = (${ex_x} − (${ex_ox})) / ${ex_scale} <span class="eq">=</span> <span class="res">${ex_u}</span><br>
+        v = (${ex_z} − (${ex_oz})) / ${ex_scale} <span class="eq">=</span> <span class="res">${ex_v}</span><br>
+        X = ${ex_u} × 1000 <span class="eq">=</span> <span class="res">${ex_sx}</span><span class="eq">  drawing space</span><br>
+        Y = (1 − ${ex_v}) × 1000 <span class="eq">=</span> <span class="res">${ex_sy}</span><br>
+        pixel on the ${ex_w} px WebP <span class="eq">=</span> <span class="res">${ex_px}, ${ex_py}</span>
+      </div>
+      <p class="small" style="margin-top: 2mm;">The match file stores only u and v, rounded to 4 decimals. The browser never sees x or z.</p>
+    </div>
+  </div>
+  <div class="grid2" style="gap: 7mm; flex: 1;">
+    <div class="stack">
+      <h3>The pipeline side: <span class="mono">pipeline/src/lila_pipeline/projection.py</span></h3>
+<div class="code"><span class="k">def</span> world_to_uv(map_id, x, z):
+    cal = MAPS[map_id]          <span class="c"># scale, origin_x, origin_z</span>
+    u = (x - cal.origin_x) / cal.scale
+    v = (z - cal.origin_z) / cal.scale
+    <span class="k">return</span> u, v                 <span class="c"># never clamped: callers count</span>
+                                <span class="c"># anything outside 0 to 1</span>
+<span class="k">def</span> uv_to_pixel(u, v, width, height):
+    px = u * width
+    py = (1.0 - v) * height     <span class="c"># rows count down, z counts up</span>
+    <span class="k">return</span> px, py</div>
+      <p class="small">Shortened from the file. An unknown map name raises an error instead of guessing.</p>
+    </div>
+    <div class="stack">
+      <h3>The browser side: <span class="mono">web/src/map/space.ts</span></h3>
+<div class="code"><span class="k">const</span> SPACE_WIDTH = 1000
+spaceHeight(map) = 1000 * map.height / map.width
+
+uvToSpace(u, v)   = [u * 1000, (1 - v) * spaceHeight]
+imageBounds(map)  = [0, spaceHeight, 1000, 0]
+                    <span class="c"># the minimap's BitmapLayer</span>
+uvToWorld(u, v)   = { x: u * scale + origin_x,
+                      z: v * scale + origin_z }
+                    <span class="c"># cursor readout only</span></div>
+      <p class="small">Summarised from the file. Paths, markers, heatmap pictures and hotspot outlines go through <span class="mono">uvToSpace</span>, and the image through <span class="mono">imageBounds</span>, so they share one space.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>4</span></div>
+</section>
+
+<!-- 5 · the flip on Lockdown -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Testing it against the art</span>
+    <h2>Getting it wrong on purpose shows the real mapping fits</h2>
+    <p class="intro">Every recorded path on Lockdown, drawn three ways on the shipped minimap. There are no surveyed landmarks to check against, so the test is whether the routes fit the roads, buildings and coastline, and whether plausible mistakes visibly don't.</p>
+  </div>
+  <div class="maps3" style="flex: 1;">
+    <figure>
+      <span class="tag"><i style="background: var(--brand)"></i>Production mapping</span>
+      <img src="${assets}/Lockdown_correct.jpg" style="aspect-ratio: 1; object-fit: cover;">
+      <figcaption><b>u, 1 − v.</b> Routes follow the island's roads and stay on land; the black margin around the art stays empty.</figcaption>
+    </figure>
+    <figure>
+      <span class="tag"><i style="background: var(--kill)"></i>Control: y flip removed</span>
+      <img src="${assets}/Lockdown_noflip.jpg" style="aspect-ratio: 1; object-fit: cover;">
+      <figcaption><b>u, v.</b> The routes are mirrored top to bottom: they cross the art at random and spill into the black margin.</figcaption>
+    </figure>
+    <figure>
+      <span class="tag"><i style="background: var(--kill)"></i>Control: x and z swapped</span>
+      <img src="${assets}/Lockdown_swap.jpg" style="aspect-ratio: 1; object-fit: cover;">
+      <figcaption><b>v, 1 − u.</b> The routes are rotated: same shapes, but they no longer follow roads or the coastline.</figcaption>
+    </figure>
+  </div>
+  <p class="small">Human paths blue in the production mapping and red in the controls; bot paths amber in all three. Judged by eye, not by a pixel-colour score: dark roads and art make pixel counts unreliable, so the maths on page 7 is the pass/fail part.</p>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>5</span></div>
+</section>
+
+<!-- 6 · the other two maps -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Testing it against the art</span>
+    <h2>The same check on AmbroseValley and GrandRift</h2>
+    <p class="intro">The flip matters most near the top and bottom edges: points near the horizontal middle barely move when mirrored, so the edges are where to look.</p>
+  </div>
+  <div class="maps4">
+    <figure><span class="tag"><i style="background: var(--brand)"></i>AmbroseValley · production</span><img src="${assets}/AmbroseValley_correct.jpg" style="aspect-ratio: 1; object-fit: cover;"></figure>
+    <figure><span class="tag"><i style="background: var(--kill)"></i>AmbroseValley · no flip</span><img src="${assets}/AmbroseValley_noflip.jpg" style="aspect-ratio: 1; object-fit: cover;"></figure>
+    <figure><span class="tag"><i style="background: var(--brand)"></i>GrandRift · production</span><img src="${assets}/GrandRift_correct.jpg" style="aspect-ratio: 1; object-fit: cover;"></figure>
+    <figure><span class="tag"><i style="background: var(--kill)"></i>GrandRift · no flip</span><img src="${assets}/GrandRift_noflip.jpg" style="aspect-ratio: 1; object-fit: cover;"></figure>
+  </div>
+  <div class="grid3" style="gap: 5mm;">
+    <div class="card tint"><h3>AmbroseValley</h3><p class="small" style="color: var(--ink);">The production routes trace the road network. Mirrored, the dense southern routes move north and off the roads.</p></div>
+    <div class="card tint"><h3>GrandRift</h3><p class="small" style="color: var(--ink);">Production routes cluster on the named areas printed on the map (Mine Pit, Engineer's Quarters, Gas Station, Labour Quarters). Mirrored, shared start points move into the black area beyond the map edge.</p></div>
+    <div class="card brand"><h3>Shared start points</h3><p class="small" style="color: var(--ink);">With the production mapping, several journeys start at the same spots on the map's edges, which fits fixed spawn points. In the controls those spots land in empty space.</p></div>
+  </div>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>6</span></div>
+</section>
+
+<!-- 7 · verification -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Verification</span>
+    <h2>The maths is the pass/fail check; the pictures are supporting evidence</h2>
+    <p class="intro">Unit tests pin down the formula's behaviour; a round trip on every exported point shows the two directions agree on real data.</p>
+  </div>
+  <div class="row" style="gap: 7mm;">
+    <div class="grow stack">
+      <h3>Unit tests: ${tests_py} pipeline, ${tests_web} browser, all passing on ${tests_date}</h3>
+      <ul class="ticks small" style="color: var(--ink);">
+        <li>The README's worked example gives (78, 890) on a 1024 px image.</li>
+        <li>World corners land on the image corners and the world centre on the image centre, for all three maps.</li>
+        <li>+x moves right, +z moves up.</li>
+        <li>GrandRift's ${gr_w} × ${gr_h} image scales each axis separately.</li>
+        <li>Values outside the map are reported, never clamped; an unknown map is rejected.</li>
+        <li>The real minimap sizes are checked, and every recorded position falls inside its map's square.</li>
+        <li>Browser: drawing space, cursor back to world, and the inverse of each function.</li>
+      </ul>
+    </div>
+    <div class="grow stack">
+      <h3>Where the real positions fall</h3>
+      <table>
+        <tr><th>Map</th><th class="num">Points</th><th class="num">Outside</th><th class="num">u range</th><th class="num">v range</th></tr>
+        ${rows_extent}
+      </table>
+      <p class="small">Players use part of each image; the rest is black margin. Nothing needed clamping.</p>
+    </div>
+  </div>
+  <div class="stack">
+    <h3>Round trip: match file back to the parquet</h3>
+    <table>
+      <tr><th>Map</th><th class="num">Points checked</th><th class="num">Max error, world units</th><th class="num">Mean error</th><th class="num">Limit set by 4-decimal rounding</th><th class="num">Max error, WebP pixels</th></tr>
+      ${rows_trip}
+    </table>
+    <p class="small">Each exported path point (u, v as stored in the JSON) was turned back into world x, z and compared with its parquet row. All ${trip_points} points line up, and no error exceeds the rounding limit, so the formulas themselves add no error.</p>
+  </div>
+  <div class="grid2" style="gap: 5mm;">
+    <div class="card good"><span class="pill ok">Shown</span><p class="small" style="color: var(--ink); margin-top: 1.5mm;">The pipeline implements the README formula exactly, the browser inverts it exactly, real routes fit the art, and the plausible mistakes visibly don't.</p></div>
+    <div class="card warn"><span class="pill bot">Not shown</span><p class="small" style="color: var(--ink); margin-top: 1.5mm;">That the README's scale and origin are what the game uses. That needs world coordinates for two or three landmarks from the level editor; until then the mapping is consistent with the maps, not proven exact.</p></div>
+  </div>
+  <div class="foot"><span>Mapping game coordinates to the minimap</span><span>7</span></div>
+</section>
+
+</body>
+</html>

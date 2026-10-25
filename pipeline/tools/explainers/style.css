@@ -1,0 +1,133 @@
+@font-face { font-family: Inter; font-weight: 400; src: url("$font_inter_400") format("woff2"); }
+@font-face { font-family: Inter; font-weight: 500; src: url("$font_inter_500") format("woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url("$font_inter_600") format("woff2"); }
+@font-face { font-family: Inter; font-weight: 700; src: url("$font_inter_700") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-weight: 400; src: url("$font_mono_400") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-weight: 500; src: url("$font_mono_500") format("woff2"); }
+
+@page { size: 297mm 210mm; margin: 0; }
+
+:root {
+  --ink: #0f1729;
+  --muted: #5b6475;
+  --faint: #8a93a3;
+  --line: #dfe3ea;
+  --paper: #ffffff;
+  --panel: #f5f7fa;
+  --brand: #2589f5;
+  --brand-strong: #1672d4;
+  --brand-tint: #e8f3ff;
+  --bot: #e99124;
+  --bot-tint: #fdf1e3;
+  --kill: #e5484d;
+  --kill-tint: #fdecec;
+  --ok: #1f9d63;
+  --ok-tint: #e5f6ee;
+  --stage: #0b1220;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); }
+body {
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--ink);
+  font-size: 9.5pt;
+  line-height: 1.45;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+.page {
+  width: 297mm;
+  height: 210mm;
+  padding: 13mm 15mm 17mm;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+  display: flex;
+  flex-direction: column;
+  gap: 5mm;
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+
+.foot {
+  position: absolute;
+  left: 15mm; right: 15mm; bottom: 6mm;
+  display: flex; justify-content: space-between;
+  font-size: 7.5pt; color: var(--faint);
+  border-top: 1px solid var(--line);
+  padding-top: 2mm;
+}
+
+/* headings */
+.eyebrow { font-size: 7.5pt; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-strong); }
+h1 { font-size: 30pt; line-height: 1.08; font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 17pt; line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; }
+h3 { font-size: 10.5pt; font-weight: 600; }
+.intro { color: var(--muted); max-width: 205mm; font-size: 10pt; }
+.head { display: flex; flex-direction: column; gap: 1.5mm; }
+.small { font-size: 8pt; color: var(--muted); }
+.muted { color: var(--muted); }
+code, .mono { font-family: "Geist Mono", ui-monospace, monospace; font-size: 8.5pt; }
+b, strong { font-weight: 600; }
+
+/* layout */
+.row { display: flex; gap: 5mm; }
+.grow { flex: 1; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+.stack { display: flex; flex-direction: column; gap: 3mm; }
+
+.card { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; background: var(--paper); }
+.card.tint { background: var(--panel); border-color: transparent; }
+.card.brand { background: var(--brand-tint); border-color: transparent; }
+.card.warn { background: var(--bot-tint); border-color: transparent; }
+.card.bad { background: var(--kill-tint); border-color: transparent; }
+.card.good { background: var(--ok-tint); border-color: transparent; }
+.card h3 { margin-bottom: 1mm; }
+.stage { background: var(--stage); color: #e6ebf3; border-radius: 3mm; padding: 4mm; }
+
+/* KPI tiles */
+.kpi { display: flex; flex-direction: column; gap: 0.5mm; }
+.kpi .v { font-size: 20pt; font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; }
+.kpi .l { font-size: 8.5pt; font-weight: 500; }
+.kpi .d { font-size: 7.5pt; color: var(--muted); }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 8.5pt; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.06em; padding: 1.6mm 2mm; border-bottom: 1px solid var(--line); }
+td { padding: 1.6mm 2mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+
+/* pills and lists */
+.pill { display: inline-block; font-size: 7pt; font-weight: 600; padding: 0.4mm 2mm; border-radius: 9mm; background: var(--brand-tint); color: var(--brand-strong); }
+.pill.bot { background: var(--bot-tint); color: #a35f0c; }
+.pill.bad { background: var(--kill-tint); color: #b42b30; }
+.pill.ok { background: var(--ok-tint); color: #157048; }
+ul.ticks { list-style: none; display: flex; flex-direction: column; gap: 1.6mm; }
+ul.ticks li { padding-left: 4.5mm; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 0; top: 1.6mm; width: 2mm; height: 2mm; border-radius: 50%; background: var(--brand); }
+ol.steps { list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 2mm; }
+ol.steps li { counter-increment: s; padding-left: 7mm; position: relative; }
+ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 4.6mm; height: 4.6mm; border-radius: 50%; background: var(--brand); color: white; font-size: 7pt; font-weight: 600; display: grid; place-items: center; }
+
+/* formula blocks */
+.formula { font-family: "Geist Mono", monospace; font-size: 10pt; background: var(--panel); border-radius: 2mm; padding: 2.5mm 3.5mm; line-height: 1.6; }
+.formula .c { color: var(--faint); }
+.formula .hl { color: var(--brand-strong); font-weight: 500; }
+
+/* figures */
+figure { display: flex; flex-direction: column; gap: 1.5mm; }
+figure img { width: 100%; display: block; border-radius: 2mm; }
+figcaption { font-size: 7.5pt; color: var(--muted); }
+svg { display: block; }
+svg text { font-family: Inter, sans-serif; }
+svg .mono { font-family: "Geist Mono", monospace; }
+
+/* cover */
+.cover { background: radial-gradient(120% 90% at 100% 0%, #dcebff 0%, #ffffff 55%); }
+.cover-band { position: absolute; left: 0; right: 0; bottom: 0; height: 72mm; background: var(--stage); }

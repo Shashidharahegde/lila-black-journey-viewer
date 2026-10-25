@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>From parquet files to the screen</title>
+<style>${style}
+.flowline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; }
+.flowline .node { padding: 0 3mm; position: relative; }
+.flowline .node + .node::before { content: ""; position: absolute; left: -2mm; top: 4mm; width: 3mm; height: 3mm; border-top: 1.5px solid #6b7a93; border-right: 1.5px solid #6b7a93; transform: rotate(45deg); }
+.flowline .k { font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; color: #8fb8f5; font-weight: 600; }
+.flowline .t { font-size: 12pt; font-weight: 600; color: #fff; margin-top: 1mm; }
+.flowline .d { font-size: 8pt; color: #aab4c5; margin-top: 0.8mm; }
+.stages { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3mm; }
+.stage-card { border: 1px solid var(--line); border-radius: 3mm; padding: 3mm; display: flex; flex-direction: column; gap: 1.6mm; position: relative; }
+.stage-card .no { font-family: "Geist Mono"; font-size: 7.5pt; color: var(--faint); }
+.stage-card .mod { font-family: "Geist Mono"; font-size: 8.5pt; font-weight: 500; color: var(--brand-strong); }
+.stage-card .what { font-size: 8pt; }
+.stage-card .issue { font-size: 7.5pt; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 1.6mm; margin-top: auto; }
+.bar { display: flex; height: 7mm; border-radius: 1.5mm; overflow: hidden; }
+.bar > div { height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 2mm 5mm; font-size: 7.5pt; color: var(--muted); }
+.legend i { display: inline-block; width: 2.4mm; height: 2.4mm; border-radius: 0.6mm; margin-right: 1.2mm; vertical-align: -0.2mm; }
+.ledger td { padding: 1.8mm 2mm; }
+.ledger .op { font-family: "Geist Mono"; color: var(--faint); width: 6mm; }
+.ledger .tot td { font-weight: 600; border-top: 1.5px solid var(--ink); }
+.trace { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm 5mm; }
+.step { border: 1px solid var(--line); border-radius: 3mm; padding: 3mm; display: flex; flex-direction: column; gap: 1.6mm; position: relative; }
+.step:nth-child(4)::before { display: none; }
+.step + .step::before { content: ""; position: absolute; left: -3.3mm; top: 6mm; width: 2mm; height: 2mm; border-top: 1.5px solid var(--brand); border-right: 1.5px solid var(--brand); transform: rotate(45deg); background: var(--paper); }
+.step .lbl { font-size: 7pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-strong); font-weight: 600; }
+.step h3 { font-size: 9.5pt; }
+.step { flex-direction: row; gap: 4mm; align-items: flex-start; }
+.step .side { display: flex; flex-direction: column; gap: 1.2mm; width: 26mm; flex: none; height: 100%; }
+.step pre { flex: 1; font-family: "Geist Mono"; font-size: 7.6pt; line-height: 1.5; background: var(--panel); border-radius: 1.6mm; padding: 2mm; white-space: pre-wrap; word-break: break-all; }
+.step .where { font-size: 7pt; color: var(--faint); margin-top: 2mm; font-family: "Geist Mono"; }
+</style>
+</head>
+<body>
+
+<!-- 1 · cover -->
+<section class="page cover">
+  <div class="head" style="margin-top: 8mm; gap: 3mm;">
+    <span class="eyebrow">LILA BLACK journey viewer · How I built this</span>
+    <h1>From parquet files<br>to the screen</h1>
+    <p class="intro" style="font-size: 11.5pt; max-width: 175mm;">How ${files_found} raw game logs become the Overview, Journeys and Heatmaps pages. A Python pipeline does all the work once, before deploy. The browser only downloads small files and draws them.</p>
+  </div>
+  <div class="grid4" style="margin-top: 4mm; max-width: 215mm;">
+    <div class="kpi"><span class="v">${files_found}</span><span class="l">Parquet files found</span><span class="d">${day_folders} day folders, ${raw_size}</span></div>
+    <div class="kpi"><span class="v">${rows_read}</span><span class="l">Rows read</span><span class="d">${rows_final} kept after cleaning</span></div>
+    <div class="kpi"><span class="v">${matches}</span><span class="l">Matches</span><span class="d">${maps_count} maps, ${dates} dates</span></div>
+    <div class="kpi"><span class="v">${web_total}</span><span class="l">Shipped to the browser</span><span class="d">${json_total} JSON + ${maps_size} minimaps</span></div>
+  </div>
+  <div class="cover-band">
+    <div style="padding: 14mm 15mm 0;">
+      <div class="flowline">
+        <div class="node"><div class="k">1 · Raw</div><div class="t">Parquet + minimaps</div><div class="d">${files_found} files, 3 images, never in git</div></div>
+        <div class="node"><div class="k">2 · Build</div><div class="t">Python pipeline</div><div class="d">Clean, project, aggregate. Run with <span class="mono">make data</span></div></div>
+        <div class="node"><div class="k">3 · Output</div><div class="t">Static JSON + WebP</div><div class="d">Committed to git, ${web_total}</div></div>
+        <div class="node"><div class="k">4 · Host</div><div class="t">Vercel</div><div class="d">Static files only, no server code</div></div>
+        <div class="node"><div class="k">5 · Draw</div><div class="t">React + deck.gl</div><div class="d">Loads files on demand and draws them</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot" style="color: #6b7a93; border-color: #24304a; z-index: 2;"><span>Every number in this document is computed by <span class="mono">pipeline/tools/explainer_pdfs.py</span> from the data and the generated files.</span><span>1</span></div>
+</section>
+
+<!-- 2 · system design -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">System design</span>
+    <h2>Three places the data lives, and what moves between them</h2>
+    <p class="intro">Build time and run time are separate. Everything that needs the raw data happens on a laptop before deploy; the site only reads what the pipeline wrote.</p>
+  </div>
+  <svg viewBox="0 0 1000 492" width="100%" style="margin-top: 2mm;">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5b6475"/></marker>
+      <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2589f5"/></marker>
+    </defs>
+    <!-- lanes -->
+    <rect x="0" y="0" width="330" height="492" rx="10" fill="#f5f7fa"/>
+    <rect x="345" y="0" width="270" height="492" rx="10" fill="#f5f7fa"/>
+    <rect x="630" y="0" width="370" height="492" rx="10" fill="#f5f7fa"/>
+    <text x="15" y="24" font-size="10" font-weight="600" fill="#1672d4" letter-spacing="1.3">BUILD TIME · LAPTOP</text>
+    <text x="360" y="24" font-size="10" font-weight="600" fill="#1672d4" letter-spacing="1.3">STATIC FILES · GIT + VERCEL</text>
+    <text x="645" y="24" font-size="10" font-weight="600" fill="#1672d4" letter-spacing="1.3">RUN TIME · BROWSER</text>
+
+    <!-- lane A: raw -->
+    <rect x="15" y="38" width="145" height="62" rx="7" fill="#fff" stroke="#dfe3ea"/>
+    <text x="27" y="58" font-size="11" font-weight="600" fill="#0f1729">Player logs</text>
+    <text x="27" y="74" font-size="9.5" fill="#5b6475">${files_found} parquet files</text>
+    <text x="27" y="88" font-size="9.5" fill="#5b6475">${day_folders} day folders · ${raw_size}</text>
+    <rect x="170" y="38" width="145" height="62" rx="7" fill="#fff" stroke="#dfe3ea"/>
+    <text x="182" y="58" font-size="11" font-weight="600" fill="#0f1729">Minimaps</text>
+    <text x="182" y="74" font-size="9.5" fill="#5b6475">3 images · ${minimap_raw_size}</text>
+    <text x="182" y="88" font-size="9.5" fill="#5b6475">gitignored, like the logs</text>
+    <line x1="87" y1="100" x2="87" y2="122" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+    <line x1="242" y1="100" x2="242" y2="122" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+
+    <!-- lane A: pipeline -->
+    <rect x="15" y="125" width="300" height="320" rx="9" fill="#e8f3ff"/>
+    <text x="28" y="144" font-size="10.5" font-weight="600" fill="#0f1729">pipeline/ · Python · <tspan class="mono" font-size="9.5">make data</tspan></text>
+    <g font-size="9.5">
+      <rect x="28" y="153" width="274" height="38" rx="6" fill="#fff"/><text x="38" y="169" class="mono" font-size="10" font-weight="500" fill="#1672d4">ingest.py</text><text x="38" y="183" fill="#5b6475">read, check columns, decode events, skip duplicate</text>
+      <rect x="28" y="197" width="274" height="38" rx="6" fill="#fff"/><text x="38" y="213" class="mono" font-size="10" font-weight="500" fill="#1672d4">normalize.py</text><text x="38" y="227" fill="#5b6475">seconds clock, doubled journeys, bot by behaviour</text>
+      <rect x="28" y="241" width="274" height="38" rx="6" fill="#fff"/><text x="38" y="257" class="mono" font-size="10" font-weight="500" fill="#1672d4">journeys.py</text><text x="38" y="271" fill="#5b6475">event types, cut at death, break paths over ${gap_limit} s</text>
+      <rect x="28" y="285" width="274" height="38" rx="6" fill="#fff" stroke="#2589f5" stroke-width="1.5"/><text x="38" y="301" class="mono" font-size="10" font-weight="500" fill="#1672d4">projection.py</text><text x="38" y="315" fill="#5b6475">world x, z to map position u, v (see the other PDF)</text>
+      <rect x="28" y="329" width="274" height="38" rx="6" fill="#fff"/><text x="38" y="345" class="mono" font-size="10" font-weight="500" fill="#1672d4">heatmaps.py · zones.py · stats.py</text><text x="38" y="359" fill="#5b6475">${grid}×${grid} grids, hotspots, ${stats_slices} statistics slices</text>
+      <rect x="28" y="373" width="274" height="38" rx="6" fill="#fff"/><text x="38" y="389" class="mono" font-size="10" font-weight="500" fill="#1672d4">export.py · images.py</text><text x="38" y="403" fill="#5b6475">JSON with hashed IDs, WebP at most ${max_side} px</text>
+    </g>
+    <text x="28" y="432" font-size="9" fill="#5b6475">Each step's output is the next step's input, in that order.</text>
+    <rect x="15" y="455" width="300" height="27" rx="6" fill="#fff" stroke="#c9d1dc" stroke-dasharray="4 3"/>
+    <text x="27" y="472" font-size="9.5" fill="#5b6475"><tspan class="mono" fill="#0f1729">build_report.json</tspan> · every count, for the audit</text>
+
+    <!-- A to B -->
+    <path d="M302 392 H330 V197 H352" fill="none" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+
+    <!-- lane B: files -->
+    <g font-size="9.5">
+      <rect x="360" y="38" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="56" class="mono" font-size="10" font-weight="500" fill="#0f1729">data/index.json</text><text x="589" y="56" text-anchor="end" fill="#1672d4" font-weight="600">${index_size}</text><text x="371" y="72" fill="#5b6475">maps, dates, one row per match (${matches})</text>
+      <rect x="360" y="88" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="106" class="mono" font-size="10" font-weight="500" fill="#0f1729">data/matches/&lt;id&gt;.json</text><text x="589" y="106" text-anchor="end" fill="#1672d4" font-weight="600">${matches_size}</text><text x="371" y="122" fill="#5b6475">${match_files} files: paths and events per actor</text>
+      <rect x="360" y="138" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="156" class="mono" font-size="10" font-weight="500" fill="#0f1729">data/heatmaps/&lt;map&gt;.json</text><text x="589" y="156" text-anchor="end" fill="#1672d4" font-weight="600">${heatmaps_size}</text><text x="371" y="172" fill="#5b6475">kills, deaths, traffic per cell and date</text>
+      <rect x="360" y="188" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="206" class="mono" font-size="10" font-weight="500" fill="#0f1729">data/zones/&lt;map&gt;.json</text><text x="589" y="206" text-anchor="end" fill="#1672d4" font-weight="600">${zones_size}</text><text x="371" y="222" fill="#5b6475">${zones_grid}×${zones_grid} regions and the hotspots</text>
+      <rect x="360" y="238" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="256" class="mono" font-size="10" font-weight="500" fill="#0f1729">data/stats.json</text><text x="589" y="256" text-anchor="end" fill="#1672d4" font-weight="600">${stats_size}</text><text x="371" y="272" fill="#5b6475">${stats_slices} map × date slices of statistics</text>
+      <rect x="360" y="288" width="240" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/><text x="371" y="306" class="mono" font-size="10" font-weight="500" fill="#0f1729">maps/&lt;map&gt;.webp</text><text x="589" y="306" text-anchor="end" fill="#1672d4" font-weight="600">${maps_size}</text><text x="371" y="322" fill="#5b6475">the 3 minimaps, resized for the web</text>
+    </g>
+    <text x="371" y="352" font-size="9" fill="#5b6475">All under&#160;<tspan class="mono">web/public/</tspan>. Same input, byte-identical files.</text>
+    <line x1="480" y1="362" x2="480" y2="390" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+    <rect x="360" y="393" width="240" height="70" rx="7" fill="#0b1220"/>
+    <text x="374" y="414" font-size="11" font-weight="600" fill="#fff">Vercel static hosting</text>
+    <text x="374" y="431" font-size="9.5" fill="#aab4c5">files served as they are from git</text>
+    <text x="374" y="446" font-size="9.5" fill="#aab4c5">every page path returns index.html</text>
+    <text x="374" y="461" font-size="9.5" fill="#aab4c5" opacity="0">.</text>
+
+    <!-- B to C -->
+    <path d="M600 428 H620 V61 H642" fill="none" stroke="#2589f5" stroke-width="1.6" marker-end="url(#ahb)"/>
+    <text x="614" y="250" font-size="9" fill="#1672d4" transform="rotate(-90 614 250)" text-anchor="middle">HTTPS GET, cached</text>
+
+    <!-- lane C -->
+    <rect x="645" y="38" width="340" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/>
+    <text x="656" y="56" font-size="10.5" font-weight="600" fill="#0f1729"><tspan class="mono" font-size="10">data/load.ts</tspan> · fetch on demand</text>
+    <text x="656" y="72" font-size="9.5" fill="#5b6475">index at start; a match or a map's heatmap only when asked for</text>
+    <line x1="815" y1="82" x2="815" y2="96" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+    <rect x="645" y="98" width="340" height="44" rx="6" fill="#fff" stroke="#dfe3ea"/>
+    <text x="656" y="116" font-size="10.5" font-weight="600" fill="#0f1729">One Zustand store ⇄ the URL</text>
+    <text x="656" y="132" font-size="9.5" fill="#5b6475"><tspan class="mono">?map= &amp;date= &amp;match=</tspan> so links and Back work</text>
+    <line x1="815" y1="142" x2="815" y2="156" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+    <g font-size="9.5">
+      <rect x="645" y="158" width="106" height="78" rx="6" fill="#fff" stroke="#dfe3ea"/>
+      <text x="655" y="176" font-size="10.5" font-weight="600" fill="#0f1729">Overview</text><text x="655" y="191" fill="#5b6475">reads stats.json</text><text x="655" y="206" fill="#5b6475">KPIs, charts,</text><text x="655" y="220" fill="#5b6475">map scores</text>
+      <rect x="762" y="158" width="106" height="78" rx="6" fill="#fff" stroke="#dfe3ea"/>
+      <text x="772" y="176" font-size="10.5" font-weight="600" fill="#0f1729">Journeys</text><text x="772" y="191" fill="#5b6475">index + 1 match</text><text x="772" y="206" fill="#5b6475">paths, markers,</text><text x="772" y="220" fill="#5b6475">playback</text>
+      <rect x="879" y="158" width="106" height="78" rx="6" fill="#fff" stroke="#dfe3ea"/>
+      <text x="889" y="176" font-size="10.5" font-weight="600" fill="#0f1729">Heatmaps</text><text x="889" y="191" fill="#5b6475">heatmaps + zones</text><text x="889" y="206" fill="#5b6475">density picture,</text><text x="889" y="220" fill="#5b6475">hotspot outlines</text>
+    </g>
+    <line x1="815" y1="236" x2="815" y2="252" stroke="#5b6475" stroke-width="1.4" marker-end="url(#ah)"/>
+    <rect x="645" y="254" width="340" height="228" rx="9" fill="#0b1220"/>
+    <text x="658" y="274" font-size="10.5" font-weight="600" fill="#fff">deck.gl · one OrthographicView, layers drawn bottom to top</text>
+    <g font-size="9.5">
+      <rect x="658" y="286" width="314" height="30" rx="5" fill="#1a2438"/><circle cx="672" cy="301" r="4.5" fill="#ffffff"/><text x="684" y="305" fill="#e6ebf3"><tspan font-weight="600">Scatterplot + Text</tspan> · hotspot outlines, numbers</text>
+      <rect x="658" y="322" width="314" height="30" rx="5" fill="#1a2438"/><circle cx="672" cy="337" r="4.5" fill="#e5484d"/><text x="684" y="341" fill="#e6ebf3"><tspan font-weight="600">IconLayer</tspan> · kill, death, storm and loot markers</text>
+      <rect x="658" y="358" width="314" height="30" rx="5" fill="#1a2438"/><circle cx="672" cy="373" r="4.5" fill="#2589f5"/><text x="684" y="377" fill="#e6ebf3"><tspan font-weight="600">PathLayer</tspan> · routes: humans blue, bots amber dashed</text>
+      <rect x="658" y="394" width="314" height="30" rx="5" fill="#1a2438"/><circle cx="672" cy="409" r="4.5" fill="#e8d44d"/><text x="684" y="413" fill="#e6ebf3"><tspan font-weight="600">BitmapLayer</tspan> · heatmap picture painted from the grid</text>
+      <rect x="658" y="430" width="314" height="30" rx="5" fill="#1a2438"/><circle cx="672" cy="445" r="4.5" fill="#6b7a93"/><text x="684" y="449" fill="#e6ebf3"><tspan font-weight="600">BitmapLayer</tspan> · the minimap WebP</text>
+    </g>
+    <text x="658" y="475" font-size="8.5" fill="#8fa0bb">All layers share one drawing space, so they can't drift apart.</text>
+  </svg>
+  <div class="foot"><span>From parquet files to the screen</span><span>2</span></div>
+</section>
+
+<!-- 3 · pipeline stages and what cleaning does -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Inside the pipeline</span>
+    <h2>Six steps, each fixing something the raw logs get wrong</h2>
+    <p class="intro">The data README is wrong in places, so every rule below comes from checking the files. Nothing is dropped silently: every removed or flagged row is counted in <span class="mono">build_report.json</span>.</p>
+  </div>
+  <div class="stages">
+    <div class="stage-card"><span class="no">01</span><span class="mod">ingest.py</span><span class="what">Reads every file, checks the 8 columns and their types, decodes the event name from bytes to text.</span><span class="issue">One file sits in two day folders: read once. ${files_read} of ${files_found} read, ${files_failed} failed.</span></div>
+    <div class="stage-card"><span class="no">02</span><span class="mod">normalize.py</span><span class="what">Reads <span class="mono">ts</span> as Unix seconds and starts each match's clock at its first event. Decides bot or human.</span><span class="issue">${doubled_count} journeys were logged twice in full: the copy goes. A file that logs <span class="mono">BotPosition</span> is a bot.</span></div>
+    <div class="stage-card"><span class="no">03</span><span class="mod">journeys.py</span><span class="what">Gives each event a type (position, kill, death, storm death, loot) and cuts each journey at its first death.</span><span class="issue">${after_death_dropped} positions were logged after the player died. Gaps over ${gap_limit} s break the path (${gaps} breaks).</span></div>
+    <div class="stage-card" style="border-color: var(--brand);"><span class="no">04</span><span class="mod">projection.py</span><span class="what">Turns world x and z into a map position from 0 to 1. The only place this happens.</span><span class="issue">The README's image size (1024 px) is wrong; positions don't depend on image size at all.</span></div>
+    <div class="stage-card"><span class="no">05</span><span class="mod">heatmaps · zones · stats</span><span class="what">Counts kills and deaths per cell, spreads time along each step, finds hotspot regions, computes the statistics.</span><span class="issue">Only human journeys count. A hotspot needs events from at least ${hot_matches} matches.</span></div>
+    <div class="stage-card"><span class="no">06</span><span class="mod">export · images</span><span class="what">Writes the JSON files and the WebP minimaps, with no timestamps, so a rebuild gives identical bytes.</span><span class="issue">Player IDs are replaced by a short hash. Match files are swapped in only after all ${match_files} are written.</span></div>
+  </div>
+  <div class="row" style="gap: 6mm; flex: 1;">
+    <div class="grow stack">
+      <h3>Where the rows go</h3>
+      <table class="ledger">
+        <tr><td class="op"></td><td>Rows read from ${files_read} files</td><td class="num">${rows_read}</td></tr>
+        <tr><td class="op">−</td><td>Second copy of the ${doubled_count} journeys logged twice in full</td><td class="num">${doubled_removed}</td></tr>
+        <tr><td class="op">−</td><td>Positions logged after the player's first death (${after_death_journeys} journeys)</td><td class="num">${after_death_dropped}</td></tr>
+        <tr class="tot"><td class="op">=</td><td>Rows kept and exported</td><td class="num">${rows_final}</td></tr>
+      </table>
+      <div class="card tint" style="padding: 3mm 4mm;">
+        <h3>Kept, but flagged</h3>
+        <ul class="ticks small" style="color: var(--ink);">
+          <li><b>${id_mismatch} journeys</b> have a bot-style numeric ID but log like the player client. Counted as human, flagged <span class="mono">id_mismatch</span>.</li>
+          <li><b>${pairs} Kill/Killed pairs</b> in the same file and second. The death counts; the kill doesn't, and no cause is claimed.</li>
+          <li><b>${after_death_events} late kills</b> logged after the player died. Kept with their timing marked uncertain.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grow stack">
+      <h3>What the ${rows_final} kept rows are</h3>
+      <div class="bar">
+        <div style="width: ${pct_position}%; background: #2589f5;"></div>
+        <div style="width: ${pct_loot}%; background: #e8b931;"></div>
+        <div style="width: ${pct_kill}%; background: #e5484d;"></div>
+        <div style="width: ${pct_death}%; background: #8e4ec6;"></div>
+        <div style="width: ${pct_storm_death}%; background: #0f1729;"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#2589f5"></i>Positions ${positions} (${pctl_position} %)</span>
+        <span><i style="background:#e8b931"></i>Loot ${loot} (${pctl_loot} %)</span>
+        <span><i style="background:#e5484d"></i>Kills ${kills} (${pctl_kill} %)</span>
+        <span><i style="background:#8e4ec6"></i>Deaths ${deaths} (${pctl_death} %)</span>
+        <span><i style="background:#0f1729"></i>Storm deaths ${storm}</span>
+      </div>
+      <h3 style="margin-top: 2mm;">Who they belong to: ${journeys_total} journeys</h3>
+      <div class="bar">
+        <div style="width: ${pct_human}%; background: #2589f5;"></div>
+        <div style="width: ${pct_bot}%; background: #e99124;"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#2589f5"></i>Human ${journeys_human} (${pct_human} %)</span>
+        <span><i style="background:#e99124"></i>Bot ${journeys_bot} (${pct_bot} %)</span>
+      </div>
+      <p class="small">A journey is one player (or bot) in one match: one parquet file. Most positions are the movement samples logged about every 5 s; they become the paths.</p>
+    </div>
+  </div>
+  <div class="foot"><span>From parquet files to the screen</span><span>3</span></div>
+</section>
+
+<!-- 4 · one event end to end -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">One event, end to end</span>
+    <h2>Following a single kill from the parquet row to the pixel</h2>
+    <p class="intro">A real row: a human on ${ex_map} kills a bot ${ex_t} s into match <span class="mono">${ex_match}</span>. The player ID is shown as its hash, the only form that leaves the pipeline.</p>
+  </div>
+  <div class="trace">
+    <div class="step">
+      <div class="side"><span class="lbl">1 · Raw row</span><h3>As stored in the file</h3><span class="where">ingest.py</span></div>
+<pre>user_id  ${ex_hash}…
+match_id ${ex_match}…
+map_id   ${ex_map}
+x ${ex_x}
+y ${ex_y}
+z ${ex_z}
+ts    ${ex_ts}
+event ${ex_event_bytes}</pre>
+    </div>
+    <div class="step">
+      <div class="side"><span class="lbl">2 · Clock</span><h3>Seconds, not milliseconds</h3><span class="where">normalize.py</span></div>
+<pre>epoch_s = ${ex_ts}
+= ${ex_iso} UTC
+
+t = epoch_s − first
+    event in match
+  = ${ex_t} s</pre>
+    </div>
+    <div class="step">
+      <div class="side"><span class="lbl">3 · Meaning</span><h3>Type, actor, flags</h3><span class="where">normalize.py · journeys.py</span></div>
+<pre>event    BotKill
+category kill
+actor    human
+         (no BotPosition)
+pair     false
+after_death false</pre>
+    </div>
+    <div class="step" style="border-color: var(--brand);">
+      <div class="side"><span class="lbl">4 · Project</span><h3>World to map position</h3><span class="where">projection.py</span></div>
+<pre>u = (x − (${ex_ox})) / ${ex_scale}
+  = ${ex_u}
+v = (z − (${ex_oz})) / ${ex_scale}
+  = ${ex_v}
+
+y (height) is ignored</pre>
+    </div>
+    <div class="step">
+      <div class="side"><span class="lbl">5 · Export</span><h3>In the match file</h3><span class="where">export.py</span></div>
+<pre>matches/${ex_match}.json
+actors[].events[]:
+${ex_json}</pre>
+    </div>
+    <div class="step">
+      <div class="side"><span class="lbl">6 · Draw</span><h3>On the minimap</h3><span class="where">map/space.ts · IconLayer</span></div>
+<pre>drawing space
+X = u × 1000
+  = ${ex_sx}
+Y = (1 − v) × 1000
+  = ${ex_sy}
+
+pixel on the ${ex_w} px
+WebP: ${ex_px}, ${ex_py}</pre>
+    </div>
+  </div>
+  <div class="grid3" style="margin-top: 1mm;">
+    <div class="card warn"><h3>The timestamp trap</h3><p class="small" style="color: var(--ink);">The column is typed as milliseconds. Read that way, this row would be at ${ex_ms_iso} and the whole dataset would span a few minutes of 1970. As seconds, it falls on its folder's date.</p></div>
+    <div class="card brand"><h3>Whose position is it?</h3><p class="small" style="color: var(--ink);">An event's x and z are where the file's owner stood. So a kill marker sits where the killer stood, and a death marker where the victim fell.</p></div>
+    <div class="card tint"><h3>Why only u and v leave</h3><p class="small" style="color: var(--ink);">The browser never sees world units, so paths, markers and heatmaps all come from the same converted numbers. The ${uv_decimals}-decimal rounding is the only change.</p></div>
+  </div>
+  <div class="foot"><span>From parquet files to the screen</span><span>4</span></div>
+</section>
+
+<!-- 5 · run time -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Run time</span>
+    <h2>What the browser downloads, and when</h2>
+    <p class="intro">Nothing is computed from raw data in the browser. It downloads the index once, then the one file a view needs. Filtering, sorting and drawing happen on files already in memory.</p>
+  </div>
+  <div class="row" style="gap: 7mm; flex: 1;">
+    <svg viewBox="0 0 560 400" style="width: 152mm; flex: none;">
+      <defs><marker id="sq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0f1729"/></marker>
+      <marker id="sqb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2589f5"/></marker></defs>
+      <rect x="10" y="6" width="120" height="32" rx="6" fill="#f5f7fa"/><text x="70" y="27" text-anchor="middle" font-size="11" font-weight="600">Level designer</text>
+      <rect x="220" y="6" width="120" height="32" rx="6" fill="#e8f3ff"/><text x="280" y="27" text-anchor="middle" font-size="11" font-weight="600">Browser app</text>
+      <rect x="430" y="6" width="120" height="32" rx="6" fill="#0b1220"/><text x="490" y="27" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Vercel</text>
+      <g stroke="#c9d1dc" stroke-dasharray="3 4"><line x1="70" y1="38" x2="70" y2="395"/><line x1="280" y1="38" x2="280" y2="395"/><line x1="490" y1="38" x2="490" y2="395"/></g>
+      <g font-size="9.5">
+        <line x1="70" y1="62" x2="276" y2="62" stroke="#0f1729" marker-end="url(#sq)"/><text x="78" y="57">opens /journeys</text>
+        <line x1="280" y1="84" x2="486" y2="84" stroke="#2589f5" marker-end="url(#sqb)"/><text x="288" y="79" fill="#1672d4">GET index.html + app JS</text>
+        <line x1="280" y1="110" x2="486" y2="110" stroke="#2589f5" marker-end="url(#sqb)"/><text x="288" y="105" fill="#1672d4">GET data/index.json · ${index_size}</text>
+        <line x1="280" y1="136" x2="486" y2="136" stroke="#2589f5" marker-end="url(#sqb)"/><text x="288" y="131" fill="#1672d4">GET maps/&lt;map&gt;.webp</text>
+        <rect x="284" y="146" width="140" height="34" rx="4" fill="#f5f7fa"/><text x="292" y="160">match list built from</text><text x="292" y="173">the index, in memory</text>
+        <line x1="70" y1="204" x2="276" y2="204" stroke="#0f1729" marker-end="url(#sq)"/><text x="78" y="199">picks a match</text>
+        <line x1="280" y1="228" x2="486" y2="228" stroke="#2589f5" marker-end="url(#sqb)"/><text x="288" y="223" fill="#1672d4">GET data/matches/&lt;id&gt;.json</text>
+        <text x="288" y="242" fill="#5b6475">median ${match_median}, largest ${match_max}</text>
+        <rect x="284" y="250" width="140" height="34" rx="4" fill="#f5f7fa"/><text x="292" y="264">paths, markers and</text><text x="292" y="277">playback drawn</text>
+        <line x1="70" y1="310" x2="276" y2="310" stroke="#0f1729" marker-end="url(#sq)"/><text x="78" y="305">switches to Heatmaps</text>
+        <line x1="280" y1="334" x2="486" y2="334" stroke="#2589f5" marker-end="url(#sqb)"/><text x="288" y="329" fill="#1672d4">GET heatmaps/ + zones/&lt;map&gt;.json</text>
+        <rect x="284" y="344" width="160" height="34" rx="4" fill="#f5f7fa"/><text x="292" y="358">grid painted into a picture,</text><text x="292" y="371">cached per map and layer</text>
+      </g>
+    </svg>
+    <div class="grow stack">
+      <table>
+        <tr><th>File</th><th>Read by</th><th class="num">Size</th></tr>
+        <tr><td class="mono">index.json</td><td>every map page, at start</td><td class="num">${index_size}</td></tr>
+        <tr><td class="mono">matches/&lt;id&gt;.json</td><td>Journeys, one per opened match</td><td class="num">${match_median} median</td></tr>
+        <tr><td class="mono">heatmaps/&lt;map&gt;.json</td><td>Heatmaps, one per map</td><td class="num">${heatmaps_size} for 3</td></tr>
+        <tr><td class="mono">zones/&lt;map&gt;.json</td><td>Heatmaps, hotspot outlines</td><td class="num">${zones_size} for 3</td></tr>
+        <tr><td class="mono">stats.json</td><td>Overview and About</td><td class="num">${stats_size}</td></tr>
+        <tr><td class="mono">maps/&lt;map&gt;.webp</td><td>every map view</td><td class="num">${maps_size} for 3</td></tr>
+      </table>
+      <div class="card tint">
+        <h3>Done in the browser</h3>
+        <ul class="ticks small" style="color: var(--ink);">
+          <li>Filtering by map and date, sorting the match list.</li>
+          <li>Cutting each path at the playback time, every frame.</li>
+          <li>Painting the heatmap grid into a soft picture (display only; no values change).</li>
+          <li>Turning the cursor position back into world x, z for the readout.</li>
+        </ul>
+      </div>
+      <div class="card brand">
+        <h3>Why there is no server</h3>
+        <p class="small" style="color: var(--ink);">The data is fixed and every question the pages ask is known in advance, so the answers are files. No database to run, no API to keep alive, nothing that can fail on a reviewer's first visit.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>From parquet files to the screen</span><span>5</span></div>
+</section>
+
+<!-- 6 · heatmaps -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Aggregation</span>
+    <h2>How positions and events become a heatmap</h2>
+    <p class="intro">Heatmaps are built from human journeys only. The ${grid}×${grid} grid holds the numbers; the soft picture on screen is painted from it and never changes them.</p>
+  </div>
+  <div class="grid3" style="flex: 1; gap: 6mm;">
+    <div class="stack">
+      <span class="pill">1 · Traffic: time along the route</span>
+      <div class="card tint" style="padding: 4mm 6mm;">${trace_svg}</div>
+      <p class="small" style="color: var(--ink);">Positions are about 5 s apart. Counting only the cell each sample lands in would leave the cells in between empty, so each step's time is spread along its straight line: here a ${trace_seconds} s step crosses ${trace_cells} cells, split by the distance inside each (computed with the pipeline's own <span class="mono">trace_step</span>).</p>
+      <p class="small">Steps over ${gap_limit} s add nothing: where the player went is unknown.</p>
+    </div>
+    <div class="stack">
+      <span class="pill">2 · Kills and deaths: counts per cell</span>
+      <svg viewBox="0 0 230 230" style="width: 62mm; align-self: center;">
+        <rect x="0" y="0" width="230" height="230" fill="#f5f7fa" rx="4"/>
+        <g stroke="#dfe3ea" stroke-width="0.6">
+          <path d="M14.4 0V230M28.8 0V230M43.1 0V230M57.5 0V230M71.9 0V230M86.3 0V230M100.6 0V230M115 0V230M129.4 0V230M143.8 0V230M158.1 0V230M172.5 0V230M186.9 0V230M201.3 0V230M215.6 0V230"/>
+          <path d="M0 14.4H230M0 28.8H230M0 43.1H230M0 57.5H230M0 71.9H230M0 86.3H230M0 100.6H230M0 115H230M0 129.4H230M0 143.8H230M0 158.1H230M0 172.5H230M0 186.9H230M0 201.3H230M0 215.6H230"/>
+        </g>
+        <g stroke="#0f1729" stroke-width="1.6" fill="none"><path d="M57.5 0V230M115 0V230M172.5 0V230M0 57.5H230M0 115H230M0 172.5H230"/></g>
+        <rect x="57.5" y="57.5" width="57.5" height="57.5" fill="none" stroke="#2589f5" stroke-width="3"/>
+        <circle cx="86.25" cy="86.25" r="40.7" fill="none" stroke="#2589f5" stroke-width="2" stroke-dasharray="4 3"/>
+      </svg>
+      <p class="small" style="color: var(--ink);">Each kill or death adds 1 to its cell. Thin lines: a corner of the ${grid}×${grid} grid. Thick lines: ${zones_grid}×${zones_grid} regions of 4×4 cells, which hotspots are judged on, because single cells mostly hold one event.</p>
+      <div class="card brand" style="padding: 3mm 4mm;">
+        <h3>A region is a hotspot when</h3>
+        <ul class="ticks small" style="color: var(--ink);">
+          <li>events come from at least ${hot_matches} different matches;</li>
+          <li>no single match gives over ${hot_share} % of its value;</li>
+          <li>it is among the ${hot_max} strongest that pass, per layer.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stack">
+      <span class="pill">3 · In the browser: painted, not recomputed</span>
+      <div class="stage" style="padding: 4mm;">
+        <svg viewBox="0 0 220 150" width="100%">
+          <defs>
+            <radialGradient id="g1"><stop offset="0" stop-color="#fffce6" stop-opacity="1"/><stop offset="0.45" stop-color="#e8d44d" stop-opacity="0.85"/><stop offset="1" stop-color="#16b3c9" stop-opacity="0"/></radialGradient>
+            <radialGradient id="g2"><stop offset="0" stop-color="#55d0e0" stop-opacity="0.9"/><stop offset="1" stop-color="#138f9e" stop-opacity="0"/></radialGradient>
+          </defs>
+          <circle cx="80" cy="70" r="46" fill="url(#g2)"/><circle cx="140" cy="88" r="38" fill="url(#g2)"/><circle cx="104" cy="74" r="44" fill="url(#g1)"/>
+          <circle cx="160" cy="46" r="22" fill="url(#g2)" opacity="0.7"/>
+          <circle cx="104" cy="74" r="30" fill="none" stroke="#fff" stroke-width="3"/><circle cx="104" cy="74" r="30" fill="none" stroke="#2589f5" stroke-width="1.5"/>
+          <circle cx="128" cy="49" r="8" fill="#2589f5"/><text x="128" y="52.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">1</text>
+        </svg>
+      </div>
+      <ul class="ticks small" style="color: var(--ink);">
+        <li>Each non-zero cell is painted as a soft bump (Gaussian, σ = 1 cell) whose colour comes from that cell's own value; neighbours are never added up, so no peak is invented.</li>
+        <li>Traffic uses one teal to yellow palette on a log scale. Kills and deaths use four count classes: 1, 2–3, 4–9, 10+.</li>
+        <li>Hotspot outlines come straight from <span class="mono">zones/&lt;map&gt;.json</span>; hovering reads the grid, not the pixels.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>From parquet files to the screen</span><span>6</span></div>
+</section>
+
+<!-- 7 · guarantees -->
+<section class="page">
+  <div class="head">
+    <span class="eyebrow">Guarantees and limits</span>
+    <h2>What the design makes sure of, and what it can't</h2>
+    <p class="intro">The pipeline is the single source of every number on screen. These are the properties that follow from that, and the gaps the data itself leaves.</p>
+  </div>
+  <div class="grid3" style="gap: 5mm;">
+    <div class="card good"><span class="pill ok">Reproducible</span><h3 style="margin-top: 2mm;">Same input, same bytes</h3><p class="small" style="color: var(--ink);">No build timestamps and a fixed sort order, so <span class="mono">make data</span> on the same raw files gives byte-identical output. A change in a diff is a change in the data or the code.</p></div>
+    <div class="card good"><span class="pill ok">Safe rebuilds</span><h3 style="margin-top: 2mm;">Nothing half-written</h3><p class="small" style="color: var(--ink);">Match files are written to a staging folder, checked against the index (one file per match, right schema), and only then swapped in. The old folder goes last.</p></div>
+    <div class="card good"><span class="pill ok">One source</span><h3 style="margin-top: 2mm;">Pages can't disagree</h3><p class="small" style="color: var(--ink);">One clock, one bot rule, one coordinate function, and statistics computed once into <span class="mono">stats.json</span>. The pages read; they don't recalculate.</p></div>
+    <div class="card good"><span class="pill ok">Private</span><h3 style="margin-top: 2mm;">No real IDs leave</h3><p class="small" style="color: var(--ink);">Player IDs are hashed before export, raw logs are gitignored, and <span class="mono">make check-ids</span> scans everything trackable for real IDs.</p></div>
+    <div class="card good"><span class="pill ok">Audited</span><h3 style="margin-top: 2mm;">Every exclusion counted</h3><p class="small" style="color: var(--ink);"><span class="mono">build_report.json</span> lists files skipped, rows removed by reason, flags, journeys by type and the path breaks, so each cleaning step can be checked.</p></div>
+    <div class="card good"><span class="pill ok">Fast first visit</span><h3 style="margin-top: 2mm;">Small, on demand</h3><p class="small" style="color: var(--ink);">${web_total} in total, but a visit loads the index and one map first. A match file is ${match_median} at the median.</p></div>
+  </div>
+  <div class="grid3" style="gap: 5mm;">
+    <div class="card warn"><span class="pill bot">Limit</span><h3 style="margin-top: 2mm;">Recorded players only</h3><p class="small" style="color: var(--ink);">Most matches have one recorded human. Everything describes what was logged, not every player in every match.</p></div>
+    <div class="card warn"><span class="pill bot">Limit</span><h3 style="margin-top: 2mm;">Straight lines between samples</h3><p class="small" style="color: var(--ink);">Paths and traffic join samples about 5 s apart with straight lines. The real route between them is unknown.</p></div>
+    <div class="card warn"><span class="pill bot">Limit</span><h3 style="margin-top: 2mm;">No extraction event</h3><p class="small" style="color: var(--ink);">A journey with no recorded death probably extracted, but the logs never say so; anything built on that is labelled inferred.</p></div>
+  </div>
+  <div class="foot"><span>From parquet files to the screen</span><span>7</span></div>
+</section>
+
+</body>
+</html>

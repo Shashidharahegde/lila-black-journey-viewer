@@ -451,7 +451,7 @@ Status as recorded in the audit, compared with today's CLAUDE.md.
 | C3 | EC-20 "alpha 255 on every pixel": 1,194 AmbroseValley pixels are below 255 | Check EC-20 (immaterial) |
 | C4 | "Storm deaths 11–15 min" (one at 10:55); "gaps up to 8 min" (human max 5 min; 8.6 min is a bot gap) | Still in the CLAUDE.md Data facts |
 | C6 | `map_score` rounds before scaling (≤ 0.0003) | Open, negligible |
-| C8 | `INSIGHTS.md` stale | Check |
+| C8 | `INSIGHTS.md` stale | Resolved 2026-10-25: rewritten from the cleaned output; every figure from `tools/insight_stats.py` |
 | C9 | README says `make data` takes ~45 s; it took 127 s | Check README |
 
 ## Appendix B. Index of every evidence file

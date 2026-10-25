@@ -82,7 +82,7 @@ data/raw/  parquet + minimaps (gitignored)
    ▼  pipeline/  — Python, run locally with `make data` (~45 s)
    ingest → normalize → journeys → project → heatmaps / zones / stats → export
    │
-   ▼  web/public/data/*.json (5.7 MB) + web/public/maps/*.webp (1.3 MB) — committed
+   ▼  web/public/data/*.json (3.9 MB) + web/public/maps/*.webp (1.3 MB), committed
    │
    ▼  web/  — React + TypeScript + deck.gl, filters and playback in the browser
    │
@@ -329,7 +329,7 @@ Tests check behaviour, not just that code runs. For example: no path point after
 |---|---|
 | `README.md` | Tech stack, setup, deploy settings, environment variables (none) |
 | `ARCHITECTURE.md` | The one-page architecture doc |
-| `INSIGHTS.md` | Three things the tool shows about the game |
+| `INSIGHTS.md` | Three verified things the data shows about the maps |
 | `CLAUDE.md` | Rules and decisions for the coding agent |
 | `Makefile` | `setup`, `data`, `test`, `web`, `check-ids`, `requirements` |
 

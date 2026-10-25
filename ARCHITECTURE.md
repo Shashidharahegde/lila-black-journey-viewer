@@ -1,64 +1,47 @@
-# Architecture
+# Architecture: LILA BLACK Player Journey Viewer
 
-Live: https://lila-black-journey-viewer.vercel.app/ · Full detail, evidence and every edge case: [TECHNICAL_REPORT.md](docs/reports/TECHNICAL_REPORT.md) · Register: [EDGE_CASES.md](docs/reports/EDGE_CASES.md)
+**Goal:** Turn five days of LILA BLACK telemetry into reliable, explorable maps for level designers. [Live app](https://lila-black-journey-viewer.vercel.app/) · [Technical report](docs/reports/TECHNICAL_REPORT.md) · [Edge cases](docs/reports/EDGE_CASES.md) · [Assumptions & evidence](docs/evidence/README.md)
 
-## What I built with and why
-| Layer | Choice | Why |
-|---|---|---|
-| Data pipeline | Python (pandas, pyarrow, numpy, Pillow), run once with `make data`; pytest | The data is small (~8 MB) and fixed, so every query is known in advance. Parsing before deploy means a visitor downloads small, ready-to-draw JSON instead of 1,243 parquet files. |
-| Frontend | React + TypeScript + Vite, deck.gl, Zustand, React Router, shadcn/ui; Vitest | deck.gl draws the minimap, paths, icons, playback and heatmaps in one WebGL view. One store holds the selection and playback clock, mirrored in the URL, so every view is a shareable link. |
-| Hosting | Vercel, static files, no backend | Nothing to start up or fail on a reviewer's first visit. |
+## 1. System design
 
-## Data flow
+```mermaid
+flowchart LR
+    A["1,243 Parquet files<br/>3 minimaps"] --> B["Python · make data<br/>Ingest → normalize → journeys<br/>project → aggregate"]
+    B --> C["Static assets<br/>3.9 MB JSON · 1.3 MB WebP"]
+    C --> D["Vercel<br/>Static hosting"]
+    D --> E["React + TypeScript + deck.gl<br/>Overview · Journeys · Heatmaps"]
 ```
-data/raw/  1,243 parquet files + 3 minimaps (gitignored)
-  → ingest     check schema, decode event bytes (UTF-8), read the one duplicated file once
-  → normalize  ts as seconds → match time; stable sort; remove 3 doubled journeys; bot = logs BotPosition
-  → journeys   events from the file owner's view; flag Kill/Killed pairs; drop positions after death; split paths at gaps > 30 s
-  → project    world (x, z) → UV 0–1                         ← the only coordinate conversion
-  → aggregate  64×64 heatmap grids, 16×16 hotspot regions, stats for 28 map × date slices
-  → web/public/data/*.json (5.7 MB) + maps/*.webp (1.3 MB)   committed; byte-identical on rebuild
-  → browser    index.json on load, one match file when opened; filtering and playback in memory
-```
-Three pages share one map row (map toggle, date filter): **Overview** (`/stats`, compares the maps), **Journeys** (`/journeys`: match list, routes, markers, playback) and **Heatmaps** (`/heatmaps`: Traffic, Kills or Deaths across matches, with hotspots). On the map, humans are solid blue and drawn on top; bots are dashed amber. Each event type has its own icon; where icons overlap, kills and deaths win over loot. Playback cuts every path at time `t` on each frame. Heatmap cells are painted as small soft bumps (display only: neighbours are never added together). Hotspots are 16×16 regions with events from ≥ 5 matches and ≤ 50 % from any one match, top 6 per layer.
 
-## Coordinate mapping
-1. **Formula** (data README, verified): `u = (x − origin_x) / scale`, `v = (z − origin_z) / scale`. `y` is elevation and is ignored.
-2. **Real image sizes, not 1024 px:** AmbroseValley 4320², GrandRift 2160×2158, Lockdown 9000². So the pipeline stores **UV, not pixels**; the web images (≤ 4,096 px) can be any size without breaking alignment.
-3. **Flip y:** image rows count from the top while world z grows upward, so `px = u·W`, `py = (1 − v)·H`, with W and H separate (GrandRift isn't square).
-4. **Worked example** (README row, AmbroseValley, scale 900, origin −370 / −473): x = −301.45, z = −355.55 → u = 0.0762, v = 0.1305 → (78, 890) at 1024 px, as the README says, and (312, 3562) on the 4096 px WebP. Without the flip, y would be 535: mirrored.
-5. **One drawing space:** deck.gl draws the image and all data at `X = u·1000`, `Y = (1 − v)·1000·H/W`, so zoom, pan and playback can't drift.
-6. **Checked four ways:**
-   - maths tests on the production function: README example, corners, centre, axis directions (`test_projection.py`);
-   - GrandRift overlays with and without the flip: with it, routes sit on roads and named places; without it, they start in the black area beyond the edge ([evidence](docs/evidence/coordinates/grandrift_validation.md));
-   - every exported point sent back to world space through the browser code: error ≤ 0.07 units, which is the JSON rounding ([evidence](docs/evidence/coordinates/reverse_mapping_validation.md));
-   - an independent audit: 99.7–100 % of samples land on map content, and every wrong flip scores lower.
+**Why this architecture?** The ~8 MB source dataset is fixed and the required queries are known. Python (pandas, pyarrow, NumPy, Pillow) validates and precomputes the data once; Vercel serves committed files without a backend. React/Vite provides the UI, deck.gl renders paths and heatmaps in one WebGL view, and Zustand/React Router keep filters and playback shareable via the URL. The browser loads `index.json` first, then match or heatmap files on demand. Journeys supports map/date/match filters, distinct human/bot paths and event markers, and timeline playback.
 
-   No landmarks with known coordinates exist, so this shows consistency (about ±10 world units), not ground truth.
+## 2. Coordinate mapping: the critical step
 
-## Assumptions where the data was ambiguous
-| Ran into | Handled by |
+1. **Normalize world coordinates in Python:** `u = (x − origin_x) / scale`, `v = (z − origin_z) / scale`. World `y` is elevation, not a top-down map axis.
+2. **Store UV, not pixels.** Draw with `pixel_x = u × width`, `pixel_y = (1 − v) × height`: the vertical flip corrects the image origin, and separate width/height preserve GrandRift's **2160 × 2158** aspect ratio. UV stays aligned when large minimaps are resized to WebP.
+3. **Use one drawing space.** deck.gl places the image and every overlay using the same UV-derived coordinates, preventing relative drift during zoom, pan and playback.
+
+**Worked check:** AmbroseValley world `(−301.45, −355.55)` → UV `(0.0762, 0.1305)` → approximately **(312, 3562)** on its 4096-pixel WebP; without the flip, Y would be about **535**. Formula/corner tests and round-trip checks pass (maximum **0.071 world units** of rounding error); **99.69–100%** of independently checked samples land on map content. **Limit:** no surveyed landmarks exist, so this supports alignment, not exact ground truth. [Validation evidence](docs/evidence/coordinates/grandrift_validation.md)
+
+## 3. Assumptions that affect correctness
+
+| Ambiguity | Implemented handling |
 |---|---|
-| `ts` typed ms, but read as ms the data spans 6.6 min in 1970 | Read as epoch **seconds**; match time = ts − earliest ts in the match; matches then last 13–887 s |
-| `event` stored as bytes | Decoded as UTF-8; an unknown event type stops the build |
-| README: numeric ID = bot. 17 numeric-ID files never log `BotPosition` and loot like players | **Bot = the file logs `BotPosition`**, else human. The 17 count as humans, flagged `id_mismatch` (≤ 1.63 % of any heatmap total) |
-| An event's x/z is the file owner's position | Kill marker = where the killer stood; death marker = where the victim fell |
-| `Kill`/`Killed` only as 3 same-file, same-second pairs | Both kept, flagged; cause unknown (not called self-kills); the `Kill` isn't counted as a kill |
-| Folders aren't UTC days; one match's files span two folders | Group by `match_id`; date = UTC date of the first event; partial days flagged |
-| One file in two folders; 3 journeys logged twice in full | Identical file read once; doubled journeys keep their first half (190 rows). Same-second repeat loots elsewhere are kept |
-| 172 journeys log positions after death | Those 173 positions dropped, so no one moves after dying; 2 late `BotKill`s kept, flagged |
-| Positions every ~5 s, gaps up to 518 s | Paths and playback break at gaps > 30 s; traffic time is traced along each shorter step |
-| No extraction event | Nothing is drawn as an extraction; a journey ends at its "last recorded position" |
-| 743 of 796 matches record one file | Figures say "recorded"; every heatmap shows its sample size; under 10 matches is flagged "Few matches" |
+| `ts` declared milliseconds; `event` stored as bytes | Treat values as **Unix seconds**; decode events as UTF-8 and reject unknown types. |
+| Numeric IDs do not always identify bots | `BotPosition` ⇒ bot; **17** conflicting journeys counted as human but flagged `id_mismatch` (not proven human-operated). |
+| Repeated records may be genuine events | Skip one identical file and remove **190** rows from three proven doubled journeys; preserve other same-second loot. |
+| Event position belongs to the file owner | A kill marks the **killer's** position; a death marks the **victim's** position. Ambiguous `Kill`/`Killed` pairs remain flagged. |
+| Missing positions and incomplete match coverage | Break paths at gaps **>30 s**; label activity **recorded**, not complete. No extraction event is inferred as fact. |
 
-## Trade-offs
-| Considered | Chose | Because |
-|---|---|---|
-| FastAPI + DuckDB backend vs static files | Static files | Fixed, small data; fewer moving parts. Revisit if the data goes live. |
-| Parse parquet in the browser (DuckDB-WASM) vs a pipeline | Python pipeline | Fast first load; tested and reproducible. |
-| Convert coordinates in the browser vs the pipeline | Pipeline, stored as UV | One tested function; paths, markers, playback and heatmaps can't disagree. |
-| Bots by ID vs by behaviour | Behaviour, mismatches flagged | Follows what the client logged; the flag keeps it reversible. |
-| Hotspots by resampling stability vs simple match guards | ≥ 5 matches, ≤ 50 % from one, top 6 | Explainable to a designer; one match can't make a hotspot. |
-| `TripsLayer` fading trail vs paths cut at `t` | Paths cut at `t`, full history visible | Same styling as the static view; testable; ≤ 16 actors per match. |
+**Open caveat:** The current traffic model traces short straight-line steps and omits longer gaps; an independent audit suggests some gaps represent standing still, making per-cell time estimates uncertain. [Audit details](docs/evidence/README.md)
 
-**Next:** an inferred-extraction layer, loot and storm heatmaps, and per-match heatmaps.
+## 4. Major trade-offs
+
+| Considered | Chosen and why |
+|---|---|
+| FastAPI/DuckDB backend vs static files | **Static:** fewer runtime failure points; revisit for live or much larger data. |
+| Browser Parquet parsing vs Python preprocessing | **Python:** predictable loading, reproducible generated assets. |
+| Pixel coordinates vs UV | **UV in the pipeline:** one tested transform; image-size independent. |
+| `TripsLayer` vs cutting paths at playback time `t` | **Cut paths:** same styling as the static view, straightforward to test at observed match sizes. |
+| Complex resampling-based hotspots vs simple guards | **≥5 matches, ≤50% from any one match, top 6:** explainable, though grid placement can affect results. |
+
+**Verification (24 Oct 2026):** 130 pipeline tests and 476 web tests passed; repeated builds produced byte-identical assets. Independent audits and known limitations are documented in the [technical report](docs/reports/TECHNICAL_REPORT.md). Game-design findings are kept separately in [INSIGHTS.md](INSIGHTS.md).

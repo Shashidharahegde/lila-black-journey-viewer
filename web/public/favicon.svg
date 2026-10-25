@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- a journey on the dark canvas: start ring, path in the human blue, end dot (design tokens: canvas #0E1520, brand #2589F5) -->
+  <rect width="32" height="32" rx="7" fill="#0E1520"/>
+  <polyline points="8.5,23.5 13.5,15 19,19.5 24,9" fill="none" stroke="#2589F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="8.5" cy="23.5" r="3" fill="#0E1520" stroke="#E6EDF5" stroke-width="2"/>
+  <circle cx="24" cy="9" r="3.2" fill="#E6EDF5"/>
+</svg>
