@@ -12,9 +12,9 @@ A browser-based tool for investigating player routes, fights, loot, storm deaths
 
 </div>
 
-![Recorded heatmap view of the LILA BLACK Player Journey Viewer](docs/assets/readme/heatmap-preview.webp)
+![Journeys page of the LILA BLACK Player Journey Viewer: one AmbroseValley match with its human route, six bot routes and event markers](docs/assets/readme/journey-preview.webp)
 
-*Development evidence capture: an AmbroseValley traffic heatmap. Open the live application for the current UI.*
+*The Journeys page: match `8b8ba679` on AmbroseValley (11 February), with the human route in solid blue, six bots in dashed amber, kill, death and loot markers, and the playback bar with event ticks (captured 25 October 2026).*
 
 ## At a glance
 
@@ -116,6 +116,8 @@ The pipeline writes about **3.9 MB of JSON** and **1.3 MB of WebP** in total; th
 
 **More detail:** [ARCHITECTURE.md](ARCHITECTURE.md) explains each stage and the alternatives considered. [TECHNICAL_REPORT.md](docs/reports/TECHNICAL_REPORT.md) covers the complete data contract.
 
+📄 **[Data flow, from parquet to screen (PDF, 7 pages)](web/public/case-study/data-flow.pdf)**: the system diagram, where every row goes during cleaning, one kill followed from its parquet row to the pixel, and how heatmaps are built.
+
 ## Coordinate mapping: the tricky part
 
 Telemetry positions are expressed in game-world `(x, y, z)`, but the minimaps are images. The original data README provided a useful projection formula while incorrectly describing all minimaps as 1024×1024 pixels. In reality, the images have different dimensions, and GrandRift is not exactly square.
@@ -145,6 +147,8 @@ pixel_y = (1 - v) × image_height
 
 **Limit:** there are no authoritative landmark/world-coordinate pairs. These checks establish strong consistency and plausible alignment, **not pixel-perfect ground truth**. See [coordinate evidence](docs/evidence/coordinates/grandrift_validation.md) and [reverse-mapping evidence](docs/evidence/coordinates/reverse_mapping_validation.md).
 
+📄 **[Coordinate mapping, step by step (PDF, 7 pages)](web/public/case-study/coordinate-mapping.pdf)**: the four coordinate systems, each map's calibration, two positions worked by hand, every path drawn with the real mapping and with two wrong ones, and the round-trip check.
+
 ## Handling imperfect data
 
 Several rules are deliberately conservative. The aim is to render observed events without turning ambiguity into a false claim.
@@ -165,6 +169,8 @@ Several rules are deliberately conservative. The aim is to render observed event
 The implemented path/playback rule **splits at gaps over 30 seconds** and traces traffic along shorter sampled steps. This is a rendering decision, **not proof of a player's actual route or time spent standing**. An independent audit found evidence that longer gaps often represent stationary periods; the existing traffic model omits roughly **3.9–4.3%** of estimated human time and can undercount some cells. Global traffic patterns were relatively stable across sensitivity checks, but local values remain **contested**.
 
 [All 30 recorded edge cases](docs/reports/EDGE_CASES.md) · [Assumptions A1–A22 and supporting evidence](docs/evidence/README.md)
+
+📄 **[Assumptions and evidence audit (PDF, 11 pages)](web/public/case-study/assumptions-evidence-audit.pdf)**: 22 data and display assumptions, each with its evidence; two are marked contested (the traffic model, A11, and the map score, A20).
 
 ### Making heatmaps readable without changing the counts
 
