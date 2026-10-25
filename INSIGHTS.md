@@ -26,8 +26,8 @@ The seven AmbroseValley spawns are not equally safe. Six lose 17 % to 35 % of th
 
 - Not luck: shuffling the spawn labels at random 5,000 times never produced a gap between the best and worst spawn as large as the real one (32 percentage points).
 - It holds on three of the four full days (10, 12 and 13 February). On 11 February the riverbank spawn was not worse (4 of 17).
-- Where they die: 44 of the 75 riverbank players reach the riverside buildings just south of the walled compound within 5 minutes (`x -136 to -46, z -113 to -5`, about 150 m north of the spawn). That area holds 6 % of all human time on the map and 16 % of all human deaths (51 of 316); 19 of those 51 are riverbank-spawn players, more than from any other spawn.
-- 23 of the 37 riverbank players who died early had not killed anything yet, and 19 of the 37 died before 2:00.
+- Where they die: 44 of the 75 riverbank players reach the riverside buildings just south of the walled compound within 5 minutes (`x -136 to -46, z -113 to -5`, about 140 m north of the spawn). That area holds 6 % of all human time on the map and 16 % of all human deaths (51 of 316); 19 of those 51 are riverbank-spawn players, more than from any other spawn.
+- 23 of the 37 riverbank players who died early had not killed anything yet, and 20 of the 37 died before 2:00.
 - They also start poorer: a median of 2 loot pickups in the first 2 minutes against 4 to 8 at every other spawn; 15 of 75 picked up nothing.
 - The picture shows each spawn with its 5-minute death rate, early deaths in red and the riverside area boxed: [AmbroseValley](docs/evidence/insights/spawn_early_deaths_AmbroseValley.webp).
 
@@ -46,7 +46,7 @@ Players don't choose this spawn, so half of the people who get it have a worse f
 ## 2. Surviving players leave from six fixed spots, and use them unevenly (inferred)
 
 **What caught my eye**
-There is no extraction event in the data, so I looked at where journeys that end without a death finish. They don't end just anywhere: on AmbroseValley they end at six exact spots, with a median distance of 2 to 3 m from each spot's centre. I read these as the extraction points. This is an inference from positions, not a logged event.
+There is no extraction event in the data, so I looked at where journeys that end without a death finish. They don't end just anywhere: on AmbroseValley they end at six exact spots, with a median distance of under 3 m from each spot's centre. I read these as the extraction points. This is an inference from positions, not a logged event.
 
 **Evidence**
 - AmbroseValley: 200 of 252 journeys without a death (79 %) end within 10 m of one of six spots. Those spots hold only 1.8 % of all human position samples, so players are not just spending a lot of time there. Only 1 journey that ended in a death has its last position there.
@@ -56,15 +56,15 @@ There is no extraction event in the data, so I looked at where journeys that end
 
 | End spot (x, z) | Journeys ending there | Share | Median end time | Kills per journey |
 |---|---|---|---|---|
-| East, by the warehouses (196, -70) | 47 | 23 % | 9:28 | 5.13 |
-| South-centre (72, -309) | 44 | 22 % | 9:38 | 4.66 |
-| North-east (213, 188) | 35 | 17 % | 9:49 | 4.77 |
-| West (-237, 52) | 33 | 16 % | 10:39 | 5.00 |
-| South-west, by the river (-151, -249) | 27 | 13 % | **6:32** | **1.93** |
-| North-west corner (-166, 311) | 18 | 9 % | 9:05 | 3.72 |
+| East, by the warehouses (194, -69) | 46 | 23 % | 9:26 | 5.15 |
+| South-centre (72, -308) | 42 | 21 % | 9:52 | 4.83 |
+| North-east (213, 188) | 35 | 18 % | 9:49 | 4.77 |
+| West (-237, 52) | 33 | 17 % | 10:39 | 5.00 |
+| South-west, by the river (-151, -249) | 27 | 14 % | **6:32** | **1.93** |
+| North-west corner (-166, 311) | 17 | 9 % | 9:39 | 3.53 |
 
-- Players cross the map to leave: only 45 of 233 left from the spot nearest the spawn they started at.
-- The south-west spot stands out: players leave from it about two and a half minutes earlier than from the next-earliest spot, with far fewer kills. It is 56 m from the riverbank spawn in insight 1, so it looks like an early way out of a dangerous start.
+- Players cross the map to leave: only 45 of the 200 left from the spot nearest the spawn they started at.
+- The south-west spot stands out: players leave from it about three minutes earlier than from the next-earliest spot, with far fewer kills. It is 58 m from the riverbank spawn in insight 1, so it looks like an early way out of a dangerous start.
 - The pictures show starts as green rings and survivors' ends as red squares: [AmbroseValley](docs/evidence/insights/starts_and_ends_AmbroseValley.webp), [Lockdown](docs/evidence/insights/starts_and_ends_Lockdown.webp), [GrandRift](docs/evidence/insights/starts_and_ends_GrandRift.webp).
 
 To see it in the tool: on Journeys, open a few matches whose player survived; the square marking the last recorded position keeps landing on the same spots.
@@ -72,7 +72,7 @@ To see it in the tool: on Journeys, open a few matches whose player survived; th
 **Actionable?**
 Yes, with the caveat that the extraction points are inferred.
 - *Metrics affected:* share of extractions per spot (9 % to 23 % today); median time to extract per spot; kills and loot before extracting.
-- *Actions:* confirm the six spots against the level data, and log an extraction event so this no longer has to be inferred; find out why the north-west spot gets half the use of the east one (distance, an exposed approach, or players not knowing it's there); decide whether a quick, low-risk exit next to the most dangerous spawn is intended, and if not, move it or make reaching it cost something.
+- *Actions:* confirm the six spots against the level data, and log an extraction event so this no longer has to be inferred; find out why the north-west spot gets about a third of the use of the east one (distance, an exposed approach, or players not knowing it's there); decide whether a quick, low-risk exit next to the most dangerous spawn is intended, and if not, move it or make reaching it cost something.
 
 **Why a level designer should care**
 Extraction points shape the second half of a match: they decide which routes are busy late and where the last fights happen. An exit hardly anyone uses is wasted space, and an exit that is much easier than the rest lets players skip the risk the mode is built on.
@@ -96,7 +96,7 @@ On Lockdown, 16.4 % of human journeys have no loot pickup at all, three times Am
 - These players die close to where they entered: a median 75 m from their start, against 171 m for all bot deaths on Lockdown.
 - Loot isn't simply far away: players who do loot get their first item about as fast on both maps (median 45 s on Lockdown, 41 s on AmbroseValley).
 - It isn't one bad spawn: the 28 no-loot journeys come from all nine Lockdown spawn points (1 to 7 each). The most, 7, come from the spawn at `x -122, z 85`, where 11 of 17 players die within 5 minutes; with 17 journeys that spawn is worth watching but too small to act on alone.
-- Early loot goes with surviving on every map, not just Lockdown. Of the players still alive at 2:00, those with 6 or more pickups died by 5:00 16.6 % of the time, against 27.8 % for those with 0 to 2. Comparing players from the same spawn, the low-loot group did worse at 11 of the 12 spawns with enough players in both groups. This is a correlation: players who loot quickly may also be more skilled.
+- Early loot goes with surviving on every map, not just Lockdown. Of the players still alive at 2:00, those with 6 or more pickups died by 5:00 16.5 % of the time, against 29.7 % for those with 0 to 2. Comparing players from the same spawn, the low-loot group did worse at all 12 spawns with at least 3 players in both groups. This is a correlation: players who loot quickly may also be more skilled.
 
 To see it in the tool: on Journeys, pick Lockdown, sort the match list by Duration and open the shortest matches; the death marker sits near the start ring with no loot markers between them.
 
@@ -111,7 +111,7 @@ A player who dies empty-handed two minutes in, near where they started, didn't r
 ---
 
 ## How these were checked
-Each insight was computed twice with separate code: once by the analysis that found it, once by an independent re-check. Both runs read the cleaned match files in `web/public/data/matches/`, which already apply the pipeline's rules (bots by behaviour, rows after death removed, duplicated journeys dropped). Spawn and end spots are found by grouping first and last positions within 50 m and 40 m.
+Every figure on this page is printed by `pipeline/tools/insight_stats.py` (`cd pipeline && uv run python tools/insight_stats.py`; `--figures` redraws the pictures). It reads the cleaned pipeline output, which already applies the pipeline's rules (bots by behaviour, rows after death removed, duplicated journeys dropped). A spawn point is a group of first positions within 50 m of each other. An end spot is the median of a group of survivors' last positions within 40 m, kept when at least 5 endings lie within 10 m of it; a journey ends "at" a spot when its last position is within those 10 m.
 
 Limits:
 - Spawn points and extraction points are inferred from positions; neither is logged.

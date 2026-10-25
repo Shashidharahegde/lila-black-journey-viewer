@@ -17,7 +17,7 @@ Figures in this spec come from running code on the generated files in `web/publi
 
   They differ whenever a journey has a gap over 30 s (median difference 3 s, largest 605 s), so they are kept as separate metrics. Neither one is called "session length" or "playtime".
 - **Kills and deaths have exact existing definitions** (spec 06, EC-12): kills = counted kills (the `Kill` of each Kill/Killed pair left out); deaths = `BotKilled` + `KilledByStorm` + the paired `Killed`. The 3 pairs are shown as their own count with "cause unknown". They are never dropped quietly and never called PvP or self-kills.
-- **No extraction event** (EC-13). Journeys without a recorded death (339 of 781) are labelled "no death recorded". If a chart calls them extractions at all, it says "inferred".
+- **No extraction event** (EC-13). Journeys without a recorded death (355 of 798) are labelled "no death recorded". If a chart calls them extractions at all, it says "inferred".
 - **Distance is a lower bound.** It is measured along straight lines between samples about 5 s apart, inside segments only. Gaps over 30 s add nothing.
 - **Grid coverage isn't "% of map explored".** The 64 × 64 grid spans the whole minimap square, including off-map and unreachable areas. Cells differ in size by map (14.1 / 9.1 / 15.6 world units), and more journeys reach more cells. Coverage is therefore stated as "grid cells with observed human traffic" and is only computed per map.
 - **Thin slices and partial days.**

@@ -85,7 +85,7 @@ Start at [evidence/README.md](evidence/README.md): every assumption (A1–A22) w
 | `event_forensics/` | Actor classification, Kill/Killed pairs, heatmap impact | `pipeline/tools/event_forensics.py` |
 | `spatial_analysis/` | Heatmap sparsity, stability, resolution, colour encoding, count bands | `pipeline/tools/` |
 | `frontend_verification/` | Check that the site shows exactly the numbers the pipeline produced | its own scripts |
-| `insights/` | Pictures behind INSIGHTS.md: starts and survivors' ends, inland cells never crossed | `pipeline/tools/insight_stats.py --figures` |
+| `insights/` | Pictures behind INSIGHTS.md: spawns and early deaths, starts and survivors' ends; plus inland cells never crossed (an earlier lead, not in INSIGHTS.md) | `pipeline/tools/insight_stats.py --figures` |
 | `hotspot_rules_compare.md` | Old vs new hotspot rule | by hand |
 | `screenshots/` | Pictures of **earlier UI versions** (heatmap visual pass, first hotspot layer, tabs and outlines). Not the current look | by hand |
 | `ASSUMPTIONS_AND_EVIDENCE.pdf` | PDF export of an earlier copy of `evidence/README.md` | by hand |

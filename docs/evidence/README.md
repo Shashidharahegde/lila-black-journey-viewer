@@ -305,9 +305,10 @@ Sources: [INDEPENDENT_EVIDENCE.md §5.5](../audits/forensic/01_independent/INDEP
 **Status:** Current. **Assumption:** no extraction event exists, so anything built on "survived" is labelled *inferred*.
 
 **Evidence**
-- 339 human journeys end alive.
-- Their spans are **86–840 s** (median 512 s), against a median of 286 s for journeys ending in death.
-- An 86 s journey argues against reading every one as an extraction.
+- 355 of 798 human journeys end alive.
+- Their spans are **25–840 s** (median 498 s), against a median of 285 s for journeys ending in death.
+- A 25 s journey argues against reading every one as an extraction.
+- The audit counted 339 (shortest 86 s, median 512 s) before the 17 `id_mismatch` journeys were counted as human (EC-09); 16 of those end alive, including the four shortest (25, 30, 36 and 50 s). Recomputed from the match files on 2026-10-25.
 
 Sources: [INDEPENDENT_EVIDENCE.md §5.6](../audits/forensic/01_independent/INDEPENDENT_EVIDENCE.md) · [FORENSIC_AUDIT_REPORT.md B4](../audits/forensic/FORENSIC_AUDIT_REPORT.md)
 
@@ -447,7 +448,7 @@ Status as recorded in the audit, compared with today's CLAUDE.md.
 | B1 | Map score isn't a quality measure | Open (A20) |
 | B2 | Identical same-second loot rows: loot rate uncertain by 7.6–14.5 % | Open (A5) |
 | C1 | "Bots in 6.5 % of matches" wording | Fixed in the Decisions table (A12) |
-| C2 | Spec 02 point 15 says "355, shortest 25 s"; should be 339 and 86 s | Check spec 02 |
+| C2 | Spec 02 point 15 says "355, shortest 25 s"; should be 339 and 86 s | Resolved 2026-10-25: since EC-09 the 17 `id_mismatch` journeys are human, so 355 and 25 s are correct (A15) |
 | C3 | EC-20 "alpha 255 on every pixel": 1,194 AmbroseValley pixels are below 255 | Check EC-20 (immaterial) |
 | C4 | "Storm deaths 11–15 min" (one at 10:55); "gaps up to 8 min" (human max 5 min; 8.6 min is a bot gap) | Still in the CLAUDE.md Data facts |
 | C6 | `map_score` rounds before scaling (≤ 0.0003) | Open, negligible |
