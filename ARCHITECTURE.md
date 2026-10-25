@@ -1,4 +1,4 @@
-# Architecture: LILA BLACK Player Journey Viewer
+# Architecture: LILA BLACK Player Journey Viewer (One Page)
 
 **Goal:** Turn five days of LILA BLACK telemetry into reliable, explorable maps for level designers. [Live app](https://lila-black-journey-viewer.vercel.app/) · [Technical report](docs/reports/TECHNICAL_REPORT.md) · [Edge cases](docs/reports/EDGE_CASES.md) · [Assumptions & evidence](docs/evidence/README.md)
 
