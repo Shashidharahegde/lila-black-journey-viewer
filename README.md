@@ -278,7 +278,7 @@ npm run lint        # oxlint
 npm run build       # TypeScript check + production Vite build
 ```
 
-**Documented checks (24 October 2026; not rerun for this README):**
+**Recorded checks (tests re-run 26 October 2026; the other checks 24 October 2026):**
 
 | Verification | Recorded result |
 |:--|:--|

@@ -79,7 +79,7 @@ One fact shaped everything after it: **743 of 796 matches contain only one recor
 ```
 data/raw/  parquet + minimaps (gitignored)
    │
-   ▼  pipeline/  — Python, run locally with `make data` (~45 s)
+   ▼  pipeline/  — Python, run locally with `make data`
    ingest → normalize → journeys → project → heatmaps / zones / stats → export
    │
    ▼  web/public/data/*.json (3.9 MB) + web/public/maps/*.webp (1.3 MB), committed

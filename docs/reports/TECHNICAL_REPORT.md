@@ -75,7 +75,7 @@ Summarised here and covered in full in section 6.
 
 ## 4. Every other edge case
 
-Full evidence and test names are in [EDGE_CASES.md](EDGE_CASES.md). Of its 30 rows, 27 are Handled and 1 is Resolved. Two are still marked Found. EC-13: no extraction layer is drawn, so there's nothing to label yet. EC-26: the pipeline part is done and the UI shows sample sizes and the "Few matches" badge, but the row hasn't been updated.
+Full evidence and test names are in [EDGE_CASES.md](EDGE_CASES.md). Of its 30 rows, 28 are Handled and 2 are Resolved.
 
 | ID | Ran into | How it is handled |
 |---|---|---|
@@ -115,7 +115,7 @@ data/raw/player_data/  1,243 parquet files + 3 minimaps (gitignored)
 → Vercel builds web/ only
 ```
 
-- **Run:** `make data` (about 45 s). The output is byte-identical on a rebuild, so `git status` stays clean when the pipeline hasn't changed.
+- **Run:** `make data`. The output is byte-identical on a rebuild, so `git status` stays clean when the pipeline hasn't changed.
 - **Why at build time:** the data is fixed and small, so every query is known in advance. A visitor downloads `index.json` and then one small match file when they open a match, instead of 1,243 parquet files.
 - **The data contract:** positions are stored as `[t, u, v]` triples grouped into path segments, and events as `{t, type, raw, u, v, flags}`. Heatmaps are sparse `[i, j, value]` cells with their sample sizes. The frontend never sees world coordinates or raw IDs.
 
@@ -197,14 +197,11 @@ The README's sample row: AmbroseValley, x = −301.45, z = −355.55. Computed w
 | deck.gl `TripsLayer` with a fading trail vs paths cut at `t` | Paths cut at `t`, full history visible | Same styling as the static view, testable on the CPU; at most 16 actors per match keeps it cheap |
 | Real IDs vs hashes | 8-character hashes | The tool doesn't need identities |
 
-## 11. Limits and open items
+## 11. Limits
 - **Coverage:** 743 of 796 matches record only one file, so the tool shows recorded actors, not everyone in the match. An empty heatmap cell means "no recorded human activity", not "unvisited".
 - **Traffic is estimated.** The real route between two samples is unknown. The audit found movement is logged on a 5 s tick only while the actor moves, so long gaps are probably standing still. Hotspot values move by 1–16 % under other allocation models, though the strongest region on each map stays the same (audit follow-up D02).
 - **No extraction event:** journeys that end without a death may have extracted, disconnected or not been recorded further.
 - **Coordinates:** consistent across every check, but trusted to about ±10 world units, not pixel-perfect.
-- **Repo housekeeping:**
-  - `web/package.json` still lists `@anthropic-ai/sdk`, which nothing imports since the chat was removed.
-  - The walkthrough video (section 12) isn't recorded yet.
 
 ## 12. Walkthrough script (3–5 min recording)
 1. Open the live URL: the Overview compares the three maps; pick AmbroseValley for its report.

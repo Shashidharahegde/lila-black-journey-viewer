@@ -259,7 +259,7 @@ Sources: [build_report.json](build_report.json) · [INDEPENDENT_EVIDENCE.md §4.
 - The overall traffic picture: Spearman 0.983–0.996.
 - The **strongest traffic region on each map** is unchanged under all six models.
 
-**Fix direction (not applied; S decides)**
+**Alternative model**
 - Put (*g* − 5) s at A, with no cut-off.
 - Rename "estimated movement time".
 
@@ -412,7 +412,7 @@ Source: `docs/specs/06_HEATMAPS.md` (visual pass) · `heatmap_review/`
 - **"Human journeys" inflates the stability.** It measures how much a map was played and has no sampling variance.
 - **GrandRift overlaps both other maps on every part** at 95 % intervals. For example, its storm deaths per 100 are 8.77 [1.8–17.5].
 
-**Recommendation (S decides):** drop "Leading" / "Needs improvement", or keep the score only as a labelled relative index.
+**Alternative:** drop "Leading" / "Needs improvement", or keep the score only as a labelled relative index.
 
 Sources: [FOLLOWUP_EVIDENCE.md §3](../audits/forensic/03_followup/FOLLOWUP_EVIDENCE.md) · `d05_map_score.json` · [RECONCILIATION_EVIDENCE.md §7.3](../audits/forensic/02_reconciliation/RECONCILIATION_EVIDENCE.md)
 
@@ -438,22 +438,22 @@ Sources: [FORENSIC_AUDIT_REPORT.md](../audits/forensic/FORENSIC_AUDIT_REPORT.md)
 
 ---
 
-## Appendix A. Open points from the audit
+## Appendix A. Points raised by the audit
 Status as recorded in the audit, compared with today's CLAUDE.md.
 
 | ID | Point | Status now |
 |---|---|---|
-| A1 | Traffic mis-places standing time and omits 3.9–4.3 % of it | Open (A11) |
+| A1 | Traffic mis-places standing time and omits 3.9–4.3 % of it | Documented limitation (A11) |
 | A2 | AmbroseValley death hotspot failed its own stability rule | Moot: the stability rule was replaced (A17) |
-| B1 | Map score isn't a quality measure | Open (A20) |
-| B2 | Identical same-second loot rows: loot rate uncertain by 7.6–14.5 % | Open (A5) |
+| B1 | Map score isn't a quality measure | Documented limitation (A20) |
+| B2 | Identical same-second loot rows: loot rate uncertain by 7.6–14.5 % | Documented limitation (A5) |
 | C1 | "Bots in 6.5 % of matches" wording | Fixed in the Decisions table (A12) |
 | C2 | Spec 02 point 15 says "355, shortest 25 s"; should be 339 and 86 s | Resolved 2026-10-25: since EC-09 the 17 `id_mismatch` journeys are human, so 355 and 25 s are correct (A15) |
-| C3 | EC-20 "alpha 255 on every pixel": 1,194 AmbroseValley pixels are below 255 | Check EC-20 (immaterial) |
-| C4 | "Storm deaths 11–15 min" (one at 10:55); "gaps up to 8 min" (human max 5 min; 8.6 min is a bot gap) | Still in the CLAUDE.md Data facts |
-| C6 | `map_score` rounds before scaling (≤ 0.0003) | Open, negligible |
+| C3 | EC-20 "alpha 255 on every pixel": 1,194 AmbroseValley pixels are below 255 | Corrected in EC-20 |
+| C4 | "Storm deaths 11–15 min" (one at 10:55); "gaps up to 8 min" (human max 5 min; 8.6 min is a bot gap) | Corrected in the CLAUDE.md Data facts |
+| C6 | `map_score` rounds before scaling (≤ 0.0003) | Accepted, negligible |
 | C8 | `INSIGHTS.md` stale | Resolved 2026-10-25: rewritten from the cleaned output; every figure from `tools/insight_stats.py` |
-| C9 | README says `make data` takes ~45 s; it took 127 s | Check README |
+| C9 | README says `make data` takes ~45 s; it took 127 s | Corrected: README and the technical report give no runtime figure |
 
 ## Appendix B. Index of every evidence file
 | Folder / file | What it is |

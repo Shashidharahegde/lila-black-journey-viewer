@@ -19,3 +19,6 @@ scratch/
 # interrupted pipeline builds (web/public/data/matches is rebuilt via these)
 web/public/data/matches.staging/
 web/public/data/matches.old/
+
+# personal list of pending items, kept out of git
+PENDING.md

@@ -1,6 +1,6 @@
 # Frontend UI guidelines
 
-**This file is the master for the frontend UI/UX.** It governs every UI change under `web/`: the UI pass on features 3–4, then playback (05), heatmaps (06) and the optional chat panel (09). Feature specs say *what* to build (scope, data, commit plan); this file says *how it looks and behaves*. If a spec disagrees with this file, this file wins and the spec is updated to match. Decisions are logged in §11; anything marked **Pending** there isn't decided yet.
+**This file is the master for the frontend UI/UX.** It governs every UI change under `web/`: the UI pass on features 3–4, then playback (05), heatmaps (06) and the optional chat panel (09). Feature specs say *what* to build (scope, data, commit plan); this file says *how it looks and behaves*. If a spec disagrees with this file, this file wins and the spec is updated to match. Decisions are logged in §11.
 
 ## 1. What the tool is for
 A Level Designer opens it to answer questions about a map:

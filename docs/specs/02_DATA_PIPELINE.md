@@ -119,7 +119,7 @@ Heatmap values:
 Store only non-zero cells.
 
 ## Implementation
-All steps are built (not yet committed). Tests are in `pipeline/tests/`, named after the EDGE_CASES IDs where one applies.
+All steps are built. Tests are in `pipeline/tests/`, named after the EDGE_CASES IDs where one applies.
 
 **Commit 1 — `data: load parquet files and decode events`** *(built)*
 `ingest.py`: read every file once, decode `event`, attach file name, folder and original row number. Validate the schema. List skipped duplicates and files that fail to load (never skip silently).
